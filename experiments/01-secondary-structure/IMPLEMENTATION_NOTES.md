@@ -41,3 +41,19 @@ The memory-safe evaluator must preserve:
 
 Only data loading, standardization, minibatch construction, and evaluation
 storage may change to avoid materializing the full residue matrix.
+
+
+## Confirmatory evaluation attempt 2 — technical performance failure
+
+The memory-safe streaming evaluator was manually terminated after more than
+40 minutes before producing any evaluation metric or result file.
+
+The bottleneck was repeated decompression and loading of thousands of per-protein
+`.npz` embedding files on every training epoch. No Q3 accuracy, macro-F1,
+Delta_ESM, G, bootstrap interval, or verdict was observed.
+
+The next evaluator consolidates the already-frozen cached embeddings into a
+disk-backed NumPy memmap. This changes storage/access only and restores the
+original global residue-level permutation each epoch while keeping RAM bounded.
+
+All frozen scientific quantities and probe hyperparameters remain unchanged.

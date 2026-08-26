@@ -1,9 +1,3 @@
-# ESM-2 SS-generalization — memory-safe confirmatory evaluation
-#
-# Technical amendment only: the original evaluator was SIGKILLed before producing
-# any metric because it materialized the full residue x 1280 matrix in RAM.
-# Scientific design, estimator class, hyperparameters, splits, metrics and frozen
-# decision bands are unchanged.
 
 import os, json, sys
 from pathlib import Path
@@ -20,172 +14,444 @@ print(sp.selftest())
 
 CACHE = Path(os.environ.get("SS_CACHE", "/content/ss_cache"))
 EMB = CACHE / "emb"
+MM = CACHE / "memmap"
+MM.mkdir(exist_ok=True)
+
 OUT = Path("results")
 OUT.mkdir(exist_ok=True)
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+
 SEED = 0
 W = 3
-EPOCHS, LR, BATCH = 40, 1e-3, 4096
+EPOCHS = 40
+LR = 1e-3
+BATCH = 4096
+CHUNK = 16384
 
 torch.manual_seed(SEED)
 np.random.seed(SEED)
 
 mf = pd.read_csv(CACHE / "manifest.csv")
+
 print(f"{len(mf)} proteins, {mf.cluster.nunique()} clusters")
 
 splits = sp.make_splits(mf.cluster.values, seed=SEED)
+
 for k, v in splits.items():
-    print(f"  {k}: {len(v)} proteins, {mf.iloc[v].cluster.nunique()} clusters")
+    print(
+        f"  {k}: {len(v)} proteins, "
+        f"{mf.iloc[v].cluster.nunique()} clusters"
+    )
 
 
-def load_protein(i, kind):
-    row = mf.iloc[int(i)]
-    d = np.load(EMB / f"{row['id']}.npz")
-    y = d["y"].astype(np.int64, copy=False)
+# ------------------------------------------------------------------
+# Build disk-backed residue arrays once
+# ------------------------------------------------------------------
 
-    if kind == "esm":
+lengths = mf["n_res"].astype(int).to_numpy()
+offsets = np.zeros(len(mf) + 1, dtype=np.int64)
+offsets[1:] = np.cumsum(lengths)
+
+N = int(offsets[-1])
+
+emb_path = MM / "esm_f16.dat"
+y_path = MM / "labels_u8.dat"
+protein_path = MM / "protein_i32.dat"
+
+if not emb_path.exists():
+    print(f"\nbuilding memmap for {N:,} residues")
+
+    emb_mm = np.memmap(
+        emb_path,
+        mode="w+",
+        dtype=np.float16,
+        shape=(N, 1280),
+    )
+
+    y_mm = np.memmap(
+        y_path,
+        mode="w+",
+        dtype=np.uint8,
+        shape=(N,),
+    )
+
+    p_mm = np.memmap(
+        protein_path,
+        mode="w+",
+        dtype=np.int32,
+        shape=(N,),
+    )
+
+    for i, row in mf.iterrows():
+        d = np.load(EMB / f"{row['id']}.npz")
         X = d["emb"]
-    else:
-        X = sp.local_window_features(row["seq"], W)
+        y = d["y"]
 
-    assert X.shape[0] == len(y), f"align fail {row['id']}"
-    return X, y, row["cluster"]
+        a, b = offsets[i], offsets[i + 1]
+
+        assert X.shape == (b - a, 1280)
+        assert len(y) == b - a
+
+        emb_mm[a:b] = X
+        y_mm[a:b] = y
+        p_mm[a:b] = i
+
+        if (i + 1) % 1000 == 0:
+            print(f"  consolidated {i+1}/{len(mf)} proteins")
+
+    emb_mm.flush()
+    y_mm.flush()
+    p_mm.flush()
+
+    np.save(MM / "offsets.npy", offsets)
+
+    print("memmap consolidation complete")
+else:
+    print("\nusing existing memmap cache")
 
 
-def streaming_stats(idx, kind, in_dim):
-    """Exact feature mean/std without materializing the training matrix."""
+emb_mm = np.memmap(
+    emb_path,
+    mode="r",
+    dtype=np.float16,
+    shape=(N, 1280),
+)
+
+y_mm = np.memmap(
+    y_path,
+    mode="r",
+    dtype=np.uint8,
+    shape=(N,),
+)
+
+p_mm = np.memmap(
+    protein_path,
+    mode="r",
+    dtype=np.int32,
+    shape=(N,),
+)
+
+
+# ------------------------------------------------------------------
+# Residue index helpers
+# ------------------------------------------------------------------
+
+def residue_indices(protein_idx):
+    parts = [
+        np.arange(offsets[i], offsets[i + 1], dtype=np.int64)
+        for i in protein_idx
+    ]
+    return np.concatenate(parts)
+
+
+train_rows = residue_indices(splits["train"])
+rand_rows = residue_indices(splits["random_test"])
+div_rows = residue_indices(splits["divergent_test"])
+
+print(
+    f"\nresidues: train={len(train_rows):,} "
+    f"random={len(rand_rows):,} "
+    f"divergent={len(div_rows):,}"
+)
+
+
+# ------------------------------------------------------------------
+# Streaming normalization
+# ------------------------------------------------------------------
+
+def streaming_mean_sd(rows):
+    s1 = np.zeros(1280, dtype=np.float64)
+    s2 = np.zeros(1280, dtype=np.float64)
     n = 0
-    s1 = np.zeros(in_dim, dtype=np.float64)
-    s2 = np.zeros(in_dim, dtype=np.float64)
 
-    for j, i in enumerate(idx):
-        X, _, _ = load_protein(i, kind)
-        X = X.astype(np.float64, copy=False)
-        n += X.shape[0]
-        s1 += X.sum(axis=0)
-        s2 += np.square(X).sum(axis=0)
+    for s in range(0, len(rows), CHUNK):
+        rr = rows[s:s+CHUNK]
 
-        if (j + 1) % 1000 == 0:
-            print(f"  stats {kind}: {j+1}/{len(idx)} proteins")
+        X = np.asarray(
+            emb_mm[rr],
+            dtype=np.float32
+        )
+
+        s1 += X.sum(0, dtype=np.float64)
+        s2 += np.square(X, dtype=np.float32).sum(
+            0,
+            dtype=np.float64
+        )
+
+        n += len(rr)
 
     mu = s1 / n
-    var = np.maximum(s2 / n - mu * mu, 0.0)
+    var = np.maximum(
+        s2 / n - mu * mu,
+        0.0
+    )
+
     sd = np.sqrt(var) + 1e-6
 
-    return mu.astype(np.float32), sd.astype(np.float32), int(n)
+    return (
+        mu.astype(np.float32),
+        sd.astype(np.float32),
+    )
 
 
-def residue_batches(idx, kind, mu, sd, epoch):
-    """Stream proteins in a deterministic shuffled order and emit residue batches.
-
-    The original implementation shuffled all residues globally each epoch. That is
-    impossible without materializing the full residue matrix. This implementation
-    instead shuffles protein order and residues within each protein deterministically
-    from the same fixed seed. Probe class/optimizer/LR/epochs/batch size are unchanged.
-    """
-    rng = np.random.default_rng(SEED + epoch)
-
-    order = np.asarray(idx).copy()
-    rng.shuffle(order)
-
-    bx, by = [], []
-    nbuf = 0
-
-    for i in order:
-        X, y, _ = load_protein(i, kind)
-
-        perm = rng.permutation(len(y))
-        X = X[perm].astype(np.float32, copy=False)
-        y = y[perm]
-
-        X = (X - mu) / sd
-
-        pos = 0
-        while pos < len(y):
-            need = BATCH - nbuf
-            take = min(need, len(y) - pos)
-
-            bx.append(X[pos:pos+take])
-            by.append(y[pos:pos+take])
-            nbuf += take
-            pos += take
-
-            if nbuf == BATCH:
-                yield np.concatenate(bx), np.concatenate(by)
-                bx, by, nbuf = [], [], 0
-
-    if nbuf:
-        yield np.concatenate(bx), np.concatenate(by)
+print("\ncomputing ESM train normalization")
+mu_esm, sd_esm = streaming_mean_sd(train_rows)
 
 
-def train_probe_streaming(idx, kind, in_dim):
-    print(f"\ncomputing train normalization: {kind}")
-    mu, sd, n = streaming_stats(idx, kind, in_dim)
-    print(f"  train residues: {n}")
+# ------------------------------------------------------------------
+# ESM linear probe
+# ------------------------------------------------------------------
 
+def train_esm():
     torch.manual_seed(SEED)
 
-    clf = nn.Linear(in_dim, 3).to(DEVICE)
-    opt = torch.optim.Adam(clf.parameters(), lr=LR)
+    clf = nn.Linear(1280, 3).to(DEVICE)
+
+    opt = torch.optim.Adam(
+        clf.parameters(),
+        lr=LR
+    )
+
     lossf = nn.CrossEntropyLoss()
 
     for ep in range(EPOCHS):
-        clf.train()
+        rng = np.random.default_rng(SEED + ep)
+
+        perm = rng.permutation(train_rows)
+
         total_loss = 0.0
         seen = 0
 
-        for Xb, yb in residue_batches(idx, kind, mu, sd, ep):
-            Xt = torch.from_numpy(Xb).to(DEVICE)
-            yt = torch.from_numpy(yb).to(DEVICE)
+        for s in range(0, len(perm), BATCH):
+            rr = perm[s:s+BATCH]
+
+            X = np.asarray(
+                emb_mm[rr],
+                dtype=np.float32
+            )
+
+            X = (X - mu_esm) / sd_esm
+
+            y = np.asarray(
+                y_mm[rr],
+                dtype=np.int64
+            )
+
+            Xt = torch.from_numpy(X).to(DEVICE)
+            yt = torch.from_numpy(y).to(DEVICE)
 
             opt.zero_grad(set_to_none=True)
-            loss = lossf(clf(Xt), yt)
+
+            loss = lossf(
+                clf(Xt),
+                yt
+            )
+
             loss.backward()
             opt.step()
 
-            total_loss += float(loss.detach()) * len(yb)
-            seen += len(yb)
+            total_loss += float(loss.detach()) * len(rr)
+            seen += len(rr)
 
         if ep == 0 or (ep + 1) % 5 == 0:
             print(
-                f"  {kind} epoch {ep+1:02d}/{EPOCHS} "
+                f"  ESM epoch {ep+1:02d}/{EPOCHS} "
                 f"loss={total_loss/seen:.5f}"
             )
 
-    return clf, (mu, sd)
+    return clf
 
 
 @torch.no_grad()
-def evaluate_streaming(clf, scaler, idx, kind):
-    """Evaluate protein-by-protein; retain only labels/predictions/cluster ids."""
-    clf.eval()
-    mu, sd = scaler
+def predict_esm(clf, rows):
+    out = []
 
-    ys, yps, cs = [], [], []
+    for s in range(0, len(rows), CHUNK):
+        rr = rows[s:s+CHUNK]
 
-    for j, i in enumerate(idx):
-        X, y, cluster = load_protein(i, kind)
-        X = X.astype(np.float32, copy=False)
-        X = (X - mu) / sd
+        X = np.asarray(
+            emb_mm[rr],
+            dtype=np.float32
+        )
 
-        preds = []
-        for s in range(0, len(y), BATCH):
-            Xt = torch.from_numpy(X[s:s+BATCH]).to(DEVICE)
-            preds.append(clf(Xt).argmax(1).cpu().numpy())
+        X = (X - mu_esm) / sd_esm
 
-        yp = np.concatenate(preds)
+        Xt = torch.from_numpy(X).to(DEVICE)
 
+        yp = clf(Xt).argmax(1).cpu().numpy()
+
+        out.append(yp)
+
+    return np.concatenate(out)
+
+
+esm_clf = train_esm()
+
+yp_rand = predict_esm(
+    esm_clf,
+    rand_rows
+)
+
+yp_div = predict_esm(
+    esm_clf,
+    div_rows
+)
+
+y_rand = np.asarray(
+    y_mm[rand_rows],
+    dtype=np.int64
+)
+
+y_div = np.asarray(
+    y_mm[div_rows],
+    dtype=np.int64
+)
+
+
+# ------------------------------------------------------------------
+# Local ±3 baseline
+# ------------------------------------------------------------------
+
+def local_matrix(protein_idx):
+    Xs = []
+    ys = []
+    cs = []
+
+    for i in protein_idx:
+        row = mf.iloc[i]
+
+        d = np.load(
+            EMB / f"{row['id']}.npz"
+        )
+
+        y = d["y"]
+
+        X = sp.local_window_features(
+            row["seq"],
+            W
+        )
+
+        Xs.append(X)
         ys.append(y)
-        yps.append(yp)
-        cs.append(np.full(len(y), cluster))
+        cs.append(
+            np.full(
+                len(y),
+                row["cluster"]
+            )
+        )
 
-        if (j + 1) % 1000 == 0:
-            print(f"  eval {kind}: {j+1}/{len(idx)} proteins")
+    return (
+        np.concatenate(Xs),
+        np.concatenate(ys),
+        np.concatenate(cs),
+    )
 
-    y = np.concatenate(ys)
-    yp = np.concatenate(yps)
-    c = np.concatenate(cs)
+
+# Local features are only 140-D, so materialization is safe.
+Xloc_train, yloc_train, _ = local_matrix(
+    splits["train"]
+)
+
+mu_loc = Xloc_train.mean(
+    0,
+    keepdims=True
+)
+
+sd_loc = Xloc_train.std(
+    0,
+    keepdims=True
+) + 1e-6
+
+Xloc_train = (
+    Xloc_train - mu_loc
+) / sd_loc
+
+
+torch.manual_seed(SEED)
+
+loc_clf = nn.Linear(
+    Xloc_train.shape[1],
+    3
+).to(DEVICE)
+
+loc_opt = torch.optim.Adam(
+    loc_clf.parameters(),
+    lr=LR
+)
+
+lossf = nn.CrossEntropyLoss()
+
+Xt = torch.tensor(
+    Xloc_train,
+    device=DEVICE,
+    dtype=torch.float32
+)
+
+yt = torch.tensor(
+    yloc_train,
+    device=DEVICE,
+    dtype=torch.long
+)
+
+nloc = len(Xt)
+
+for ep in range(EPOCHS):
+    g = torch.Generator(
+        device=DEVICE
+    )
+    g.manual_seed(SEED + ep)
+
+    perm = torch.randperm(
+        nloc,
+        generator=g,
+        device=DEVICE
+    )
+
+    for s in range(0, nloc, BATCH):
+        b = perm[s:s+BATCH]
+
+        loc_opt.zero_grad()
+
+        loss = lossf(
+            loc_clf(Xt[b]),
+            yt[b]
+        )
+
+        loss.backward()
+        loc_opt.step()
+
+    if ep == 0 or (ep + 1) % 5 == 0:
+        print(
+            f"  local epoch {ep+1:02d}/{EPOCHS}"
+        )
+
+
+@torch.no_grad()
+def local_eval(protein_idx):
+    X, y, c = local_matrix(protein_idx)
+
+    X = (
+        X - mu_loc
+    ) / sd_loc
+
+    preds = []
+
+    for s in range(0, len(y), CHUNK):
+        Xt = torch.tensor(
+            X[s:s+CHUNK],
+            device=DEVICE,
+            dtype=torch.float32
+        )
+
+        preds.append(
+            loc_clf(Xt)
+            .argmax(1)
+            .cpu()
+            .numpy()
+        )
+
+    yp = np.concatenate(preds)
 
     return dict(
         acc=sp.q3_accuracy(y, yp),
@@ -197,29 +463,98 @@ def evaluate_streaming(clf, scaler, idx, kind):
     )
 
 
-def fit_and_eval(kind, in_dim):
-    clf, scaler = train_probe_streaming(splits["train"], kind, in_dim)
+# ------------------------------------------------------------------
+# Build result cells
+# ------------------------------------------------------------------
 
-    out = {}
-    for split in ("random_test", "divergent_test"):
-        print(f"\nevaluating {kind}: {split}")
-        out[split] = evaluate_streaming(
-            clf, scaler, splits[split], kind
-        )
+cluster_rand = np.concatenate([
+    np.full(
+        offsets[i+1] - offsets[i],
+        mf.iloc[i]["cluster"]
+    )
+    for i in splits["random_test"]
+])
 
-    return out
+cluster_div = np.concatenate([
+    np.full(
+        offsets[i+1] - offsets[i],
+        mf.iloc[i]["cluster"]
+    )
+    for i in splits["divergent_test"]
+])
 
 
-# Confirmatory analysis: same order as frozen evaluator.
-esm = fit_and_eval("esm", 1280)
-loc = fit_and_eval("local", (2 * W + 1) * 20)
+esm = {
+    "random_test": dict(
+        acc=sp.q3_accuracy(
+            y_rand,
+            yp_rand
+        ),
+        f1=sp.macro_f1(
+            y_rand,
+            yp_rand
+        ),
+        correct=(
+            y_rand == yp_rand
+        ).astype(np.int8),
+        cluster=cluster_rand,
+        y=y_rand,
+        yp=yp_rand,
+    ),
+    "divergent_test": dict(
+        acc=sp.q3_accuracy(
+            y_div,
+            yp_div
+        ),
+        f1=sp.macro_f1(
+            y_div,
+            yp_div
+        ),
+        correct=(
+            y_div == yp_div
+        ).astype(np.int8),
+        cluster=cluster_div,
+        y=y_div,
+        yp=yp_div,
+    ),
+}
 
-acc_esm_rand = esm["random_test"]["acc"]
-acc_esm_div = esm["divergent_test"]["acc"]
-acc_loc_div = loc["divergent_test"]["acc"]
 
-delta_div = acc_esm_div - acc_loc_div
-gap = acc_esm_rand - acc_esm_div
+loc = {
+    "random_test": local_eval(
+        splits["random_test"]
+    ),
+    "divergent_test": local_eval(
+        splits["divergent_test"]
+    ),
+}
+
+
+# ------------------------------------------------------------------
+# Frozen quantities
+# ------------------------------------------------------------------
+
+acc_esm_rand = esm[
+    "random_test"
+]["acc"]
+
+acc_esm_div = esm[
+    "divergent_test"
+]["acc"]
+
+acc_loc_div = loc[
+    "divergent_test"
+]["acc"]
+
+delta_div = (
+    acc_esm_div
+    - acc_loc_div
+)
+
+gap = (
+    acc_esm_rand
+    - acc_esm_div
+)
 
 
 d_lo, d_hi = sp.paired_diff_bootstrap(
@@ -231,91 +566,163 @@ d_lo, d_hi = sp.paired_diff_bootstrap(
 )
 
 
-def unpaired_gap_ci(a, b, reps=2000, seed=SEED):
+def unpaired_gap_ci(
+    a,
+    b,
+    reps=2000,
+    seed=SEED
+):
     rng = np.random.default_rng(seed)
 
     def acc_boot(cell):
         cl = cell["cluster"]
         corr = cell["correct"]
+
         uniq = np.unique(cl)
-        idx = {c: np.where(cl == c)[0] for c in uniq}
-        pick = rng.choice(uniq, len(uniq), replace=True)
-        rows = np.concatenate([idx[c] for c in pick])
+
+        idx = {
+            c: np.where(cl == c)[0]
+            for c in uniq
+        }
+
+        pick = rng.choice(
+            uniq,
+            len(uniq),
+            replace=True
+        )
+
+        rows = np.concatenate([
+            idx[c]
+            for c in pick
+        ])
+
         return corr[rows].mean()
 
-    g = np.array(
-        [acc_boot(a) - acc_boot(b) for _ in range(reps)]
-    )
+    vals = np.array([
+        acc_boot(a)
+        - acc_boot(b)
+        for _ in range(reps)
+    ])
+
     return (
-        float(np.percentile(g, 2.5)),
-        float(np.percentile(g, 97.5)),
+        float(np.percentile(vals, 2.5)),
+        float(np.percentile(vals, 97.5)),
     )
 
 
 g_lo, g_hi = unpaired_gap_ci(
-    esm["random_test"], esm["divergent_test"]
+    esm["random_test"],
+    esm["divergent_test"]
 )
 
-verdict = sp.verdict(delta_div, gap)
+verdict = sp.verdict(
+    delta_div,
+    gap
+)
+
+
+# ------------------------------------------------------------------
+# Results
+# ------------------------------------------------------------------
 
 rows = [
     dict(
         cell="ESM_random",
         acc=acc_esm_rand,
-        macro_f1=esm["random_test"]["f1"],
+        macro_f1=esm["random_test"]["f1"]
     ),
     dict(
         cell="ESM_divergent",
         acc=acc_esm_div,
-        macro_f1=esm["divergent_test"]["f1"],
+        macro_f1=esm["divergent_test"]["f1"]
     ),
     dict(
         cell="local_random",
         acc=loc["random_test"]["acc"],
-        macro_f1=loc["random_test"]["f1"],
+        macro_f1=loc["random_test"]["f1"]
     ),
     dict(
         cell="local_divergent",
         acc=acc_loc_div,
-        macro_f1=loc["divergent_test"]["f1"],
+        macro_f1=loc["divergent_test"]["f1"]
     ),
 ]
 
 pd.DataFrame(rows).to_csv(
-    OUT / "ss_generalization.csv", index=False
+    OUT / "ss_generalization.csv",
+    index=False
 )
 
 summary = dict(
-    delta_esm_divergent=round(delta_div, 4),
-    delta_ci=[round(d_lo, 4), round(d_hi, 4)],
-    G=round(gap, 4),
-    G_ci=[round(g_lo, 4), round(g_hi, 4)],
-    acc_esm_random=round(acc_esm_rand, 4),
-    acc_esm_divergent=round(acc_esm_div, 4),
-    acc_local_divergent=round(acc_loc_div, 4),
-    verdict=verdict,
+    delta_esm_divergent=round(
+        delta_div,
+        4
+    ),
+    delta_ci=[
+        round(d_lo, 4),
+        round(d_hi, 4)
+    ],
+    G=round(
+        gap,
+        4
+    ),
+    G_ci=[
+        round(g_lo, 4),
+        round(g_hi, 4)
+    ],
+    acc_esm_random=round(
+        acc_esm_rand,
+        4
+    ),
+    acc_esm_divergent=round(
+        acc_esm_div,
+        4
+    ),
+    acc_local_divergent=round(
+        acc_loc_div,
+        4
+    ),
+    verdict=verdict
 )
 
 json.dump(
     summary,
-    open(OUT / "ss_summary.json", "w"),
-    indent=2,
+    open(
+        OUT / "ss_summary.json",
+        "w"
+    ),
+    indent=2
+)
+
+
+print(
+    f"\nESM Q3: random "
+    f"{acc_esm_rand:.3f} | "
+    f"divergent {acc_esm_div:.3f}"
 )
 
 print(
-    f"\nESM  Q3: random {acc_esm_rand:.3f} | "
-    f"divergent {acc_esm_div:.3f}"
+    f"local Q3 divergent: "
+    f"{acc_loc_div:.3f}"
 )
-print(f"local Q3 divergent: {acc_loc_div:.3f}")
+
 print(
-    f"Delta_ESM(divergent) = {delta_div:+.3f} "
-    f" CI [{d_lo:+.3f}, {d_hi:+.3f}]"
+    f"Delta_ESM(divergent) = "
+    f"{delta_div:+.3f} "
+    f"CI [{d_lo:+.3f}, {d_hi:+.3f}]"
 )
+
 print(
-    f"G (random-divergent) = {gap:+.3f} "
-    f" CI [{g_lo:+.3f}, {g_hi:+.3f}]"
+    f"G (random-divergent) = "
+    f"{gap:+.3f} "
+    f"CI [{g_lo:+.3f}, {g_hi:+.3f}]"
 )
-print(f"\nVERDICT (frozen bands): {verdict}")
+
+print(
+    f"\nVERDICT (frozen bands): "
+    f"{verdict}"
+)
+
 
 prov = dict(
     model="facebook/esm2_t33_650M_UR50D",
@@ -325,20 +732,28 @@ prov = dict(
     lr=LR,
     batch=BATCH,
     seed=SEED,
-    evaluator="streaming-v1",
-    first_attempt="SIGKILL before metrics; host RAM exhaustion",
-    minibatch_order=(
-        "protein order shuffled each epoch; residues shuffled "
-        "within protein; scientific design unchanged"
+    evaluator="memmap-v1",
+    previous_attempts=[
+        "attempt1: host RAM SIGKILL before metrics",
+        "attempt2: repeated-npz-I/O stop before metrics"
+    ],
+    splits={
+        k: int(len(v))
+        for k, v in splits.items()
+    },
+    n_clusters=int(
+        mf.cluster.nunique()
     ),
-    splits={k: int(len(v)) for k, v in splits.items()},
-    n_clusters=int(mf.cluster.nunique()),
+    n_residues=N,
 )
 
 json.dump(
     prov,
-    open(OUT / "provenance.json", "w"),
-    indent=2,
+    open(
+        OUT / "provenance.json",
+        "w"
+    ),
+    indent=2
 )
 
 print(
