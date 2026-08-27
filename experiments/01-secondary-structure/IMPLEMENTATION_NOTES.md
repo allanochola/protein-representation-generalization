@@ -145,3 +145,45 @@ The resulting canonical seed-0 split is:
 All model, representation, baseline, optimizer, hyperparameter, metric,
 bootstrap, effect-definition, and preregistered decision-band quantities remain
 unchanged.
+
+
+## Confirmatory evaluation attempt 5 — bootstrap performance correction
+
+The canonical confirmatory run completed both frozen 40-epoch probes and
+produced and saved the primary confirmatory metrics before bootstrap.
+
+Observed primary point estimates were:
+
+- ESM random-test Q3: 0.765166
+- ESM divergent-test Q3: 0.762263
+- local random-test Q3: 0.607324
+- local divergent-test Q3: 0.607224
+- Delta_ESM divergent: 0.155039
+- G: 0.002903
+
+The subsequent preregistered 2,000-replicate cluster bootstrap did not complete
+after approximately eight hours. Profiling of the implementation showed that
+each replicate repeatedly constructed and concatenated residue-index arrays for
+all sampled clusters.
+
+After the primary point estimates had been observed, bootstrap execution was
+therefore optimized using per-cluster sufficient statistics: residue counts and
+correct-prediction counts. The resampling unit, random-number generator,
+replacement scheme, number of sampled clusters, number of replicates,
+residue-weighted accuracy statistic, seeds, percentile interval, and all frozen
+scientific quantities remain unchanged.
+
+Equivalence was tested before using the optimized implementation for the
+confirmatory intervals.
+
+For the paired Delta_ESM bootstrap, the original residue-concatenation
+implementation and sufficient-statistic implementation produced identical
+95% intervals on an uneven-cluster synthetic test, with maximum absolute
+interval difference 2.1e-17.
+
+For the unpaired G bootstrap, the two implementations produced exactly
+identical bootstrap replicates and exactly identical 95% intervals on an
+uneven-cluster synthetic test (maximum replicate and interval difference 0.0).
+
+This is therefore an execution-time optimization of the frozen cluster
+bootstrap, not a change to the inferential procedure.

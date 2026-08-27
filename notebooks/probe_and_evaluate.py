@@ -652,37 +652,58 @@ def unpaired_gap_ci(
     reps=2000,
     seed=SEED
 ):
+    """Cluster bootstrap CI for accuracy(a) - accuracy(b).
+
+    Uses per-cluster residue counts and correct counts. This is mathematically
+    equivalent to explicitly concatenating every residue from each sampled
+    cluster, but avoids rebuilding large residue-index arrays each replicate.
+    """
     rng = np.random.default_rng(seed)
 
-    def acc_boot(cell):
-        cl = cell["cluster"]
-        corr = cell["correct"]
+    def cluster_stats(cell):
+        cl = np.asarray(cell["cluster"])
+        corr = np.asarray(cell["correct"], dtype=np.float64)
 
-        uniq = np.unique(cl)
+        uniq, inv = np.unique(cl, return_inverse=True)
+        k = len(uniq)
 
-        idx = {
-            c: np.where(cl == c)[0]
-            for c in uniq
-        }
+        n = np.bincount(
+            inv,
+            minlength=k
+        ).astype(np.float64)
 
-        pick = rng.choice(
-            uniq,
-            len(uniq),
-            replace=True
+        correct = np.bincount(
+            inv,
+            weights=corr,
+            minlength=k
         )
 
-        rows = np.concatenate([
-            idx[c]
-            for c in pick
-        ])
+        return k, n, correct
 
-        return corr[rows].mean()
+    ka, na, ca = cluster_stats(a)
+    kb, nb, cb = cluster_stats(b)
 
-    vals = np.array([
-        acc_boot(a)
-        - acc_boot(b)
-        for _ in range(reps)
-    ])
+    vals = np.empty(reps, dtype=np.float64)
+
+    for r in range(reps):
+        # Same independent cluster resampling as the frozen implementation.
+        pick_a = rng.choice(ka, size=ka, replace=True)
+        pick_b = rng.choice(kb, size=kb, replace=True)
+
+        mult_a = np.bincount(pick_a, minlength=ka)
+        mult_b = np.bincount(pick_b, minlength=kb)
+
+        acc_a = (
+            np.dot(mult_a, ca)
+            / np.dot(mult_a, na)
+        )
+
+        acc_b = (
+            np.dot(mult_b, cb)
+            / np.dot(mult_b, nb)
+        )
+
+        vals[r] = acc_a - acc_b
 
     return (
         float(np.percentile(vals, 2.5)),

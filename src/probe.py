@@ -110,19 +110,43 @@ def make_splits(cluster_per_protein, seed=0, div_frac=0.2, indist_frac=0.15):
 
 
 def paired_diff_bootstrap(cluster_ids, correct_a, correct_b, reps=1000, seed=0):
-    """CI for mean(correct_a) - mean(correct_b) over the SAME residues, resampling
-    whole clusters. correct_* are per-residue 0/1 arrays on the same test set."""
+    """CI for mean(correct_a) - mean(correct_b) over the SAME residues,
+    resampling whole clusters.
+
+    Uses per-cluster sufficient statistics rather than repeatedly materializing
+    residue-index arrays. This is mathematically identical to concatenating all
+    residues belonging to each sampled cluster, including repeated clusters.
+    """
     rng = np.random.default_rng(seed)
+
     cluster_ids = np.asarray(cluster_ids)
-    ca, cb = np.asarray(correct_a, float), np.asarray(correct_b, float)
-    uniq = np.unique(cluster_ids)
-    idx_by = {c: np.where(cluster_ids == c)[0] for c in uniq}
-    d = np.empty(reps)
+    ca = np.asarray(correct_a, dtype=np.float64)
+    cb = np.asarray(correct_b, dtype=np.float64)
+
+    uniq, inv = np.unique(cluster_ids, return_inverse=True)
+    k = len(uniq)
+
+    n = np.bincount(inv, minlength=k).astype(np.float64)
+    sum_a = np.bincount(inv, weights=ca, minlength=k)
+    sum_b = np.bincount(inv, weights=cb, minlength=k)
+
+    d = np.empty(reps, dtype=np.float64)
+
     for b in range(reps):
-        pick = rng.choice(uniq, size=len(uniq), replace=True)
-        rows = np.concatenate([idx_by[c] for c in pick])
-        d[b] = ca[rows].mean() - cb[rows].mean()
-    return float(np.percentile(d, 2.5)), float(np.percentile(d, 97.5))
+        pick = rng.choice(k, size=k, replace=True)
+        multiplicity = np.bincount(pick, minlength=k)
+
+        denom = np.dot(multiplicity, n)
+
+        d[b] = (
+            np.dot(multiplicity, sum_a)
+            - np.dot(multiplicity, sum_b)
+        ) / denom
+
+    return (
+        float(np.percentile(d, 2.5)),
+        float(np.percentile(d, 97.5)),
+    )
 
 
 def verdict(delta_div, gap):
