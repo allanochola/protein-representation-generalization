@@ -84,3 +84,26 @@ using --threads 1.
 The resulting 11,043-cluster partition was reproduced exactly on an independent
 second run, including identical protein-to-cluster assignments. This
 deterministic partition is frozen for the confirmatory analysis.
+
+
+## Confirmatory evaluation attempt 3 — runtime termination after training
+
+The disk-backed memmap evaluator successfully completed:
+
+- consolidation of all 2,875,432 residue embeddings,
+- ESM probe training for all 40 frozen epochs,
+- local-sequence baseline training for all 40 frozen epochs.
+
+The Colab runtime was then disconnected before evaluation output was produced.
+
+No Q3 accuracy, macro-F1, Delta_ESM, G, bootstrap interval, or experimental
+verdict was observed.
+
+To prevent loss of completed computation on future runs, the evaluator was
+amended to checkpoint the ESM normalization, ESM probe, and local probe, and to
+write the primary confirmatory metrics to disk immediately after evaluation and
+before bootstrap.
+
+The frozen scientific design, model, layer, clustering, split, baseline, probe
+class, optimizer, hyperparameters, metrics, bootstrap, and decision bands remain
+unchanged.

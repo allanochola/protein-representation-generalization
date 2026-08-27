@@ -20,6 +20,9 @@ MM.mkdir(exist_ok=True)
 OUT = Path("results")
 OUT.mkdir(exist_ok=True)
 
+CKPT = OUT / "checkpoints"
+CKPT.mkdir(exist_ok=True)
+
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 SEED = 0
@@ -195,8 +198,22 @@ def streaming_mean_sd(rows):
     )
 
 
-print("\ncomputing ESM train normalization")
-mu_esm, sd_esm = streaming_mean_sd(train_rows)
+esm_norm_path = CKPT / "esm_normalization.npz"
+
+if esm_norm_path.exists():
+    z = np.load(esm_norm_path)
+    mu_esm = z["mu"].astype(np.float32)
+    sd_esm = z["sd"].astype(np.float32)
+    print("\nloaded ESM train normalization checkpoint")
+else:
+    print("\ncomputing ESM train normalization")
+    mu_esm, sd_esm = streaming_mean_sd(train_rows)
+    np.savez(
+        esm_norm_path,
+        mu=mu_esm,
+        sd=sd_esm,
+    )
+    print("saved ESM train normalization checkpoint")
 
 
 # ------------------------------------------------------------------
@@ -286,7 +303,22 @@ def predict_esm(clf, rows):
     return np.concatenate(out)
 
 
-esm_clf = train_esm()
+esm_ckpt = CKPT / "esm_probe.pt"
+
+if esm_ckpt.exists():
+    esm_clf = nn.Linear(1280, 3).to(DEVICE)
+    esm_clf.load_state_dict(
+        torch.load(
+            esm_ckpt,
+            map_location=DEVICE,
+            weights_only=True,
+        )
+    )
+    print("\nloaded ESM probe checkpoint")
+else:
+    esm_clf = train_esm()
+    torch.save(esm_clf.state_dict(), esm_ckpt)
+    print("saved ESM probe checkpoint")
 
 yp_rand = predict_esm(
     esm_clf,
@@ -396,35 +428,50 @@ yt = torch.tensor(
 
 nloc = len(Xt)
 
-for ep in range(EPOCHS):
-    g = torch.Generator(
-        device=DEVICE
+local_ckpt = CKPT / "local_probe.pt"
+
+if local_ckpt.exists():
+    loc_clf.load_state_dict(
+        torch.load(
+            local_ckpt,
+            map_location=DEVICE,
+            weights_only=True,
+        )
     )
-    g.manual_seed(SEED + ep)
+    print("\nloaded local probe checkpoint")
+else:
+    for ep in range(EPOCHS):
+        g = torch.Generator(
+            device=DEVICE
+        )
+        g.manual_seed(SEED + ep)
 
-    perm = torch.randperm(
-        nloc,
-        generator=g,
-        device=DEVICE
-    )
-
-    for s in range(0, nloc, BATCH):
-        b = perm[s:s+BATCH]
-
-        loc_opt.zero_grad()
-
-        loss = lossf(
-            loc_clf(Xt[b]),
-            yt[b]
+        perm = torch.randperm(
+            nloc,
+            generator=g,
+            device=DEVICE
         )
 
-        loss.backward()
-        loc_opt.step()
+        for s in range(0, nloc, BATCH):
+            b = perm[s:s+BATCH]
 
-    if ep == 0 or (ep + 1) % 5 == 0:
-        print(
-            f"  local epoch {ep+1:02d}/{EPOCHS}"
-        )
+            loc_opt.zero_grad()
+
+            loss = lossf(
+                loc_clf(Xt[b]),
+                yt[b]
+            )
+
+            loss.backward()
+            loc_opt.step()
+
+        if ep == 0 or (ep + 1) % 5 == 0:
+            print(
+                f"  local epoch {ep+1:02d}/{EPOCHS}"
+            )
+
+    torch.save(loc_clf.state_dict(), local_ckpt)
+    print("saved local probe checkpoint")
 
 
 @torch.no_grad()
@@ -555,6 +602,31 @@ gap = (
     acc_esm_rand
     - acc_esm_div
 )
+
+# Persist the primary confirmatory quantities BEFORE bootstrap.
+# These are computed under the already-frozen definitions.
+primary = {
+    "ESM_random_Q3": float(acc_esm_rand),
+    "ESM_random_macro_F1": float(esm["random_test"]["f1"]),
+    "ESM_divergent_Q3": float(acc_esm_div),
+    "ESM_divergent_macro_F1": float(esm["divergent_test"]["f1"]),
+    "local_random_Q3": float(loc["random_test"]["acc"]),
+    "local_random_macro_F1": float(loc["random_test"]["f1"]),
+    "local_divergent_Q3": float(acc_loc_div),
+    "local_divergent_macro_F1": float(loc["divergent_test"]["f1"]),
+    "Delta_ESM_divergent": float(delta_div),
+    "G": float(gap),
+}
+
+primary_path = OUT / "primary_metrics_prebootstrap.json"
+
+with open(primary_path, "w") as fh:
+    json.dump(primary, fh, indent=2)
+
+print("\n=== PRIMARY CONFIRMATORY METRICS (saved before bootstrap) ===")
+for k, v in primary.items():
+    print(f"{k}: {v:.6f}")
+print("saved:", primary_path)
 
 
 d_lo, d_hi = sp.paired_diff_bootstrap(
