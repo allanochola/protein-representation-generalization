@@ -107,3 +107,41 @@ before bootstrap.
 The frozen scientific design, model, layer, clustering, split, baseline, probe
 class, optimizer, hyperparameters, metrics, bootstrap, and decision bands remain
 unchanged.
+
+
+## Confirmatory evaluation attempt 4 — interrupted before metrics for split reproducibility
+
+The first Kaggle confirmatory run successfully reused the complete ESM cache,
+rebuilt the memory-safe memmap, saved the ESM normalization checkpoint, and
+reached ESM epoch 20/40.
+
+Before any evaluation metric was produced, the run was manually stopped because
+the seed-0 split counts differed from the earlier Colab attempt despite an
+identical 11,043-cluster biological partition.
+
+No Q3 accuracy, macro-F1, Delta_ESM, G, bootstrap interval, or experimental
+verdict was observed. No ESM or local probe checkpoint had yet been saved.
+
+Diagnosis showed that the split implementation was deterministic only
+conditional on arbitrary protein-row order and MMseqs representative labels.
+The biological cluster partition itself was unchanged.
+
+The pre-result correction assigns:
+
+- each protein a SHA-256 record key derived from sequence plus Q3 labels;
+- each cluster a SHA-256 key derived from the sorted record keys of its members;
+- manifest rows in sorted record-key order before seed-0 splitting.
+
+A stress test that independently scrambled both manifest row order and cluster
+labels recovered exactly identical biological membership for train,
+random-test, and divergent-test sets.
+
+The resulting canonical seed-0 split is:
+
+- train: 7,712 proteins / 7,529 clusters
+- random_test: 1,361 proteins / 1,353 clusters
+- divergent_test: 2,300 proteins / 2,209 clusters
+
+All model, representation, baseline, optimizer, hyperparameter, metric,
+bootstrap, effect-definition, and preregistered decision-band quantities remain
+unchanged.

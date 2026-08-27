@@ -37,6 +37,14 @@ np.random.seed(SEED)
 
 mf = pd.read_csv(CACHE / "manifest.csv")
 
+assert "record_key" in mf.columns, (
+    "manifest lacks content-derived record_key; rerun canonical manifest step"
+)
+assert mf["record_key"].is_unique, "record_key must be unique"
+assert mf["record_key"].is_monotonic_increasing, (
+    "manifest must be canonically sorted by record_key"
+)
+
 print(f"{len(mf)} proteins, {mf.cluster.nunique()} clusters")
 
 splits = sp.make_splits(mf.cluster.values, seed=SEED)

@@ -15,6 +15,7 @@
 
 # %%
 import os
+import hashlib
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -64,10 +65,51 @@ for j, p in enumerate(clean):
     if not fp.exists():
         emb = ex.embed_layer(tok, model, p["seq"], layer=LAYER, device=DEVICE)
         np.savez_compressed(fp, emb=emb, y=p["y"])
-    manifest.append(dict(id=p["id"], cluster=clu.get(p["id"], p["id"]),
-                         seq=p["seq"], n_res=len(p["seq"]), npz=str(fp)))
+    payload = (
+        p["seq"].encode("utf-8")
+        + b"\\0"
+        + np.asarray(p["y"], dtype=np.uint8).tobytes()
+    )
+    record_key = hashlib.sha256(payload).hexdigest()
+
+    manifest.append(dict(
+        id=p["id"],
+        cluster=clu.get(p["id"], p["id"]),
+        record_key=record_key,
+        seq=p["seq"],
+        n_res=len(p["seq"]),
+        npz=str(fp),
+    ))
     if j % 200 == 0:
         print(f"  embedded {j+1}/{len(clean)}")
 
-pd.DataFrame(manifest).to_csv(CACHE / "manifest.csv", index=False)
-print(f"cached {len(manifest)} proteins across {n_clusters} clusters -> {CACHE}")
+mf = pd.DataFrame(manifest)
+
+# Replace arbitrary MMseqs representative IDs with an intrinsic cluster key:
+# SHA256(sorted content-derived record keys belonging to the cluster)).
+stable_cluster = {}
+
+for old_cluster, g in mf.groupby("cluster", sort=False):
+    members = sorted(g["record_key"].tolist())
+    payload = "\\n".join(members).encode("ascii")
+    stable_cluster[old_cluster] = hashlib.sha256(payload).hexdigest()
+
+mf["cluster"] = mf["cluster"].map(stable_cluster)
+
+# Canonical protein row order. This makes the seed-0 random-test sampling
+# independent of LMDB enumeration order and arbitrary pXXXX identifiers.
+mf = (
+    mf.sort_values("record_key")
+      .reset_index(drop=True)
+)
+
+assert mf["record_key"].is_unique
+assert mf["record_key"].is_monotonic_increasing
+assert mf["cluster"].nunique() == n_clusters
+
+mf.to_csv(CACHE / "manifest.csv", index=False)
+
+print(
+    f"cached {len(mf)} proteins across {n_clusters} clusters -> {CACHE}"
+)
+print("manifest canonicalization: content-derived record + cluster keys")
