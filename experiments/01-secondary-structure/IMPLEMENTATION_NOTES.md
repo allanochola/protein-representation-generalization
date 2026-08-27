@@ -57,3 +57,30 @@ disk-backed NumPy memmap. This changes storage/access only and restores the
 original global residue-level permutation each epoch while keeping RAM bounded.
 
 All frozen scientific quantities and probe hyperparameters remain unchanged.
+
+
+## Pre-result clustering reproducibility amendment
+
+During environment reconstruction, repeated MMseqs2 clustering of the same
+11,373 cleaned proteins produced a one-cluster discrepancy: 11,042 versus
+11,043 clusters.
+
+The underlying labeled dataset was unchanged:
+- 11,373 proteins
+- 2,875,432 residues
+- overall Q3 balance: H=0.3614, E=0.2127, C=0.4259
+
+No confirmatory Q3 accuracy, macro-F1, Delta_ESM, G, bootstrap interval, or
+verdict had been observed.
+
+To remove clustering nondeterminism before analysis, the proteins were ordered
+deterministically by protein id and reclustered at 30% identity with MMseqs2
+build:
+
+eec9c354be4276d2373996af2e50808b1390d527
+
+using --threads 1.
+
+The resulting 11,043-cluster partition was reproduced exactly on an independent
+second run, including identical protein-to-cluster assignments. This
+deterministic partition is frozen for the confirmatory analysis.

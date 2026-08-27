@@ -18,7 +18,7 @@ def load_tape_ss(data_dir, max_len=1022, min_len=20):
     per-residue Q3 indices (H=0, E=1, C=2). Returns (proteins, (seq_key, ss_key))."""
     import lmdb
     records = []
-    for f in glob.glob(os.path.join(data_dir, "secondary_structure_*.lmdb")):
+    for f in sorted(glob.glob(os.path.join(data_dir, "secondary_structure_*.lmdb"))):
         env = lmdb.open(f, readonly=True, lock=False)
         with env.begin() as txn:
             for key, val in txn.cursor():
@@ -56,7 +56,7 @@ def cluster_30(clean, out_dir, min_seq_id=0.3):
     os.makedirs(out_dir, exist_ok=True)
     fasta = os.path.join(out_dir, "seqs.fasta")
     with open(fasta, "w") as fh:
-        for p in clean:
+        for p in sorted(clean, key=lambda x: int(x["id"][1:])):
             fh.write(f">{p['id']}\n{p['seq']}\n")
     tsv = os.path.join(out_dir, "clu_cluster.tsv")
     if not os.path.exists(tsv):
@@ -67,7 +67,7 @@ def cluster_30(clean, out_dir, min_seq_id=0.3):
             os.environ["PATH"] += ":/tmp/mmseqs/bin"
         subprocess.run(
             f"mmseqs easy-cluster {fasta} {out_dir}/clu {out_dir}/tmp "
-            f"--min-seq-id {min_seq_id} -c 0.8 --cov-mode 1 > {out_dir}/mmseqs.log 2>&1",
+            f"--min-seq-id {min_seq_id} -c 0.8 --cov-mode 1 --threads 1 > {out_dir}/mmseqs.log 2>&1",
             shell=True, check=True)
     clu = {}
     for line in open(tsv):
