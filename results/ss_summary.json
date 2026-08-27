@@ -1,0 +1,16 @@
+{
+  "delta_esm_divergent": 0.155,
+  "delta_ci": [
+    0.1514,
+    0.1588
+  ],
+  "G": 0.0029,
+  "G_ci": [
+    -0.0033,
+    0.0088
+  ],
+  "acc_esm_random": 0.7652,
+  "acc_esm_divergent": 0.7623,
+  "acc_local_divergent": 0.6072,
+  "verdict": "H_repr"
+}

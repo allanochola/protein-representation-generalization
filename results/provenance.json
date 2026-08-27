@@ -1,0 +1,97 @@
+{
+  "model": "facebook/esm2_t33_650M_UR50D",
+  "layer": 17,
+  "window": 3,
+  "epochs": 40,
+  "lr": 0.001,
+  "batch": 4096,
+  "seed": 0,
+  "evaluator": "memmap-v1",
+  "previous_attempts": [
+    "attempt1: host RAM SIGKILL before metrics",
+    "attempt2: repeated-npz-I/O stop before metrics"
+  ],
+  "splits": {
+    "train": 7712,
+    "random_test": 1361,
+    "divergent_test": 2300
+  },
+  "n_clusters": 11043,
+  "n_residues": 2875432,
+  "split_audit": {
+    "total_proteins": 11373,
+    "total_clusters": 11043,
+    "total_residues": 2875432,
+    "train": {
+      "proteins": 7712,
+      "clusters": 7529,
+      "residues": 1946379
+    },
+    "random_test": {
+      "proteins": 1361,
+      "clusters": 1353,
+      "residues": 346632
+    },
+    "divergent_test": {
+      "proteins": 2300,
+      "clusters": 2209,
+      "residues": 582421
+    },
+    "cluster_intersections": {
+      "train_random": 48,
+      "train_divergent": 0,
+      "random_divergent": 0
+    },
+    "protein_intersections": {
+      "train_random": 0,
+      "train_divergent": 0,
+      "random_divergent": 0
+    },
+    "cluster_union": 11043,
+    "clusters_missing_from_union": 0,
+    "count_reconciliation": {
+      "naive_per_split_sum": 11091,
+      "train_random_shared_clusters": 48,
+      "reconciled_unique_clusters": 11043
+    },
+    "audit_pass": true
+  },
+  "split_count_reconciliation": "The per-split distinct-cluster counts sum to 11,091 because 48 clusters contain separate proteins assigned to both the training and in-distribution random-test sets. Subtracting this intentional overlap gives the 11,043 unique clusters in the pooled dataset. The divergent test shares zero clusters with either training or random test.",
+  "bootstrap": {
+    "replicates": 2000,
+    "seed": 0,
+    "resampling_unit": "30%-sequence-identity cluster",
+    "interval": "95% percentile interval",
+    "implementation": "per-cluster sufficient statistics",
+    "runtime_seconds": {
+      "delta_esm": 0.698,
+      "generalization_gap": 1.099,
+      "total": 1.797
+    },
+    "equivalence_validation": {
+      "paired_delta_max_ci_difference": 2.0816681711721685e-17,
+      "gap_max_replicate_difference": 0.0,
+      "gap_max_ci_difference": 0.0
+    },
+    "note": "The original implementation repeatedly materialized and concatenated residue-index arrays for sampled clusters. The optimized implementation uses per-cluster residue and correct-prediction counts while preserving the same cluster-resampling procedure and residue-weighted statistic."
+  },
+  "reproducibility_checks": {
+    "canonical_split_invariance": "PASS: scrambling manifest row order and arbitrary cluster labels recovered identical biological train/random/divergent membership.",
+    "bootstrap_equivalence": "PASS: the optimized bootstrap reproduced the frozen computation. The paired Delta interval differed only at floating-point roundoff; the G bootstrap matched replicate-for-replicate.",
+    "checkpointed_rerun": "The final checkpointed rerun reproduced the saved primary metrics and final confidence intervals. Because it reused the same trained probe checkpoints, this is not claimed as an independent end-to-end retraining determinism test."
+  },
+  "final_result": {
+    "delta_esm_divergent": 0.15503905250669192,
+    "delta_esm_ci95": [
+      0.151,
+      0.159
+    ],
+    "generalization_gap": 0.0029029031388969617,
+    "generalization_gap_ci95": [
+      -0.003,
+      0.009
+    ],
+    "verdict": "H_repr",
+    "confirmatory_exit_code": 0
+  }
+}

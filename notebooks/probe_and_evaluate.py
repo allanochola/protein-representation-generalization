@@ -1,5 +1,5 @@
 
-import os, json, sys
+import os, json, sys, time
 from pathlib import Path
 
 import numpy as np
@@ -637,6 +637,7 @@ for k, v in primary.items():
 print("saved:", primary_path)
 
 
+_t_delta = time.perf_counter()
 d_lo, d_hi = sp.paired_diff_bootstrap(
     esm["divergent_test"]["cluster"],
     esm["divergent_test"]["correct"],
@@ -644,6 +645,7 @@ d_lo, d_hi = sp.paired_diff_bootstrap(
     reps=2000,
     seed=SEED,
 )
+delta_bootstrap_seconds = time.perf_counter() - _t_delta
 
 
 def unpaired_gap_ci(
@@ -711,9 +713,17 @@ def unpaired_gap_ci(
     )
 
 
+_t_gap = time.perf_counter()
 g_lo, g_hi = unpaired_gap_ci(
     esm["random_test"],
     esm["divergent_test"]
+)
+gap_bootstrap_seconds = time.perf_counter() - _t_gap
+
+print(
+    f"bootstrap runtime: Delta={delta_bootstrap_seconds:.3f}s | "
+    f"G={gap_bootstrap_seconds:.3f}s | "
+    f"total={delta_bootstrap_seconds + gap_bootstrap_seconds:.3f}s"
 )
 
 verdict = sp.verdict(
