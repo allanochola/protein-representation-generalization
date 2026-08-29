@@ -1118,6 +1118,500 @@ def environment_info():
     }
 
 
+
+def calibrate_clustered_ap_shifts(
+    target_aps,
+    prevalence=0.01,
+    n_clusters=1000,
+    n_residues=500_000,
+    seed=139999,
+):
+    """
+    Independently calibrate fixed score shifts under the current
+    cluster-heterogeneity assumptions.
+
+    The calibration pool is generated once and is separate from every
+    outer simulation dataset.
+    """
+    rng = np.random.default_rng(seed)
+
+    n_positive = int(
+        round(n_residues * prevalence)
+    )
+
+    sizes = make_cluster_sizes(
+        n_clusters,
+        n_residues,
+        rng,
+    )
+
+    y, cluster_id = allocate_binary_labels(
+        sizes,
+        n_positive,
+        rng,
+    )
+
+    latents = make_score_latents(
+        y,
+        cluster_id,
+        rng,
+    )
+
+    residue_noise = latents["residue_noise"]
+    cluster_difficulty = (
+        latents["cluster_difficulty"][cluster_id]
+    )
+
+    targets = sorted(
+        set(float(x) for x in target_aps)
+    )
+
+    shifts = {}
+
+    for target_ap in targets:
+        lo, hi = 0.0, 12.0
+
+        for _ in range(45):
+            mid = (lo + hi) / 2
+
+            scores = (
+                residue_noise
+                + y * (
+                    mid
+                    + cluster_difficulty
+                )
+            )
+
+            ap = average_precision_score(
+                y,
+                scores,
+            )
+
+            if ap < target_ap:
+                lo = mid
+            else:
+                hi = mid
+
+        shift = (lo + hi) / 2
+
+        achieved = average_precision_score(
+            y,
+            residue_noise
+            + y * (
+                shift
+                + cluster_difficulty
+            ),
+        )
+
+        shifts[str(target_ap)] = {
+            "shift": float(shift),
+            "calibration_ap": float(achieved),
+        }
+
+    return {
+        "prevalence": float(prevalence),
+        "n_clusters": int(n_clusters),
+        "n_residues": int(n_residues),
+        "n_positive": int(n_positive),
+        "seed": int(seed),
+        "cluster_prevalence_sigma": float(
+            CLUSTER_PREVALENCE_SIGMA
+        ),
+        "cluster_difficulty_sigma": float(
+            CLUSTER_DIFFICULTY_SIGMA
+        ),
+        "targets": shifts,
+    }
+
+
+def run_planned_support_retention(
+    true_R_values=(0.95, 1.00),
+    outer_reps=100,
+    bootstrap_reps=300,
+    seed=140000,
+):
+    """
+    Retention sensitivity under approximately planned support.
+
+    Random test:
+        100 clusters / 420 positives
+
+    Divergent test:
+        170 clusters / 700 positives
+
+    Synthetic heterogeneity:
+        CLUSTER_PREVALENCE_SIGMA = 0.75
+        CLUSTER_DIFFICULTY_SIGMA = 0.60
+
+    Arms B and D share latent residue/cluster difficulty within each split.
+
+    Signal shifts are calibrated once independently and then fixed across
+    outer replicates, so realized AP and R vary freely.
+    """
+    global CLUSTER_PREVALENCE_SIGMA
+    global CLUSTER_DIFFICULTY_SIGMA
+
+    old_prev = CLUSTER_PREVALENCE_SIGMA
+    old_diff = CLUSTER_DIFFICULTY_SIGMA
+
+    CLUSTER_PREVALENCE_SIGMA = 0.75
+    CLUSTER_DIFFICULTY_SIGMA = 0.60
+
+    try:
+        true_R_values = [
+            float(x) for x in true_R_values
+        ]
+
+        prevalence = 0.01
+
+        rand_clusters = 100
+        rand_positive = 420
+
+        div_clusters = 170
+        div_positive = 700
+
+        rand_residues = int(
+            round(rand_positive / prevalence)
+        )
+        div_residues = int(
+            round(div_positive / prevalence)
+        )
+
+        ap_b_rand_target = 0.05
+        ap_d_rand_target = 0.20
+
+        delta_rand_target = (
+            ap_d_rand_target
+            - ap_b_rand_target
+        )
+
+        target_aps = {
+            ap_b_rand_target,
+            ap_d_rand_target,
+        }
+
+        targets_by_R = {}
+
+        for R0 in true_R_values:
+            ap_b_div_target = 0.05
+            ap_d_div_target = (
+                ap_b_div_target
+                + R0 * delta_rand_target
+            )
+
+            targets_by_R[R0] = {
+                "ap_b_div": ap_b_div_target,
+                "ap_d_div": ap_d_div_target,
+            }
+
+            target_aps.add(ap_b_div_target)
+            target_aps.add(ap_d_div_target)
+
+        calibration = calibrate_clustered_ap_shifts(
+            target_aps=target_aps,
+            prevalence=prevalence,
+            n_clusters=1000,
+            n_residues=500_000,
+            seed=seed - 1,
+        )
+
+        shift_map = {
+            float(k): v["shift"]
+            for k, v in calibration["targets"].items()
+        }
+
+        results = {}
+
+        for R_index, R0 in enumerate(true_R_values):
+
+            print(
+                f"\n=== planned support, true R = {R0:.2f} ==="
+            )
+
+            rng = np.random.default_rng(
+                seed + R_index * 10000
+            )
+
+            ap_b_div_target = (
+                targets_by_R[R0]["ap_b_div"]
+            )
+            ap_d_div_target = (
+                targets_by_R[R0]["ap_d_div"]
+            )
+
+            ci_lows = []
+            log_half_widths = []
+            point_Rs = []
+            bootstrap_medians = []
+            valid_fractions = []
+            realized = []
+
+            for i in range(outer_reps):
+
+                # Random split
+                sizes_r = make_cluster_sizes(
+                    rand_clusters,
+                    rand_residues,
+                    rng,
+                )
+
+                y_r, c_r = allocate_binary_labels(
+                    sizes_r,
+                    rand_positive,
+                    rng,
+                )
+
+                latents_r = make_score_latents(
+                    y_r,
+                    c_r,
+                    rng,
+                )
+
+                b_r = scores_from_fixed_shift(
+                    y_r,
+                    c_r,
+                    shift_map[ap_b_rand_target],
+                    latents_r,
+                )
+
+                d_r = scores_from_fixed_shift(
+                    y_r,
+                    c_r,
+                    shift_map[ap_d_rand_target],
+                    latents_r,
+                )
+
+                # Divergent split
+                sizes_d = make_cluster_sizes(
+                    div_clusters,
+                    div_residues,
+                    rng,
+                )
+
+                y_d, c_d = allocate_binary_labels(
+                    sizes_d,
+                    div_positive,
+                    rng,
+                )
+
+                latents_d = make_score_latents(
+                    y_d,
+                    c_d,
+                    rng,
+                )
+
+                b_d = scores_from_fixed_shift(
+                    y_d,
+                    c_d,
+                    shift_map[ap_b_div_target],
+                    latents_d,
+                )
+
+                d_d = scores_from_fixed_shift(
+                    y_d,
+                    c_d,
+                    shift_map[ap_d_div_target],
+                    latents_d,
+                )
+
+                point = retention_point_estimate(
+                    y_r,
+                    b_r,
+                    d_r,
+                    y_d,
+                    b_d,
+                    d_d,
+                )
+
+                boot = weighted_cluster_bootstrap_retention(
+                    y_r,
+                    b_r,
+                    d_r,
+                    c_r,
+                    y_d,
+                    b_d,
+                    d_d,
+                    c_d,
+                    reps=bootstrap_reps,
+                    seed=(
+                        seed
+                        + R_index * 100000
+                        + 1000
+                        + i
+                    ),
+                )
+
+                point_Rs.append(point["R"])
+                ci_lows.append(boot["ci_low"])
+                log_half_widths.append(
+                    boot["log_half_width"]
+                )
+                bootstrap_medians.append(
+                    boot["median_R"]
+                )
+                valid_fractions.append(
+                    boot["valid_fraction"]
+                )
+                realized.append(point)
+
+                if (i + 1) % 10 == 0:
+                    detect = np.mean(
+                        np.asarray(ci_lows)
+                        > RETENTION_THRESHOLD
+                    )
+
+                    print(
+                        f"{i+1:3d}/{outer_reps} | "
+                        f"mean point R="
+                        f"{np.nanmean(point_Rs):.3f} | "
+                        f"CI_low="
+                        f"{np.mean(ci_lows):.3f} | "
+                        f"detect={detect:.3f}"
+                    )
+
+            point_Rs = np.asarray(
+                point_Rs,
+                dtype=float,
+            )
+            ci_lows = np.asarray(
+                ci_lows,
+                dtype=float,
+            )
+            log_half_widths = np.asarray(
+                log_half_widths,
+                dtype=float,
+            )
+
+            valid_point_Rs = point_Rs[
+                np.isfinite(point_Rs)
+                & (point_Rs > 0)
+            ]
+
+            sd_log_point_R = float(
+                np.std(
+                    np.log(valid_point_Rs),
+                    ddof=1,
+                )
+            )
+
+            mean_bootstrap_sigma = float(
+                np.mean(
+                    log_half_widths / 1.96
+                )
+            )
+
+            results[str(R0)] = {
+                "target_true_R": float(R0),
+                "outer_replicates": int(
+                    outer_reps
+                ),
+                "bootstrap_replicates": int(
+                    bootstrap_reps
+                ),
+                "random_support": {
+                    "clusters": rand_clusters,
+                    "positives": rand_positive,
+                },
+                "divergent_support": {
+                    "clusters": div_clusters,
+                    "positives": div_positive,
+                },
+                "mean_point_R": float(
+                    np.nanmean(point_Rs)
+                ),
+                "sd_log_point_R":
+                    sd_log_point_R,
+                "mean_bootstrap_sigma_logR":
+                    mean_bootstrap_sigma,
+                "calibration_ratio": float(
+                    sd_log_point_R
+                    / mean_bootstrap_sigma
+                ),
+                "point_R_percentiles": [
+                    float(x)
+                    for x in np.nanpercentile(
+                        point_Rs,
+                        [5, 50, 95],
+                    )
+                ],
+                "mean_bootstrap_median_R":
+                    float(
+                        np.mean(
+                            bootstrap_medians
+                        )
+                    ),
+                "mean_log_R_half_width":
+                    float(
+                        np.mean(
+                            log_half_widths
+                        )
+                    ),
+                "mean_CI_low":
+                    float(
+                        np.mean(ci_lows)
+                    ),
+                "CI_low_percentiles": [
+                    float(x)
+                    for x in np.percentile(
+                        ci_lows,
+                        [5, 50, 95],
+                    )
+                ],
+                "detection_probability":
+                    float(
+                        np.mean(
+                            ci_lows
+                            > RETENTION_THRESHOLD
+                        )
+                    ),
+                "mean_valid_fraction":
+                    float(
+                        np.mean(
+                            valid_fractions
+                        )
+                    ),
+                "mean_realized_AP": {
+                    key: float(
+                        np.mean([
+                            row[key]
+                            for row in realized
+                        ])
+                    )
+                    for key in (
+                        "ap_b_rand",
+                        "ap_d_rand",
+                        "ap_b_div",
+                        "ap_d_div",
+                        "delta_rand",
+                        "delta_div",
+                    )
+                },
+            }
+
+        return {
+            "scenario":
+                "fixed_shift_planned_support_retention",
+            "environment":
+                environment_info(),
+            "shared_arm_latents": True,
+            "cluster_prevalence_sigma":
+                0.75,
+            "cluster_difficulty_sigma":
+                0.60,
+            "prevalence":
+                prevalence,
+            "retention_threshold":
+                RETENTION_THRESHOLD,
+            "calibration":
+                calibration,
+            "results":
+                results,
+        }
+
+    finally:
+        CLUSTER_PREVALENCE_SIGMA = old_prev
+        CLUSTER_DIFFICULTY_SIGMA = old_diff
+
 def main():
     parser = argparse.ArgumentParser()
 
