@@ -1,0 +1,118 @@
+{
+  "scenario": "fixed_shift_planned_support_retention",
+  "environment": {
+    "python": "3.12.13",
+    "numpy": "2.0.2",
+    "scikit_learn": "1.6.1"
+  },
+  "shared_arm_latents": true,
+  "cluster_prevalence_sigma": 0.75,
+  "cluster_difficulty_sigma": 0.6,
+  "prevalence": 0.01,
+  "retention_threshold": 0.75,
+  "calibration": {
+    "prevalence": 0.01,
+    "n_clusters": 1000,
+    "n_residues": 500000,
+    "n_positive": 5000,
+    "seed": 139999,
+    "cluster_prevalence_sigma": 0.75,
+    "cluster_difficulty_sigma": 0.6,
+    "targets": {
+      "0.05": {
+        "shift": 0.8757994623642276,
+        "calibration_ap": 0.049999996778653605
+      },
+      "0.1925": {
+        "shift": 1.6477692138400357,
+        "calibration_ap": 0.19249970420472126
+      },
+      "0.2": {
+        "shift": 1.6746890077776584,
+        "calibration_ap": 0.200000004221456
+      }
+    }
+  },
+  "results": {
+    "0.95": {
+      "target_true_R": 0.95,
+      "outer_replicates": 100,
+      "bootstrap_replicates": 300,
+      "random_support": {
+        "clusters": 100,
+        "positives": 420
+      },
+      "divergent_support": {
+        "clusters": 170,
+        "positives": 700
+      },
+      "mean_point_R": 0.9489418351262912,
+      "sd_log_point_R": 0.202755606272729,
+      "mean_bootstrap_sigma_logR": 0.20977747578700895,
+      "calibration_ratio": 0.9665270568828401,
+      "point_R_percentiles": [
+        0.6819223104318215,
+        0.9148468612980205,
+        1.314833354149109
+      ],
+      "mean_bootstrap_median_R": 0.9473913878708679,
+      "mean_log_R_half_width": 0.4111638525425375,
+      "mean_CI_low": 0.6363536339040899,
+      "CI_low_percentiles": [
+        0.4743699259648449,
+        0.6286221899529829,
+        0.8494369338679698
+      ],
+      "detection_probability": 0.18,
+      "mean_valid_fraction": 1.0,
+      "mean_realized_AP": {
+        "ap_b_rand": 0.05550754388266792,
+        "ap_d_rand": 0.21053138383344294,
+        "ap_b_div": 0.05125978290522536,
+        "ap_d_div": 0.19468641460939545,
+        "delta_rand": 0.15502383995077504,
+        "delta_div": 0.14342663170417005
+      }
+    },
+    "1.0": {
+      "target_true_R": 1.0,
+      "outer_replicates": 100,
+      "bootstrap_replicates": 300,
+      "random_support": {
+        "clusters": 100,
+        "positives": 420
+      },
+      "divergent_support": {
+        "clusters": 170,
+        "positives": 700
+      },
+      "mean_point_R": 1.0267315194561109,
+      "sd_log_point_R": 0.19502317794210586,
+      "mean_bootstrap_sigma_logR": 0.21011077076073378,
+      "calibration_ratio": 0.9281921970777542,
+      "point_R_percentiles": [
+        0.7254623666657701,
+        0.983295115711747,
+        1.4024778131177869
+      ],
+      "mean_bootstrap_median_R": 1.0232746557014007,
+      "mean_log_R_half_width": 0.4118171106910383,
+      "mean_CI_low": 0.6882836101537315,
+      "CI_low_percentiles": [
+        0.49194850159455245,
+        0.6624366811323037,
+        0.932570225688734
+      ],
+      "detection_probability": 0.29,
+      "mean_valid_fraction": 1.0,
+      "mean_realized_AP": {
+        "ap_b_rand": 0.05283561408424454,
+        "ap_d_rand": 0.20345585833801888,
+        "ap_b_div": 0.05137474012291004,
+        "ap_d_div": 0.20250011036652707,
+        "delta_rand": 0.15062024425377435,
+        "delta_div": 0.15112537024361702
+      }
+    }
+  }
+}
