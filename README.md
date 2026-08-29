@@ -34,6 +34,9 @@ For this target, the fixed ESM-2 representation retains substantial linearly acc
 
 See the [frozen protocol](experiments/01-secondary-structure/PROTOCOL.md) and [full result](experiments/01-secondary-structure/results.md).
 
+**Zenodo:** [10.5281/zenodo.22134890](https://doi.org/10.5281/zenodo.22134890)
+
+
 ---
 
 ## Experiment 02 — Catalytic residues
@@ -88,6 +91,8 @@ See the [draft protocol](experiments/02-catalytic-residues/PROTOCOL.md), [pre-da
 
 ---
 
+**Zenodo:** [10.5281/zenodo.22164680](https://doi.org/10.5281/zenodo.22164680)
+
 ## Split audit — Experiment 01
 
 The final canonical dataset contains **11,373 proteins, 11,043 clusters, and 2,875,432 residues**.
@@ -97,6 +102,20 @@ The divergent split shares **zero clusters** with training or random test.
 The per-split cluster counts sum to 11,091 because **48 clusters contain different proteins in both training and the in-distribution random test**. Subtracting that intentional overlap reconciles exactly to the 11,043 unique clusters.
 
 Protein membership is disjoint across all three splits.
+
+---
+
+## Citable releases
+
+### Experiment 01 — secondary-structure representation generalization
+
+Ochola, A. (2026). *Protein representation generalization: ESM-2 secondary-structure information under a 30%-identity cluster holdout*. Zenodo.  
+https://doi.org/10.5281/zenodo.22134890
+
+### Experiment 02 — catalytic-residue pre-data feasibility
+
+Ochola, A. (2026). *Pre-data feasibility analysis for catalytic-residue representation generalization under a 30%-identity family holdout* (Version 1.0.0). Zenodo.  
+https://doi.org/10.5281/zenodo.22164680
 
 ---
 
