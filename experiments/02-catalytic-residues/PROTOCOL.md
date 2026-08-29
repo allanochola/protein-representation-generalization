@@ -1,6 +1,6 @@
 # Experiment 02 — Catalytic-residue information in ESM-2 under a 30%-identity family holdout
 
-**Status:** DRAFT v0.4 — not frozen, and the final design iteration. Decision thresholds are fixed in this document and require no data-derived calibration (§10). Precision floors K2/K3, and the choice between two retention definitions, are outputs of the pre-data simulation (§11). No confirmatory label or result has been inspected. No further machinery is added after this version.
+**Status:** CLOSED PRE-DATA — DRAFT v0.4 never reached v1.0 freeze. Pre-data precision analysis found the planned configuration insufficiently sensitive to the required retention criterion; see `PRE_DATA_PRECISION.md`, `IMPLEMENTATION_NOTES.md`, and `results.md`. No confirmatory catalytic-residue label, ESM embedding, probe result, or test-split result was inspected.
 
 **Repository:** `protein-representation-generalization`
 **Predecessor:** `experiments/01-secondary-structure/` (closed, verdict H_repr, Zenodo DOI 10.5281/zenodo.22134890)
