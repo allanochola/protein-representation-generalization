@@ -1621,6 +1621,7 @@ def main():
             "self-test",
             "retention-favorable",
             "retention-fixed",
+            "retention-planned",
         ],
     )
 
@@ -1672,11 +1673,22 @@ def main():
                 ),
         }
 
-    else:
+    elif args.command == "retention-fixed":
         result = run_fixed_shift_retention_curve(
             true_R_values=(
                 0.85,
                 0.90,
+                0.95,
+                1.00,
+            ),
+            outer_reps=args.outer,
+            bootstrap_reps=args.bootstrap,
+            seed=args.seed,
+        )
+
+    else:
+        result = run_planned_support_retention(
+            true_R_values=(
                 0.95,
                 1.00,
             ),
