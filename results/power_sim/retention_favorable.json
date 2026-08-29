@@ -22,5 +22,6 @@
     "mean_CI_low": 0.7329478382267242,
     "detection_probability": 0.0,
     "mean_valid_fraction": 1.0
-  }
+  },
+  "note": "SUPERSEDED DIAGNOSTIC \u2014 NOT A POWER ESTIMATE. This run shared B/D latents but re-tuned signal strength to hit target AP inside every outer dataset, suppressing across-dataset variability and invalidating detection_probability as a power estimate. Retained only for audit history. Use retention_fixed_shift.json and retention_planned_support.json for calibrated feasibility evidence."
 }
