@@ -24,7 +24,7 @@ No Experiment 02 label pool was constructed to obtain these figures. They are or
 
 Feasibility diagnostics are only as good as the simulator producing them. Two defects were found and corrected before any result here was accepted; both are documented in `IMPLEMENTATION_NOTES.md`.
 
-1. Arms B and D were generated with independent noise, zeroing a covariance that is strongly positive in reality and inflating the variance of every difference-based statistic. Correcting it cut the log-R half-width from 0.614 to 0.207 under otherwise identical settings.
+1. Arms B and D were generated with independent noise, zeroing a covariance that is strongly positive in reality and inflating the variance of every difference-based statistic. Across the subsequent pairing correction, the log-R half-width fell from 0.614 to 0.207. Those two runs also differed in cluster heterogeneity, so the full reduction cannot be attributed to pairing alone; the earlier 0.614 value is retained only as part of the simulator audit.
 2. The score generator re-tuned its signal shift to hit target AP in every synthetic dataset, pinning realized AP and removing the across-dataset variation that outer replication measures. Reported detection was deflated roughly sevenfold.
 
 After correction the simulator was validated on across-replicate standard deviation of `log R̂` against mean bootstrap sigma. That ratio was 6.6 under pinning. Post-correction it sits between 0.91 and 1.17 across four retention conditions, and detection tracks the analytic expectation monotonically:
