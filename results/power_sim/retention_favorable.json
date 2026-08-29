@@ -1,0 +1,27 @@
+{
+  "environment": {
+    "python": "3.12.13",
+    "numpy": "2.0.2",
+    "scikit_learn": "1.6.1"
+  },
+  "result": {
+    "scenario": "maximally_favorable_retention",
+    "true_R": 0.9,
+    "retention_threshold": 0.75,
+    "cluster_prevalence_sigma": 0.0,
+    "cluster_difficulty_sigma": 0.0,
+    "shared_arm_latents": true,
+    "clusters_per_split": 170,
+    "positives_per_split": 700,
+    "prevalence": 0.01,
+    "outer_replicates": 30,
+    "bootstrap_replicates": 300,
+    "seed": 91000,
+    "mean_median_R": 0.9028098306909341,
+    "mean_log_R_half_width": 0.20800891791346174,
+    "mean_CI_low": 0.7329478382267242,
+    "detection_probability": 0.0,
+    "mean_valid_fraction": 1.0
+  },
+  "note": "SUPERSEDED DIAGNOSTIC \u2014 NOT A POWER ESTIMATE. This run shared B/D latents but re-tuned signal strength to hit target AP inside every outer dataset, suppressing across-dataset variability and invalidating detection_probability as a power estimate. Retained only for audit history. Use retention_fixed_shift.json and retention_planned_support.json for calibrated feasibility evidence."
+}
