@@ -17,7 +17,7 @@ UNIPROT_FIELDS   = [
     "accession", "reviewed", "id", "protein_name", "gene_names",
     "organism_name", "organism_id", "lineage",
     "length", "sequence", "mass", "fragment",
-    "keywords", "protein_existence", "annotation_score",
+    "keyword", "protein_existence", "annotation_score",
     "cc_function", "cc_subcellular_location",
     "ft_signal", "ft_propep", "ft_chain",
     "xref_pfam", "xref_interpro",
