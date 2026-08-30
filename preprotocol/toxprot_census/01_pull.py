@@ -22,13 +22,16 @@ BASE_URL = "https://rest.uniprot.org/uniprotkb/search"
 
 
 def _next_link(headers: dict) -> str | None:
-    """Extract next-page URL from the Link response header."""
+    """Extract the rel="next" URL from UniProt's RFC 8288 Link header.
+
+    Do not split on commas because the URL contains a comma-separated
+    fields parameter.
+    """
+    import re
+
     link = headers.get("Link", "")
-    for part in link.split(","):
-        part = part.strip()
-        if 'rel="next"' in part:
-            return part.split(";")[0].strip().strip("<>")
-    return None
+    match = re.search(r'<([^>]+)>\s*;\s*rel="next"', link)
+    return match.group(1) if match else None
 
 
 def pull() -> int:
