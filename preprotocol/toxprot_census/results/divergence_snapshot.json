@@ -1,0 +1,26 @@
+{
+  "stage": "Tox-Prot sequence-divergence census",
+  "definition": "For each 30%-identity cluster C, max_cross_cluster_id is the maximum qualifying identity between any member of C and any positive sequence outside C. Sequence-divergent iff max_cross_cluster_id < 0.30.",
+  "total_clusters": 1215,
+  "sequence_divergent_clusters": 936,
+  "divergent_fraction": 0.77,
+  "diagnostic_burn_clusters": 187,
+  "usable_divergent_clusters": 796,
+  "identity_bands_descriptive_only": {
+    "lt_20pct_reported_or_no_significant_hit": 907,
+    "20_to_25pct": 5,
+    "25_to_30pct": 24
+  },
+  "short_sequence_caveat": "Pairwise MMseqs2 search uses e-value <=1e-3. Very short peptides may lack significant pairwise hits despite genuine homology. Sub-30% identity bands are therefore descriptive only; family-profile auditing in Step 05 is required.",
+  "mmseqs_search": {
+    "min_seq_id_search_floor": 0.0,
+    "divergence_gate": 0.3,
+    "coverage": 0.8,
+    "cov_mode": 1,
+    "sensitivity": 7.5,
+    "alignment_mode": 3,
+    "evalue": "1e-3"
+  },
+  "code_commit": "f305989",
+  "divergence_assignment_sha256": "fd2b1e1ac5fdca1657a59fb713e7b0305dd5488f0db16b4bb18ccfdf76912a83"
+}
