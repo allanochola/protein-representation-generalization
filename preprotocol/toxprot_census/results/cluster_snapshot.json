@@ -1,0 +1,35 @@
+{
+  "stage": "Tox-Prot 30pct clustering",
+  "cleaned_entries": 7534,
+  "precursor": {
+    "members": 7534,
+    "clusters": 1215,
+    "singletons": 672,
+    "singleton_fraction": 0.5531,
+    "median_cluster_size": 1.0,
+    "mean_cluster_size": 6.2,
+    "max_cluster_size": 377
+  },
+  "mature": {
+    "members": 7533,
+    "clusters": 1279,
+    "singletons": 708,
+    "singleton_fraction": 0.5536,
+    "median_cluster_size": 1.0,
+    "mean_cluster_size": 5.89,
+    "max_cluster_size": 308,
+    "excluded_below_min_length": 1
+  },
+  "cluster_parameters": {
+    "min_seq_id": 0.3,
+    "coverage": 0.8,
+    "cov_mode": 1,
+    "cluster_mode": 0,
+    "sensitivity": 7.5,
+    "threads": 8
+  },
+  "mmseqs2_version": "eec9c354be4276d2373996af2e50808b1390d527",
+  "code_commit": "666740df7433732ac169a8473018b9c3db17e3f5",
+  "precursor_clusters_sha256": "a145dd40de92f72ae3ff05a77d6320cbf7dfda30185f7d3c81652a1a99f85639",
+  "mature_clusters_sha256": "c9224609a9228db6980ca90b40fc224c3e350e58003713b85ec4f85079c0fe8c"
+}
