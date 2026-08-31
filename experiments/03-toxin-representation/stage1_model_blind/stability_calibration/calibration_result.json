@@ -1,0 +1,8 @@
+{
+  "status": "UNCALIBRATED",
+  "n_latents": 32,
+  "n_outer": 500,
+  "n_perturbations": 100,
+  "subsample_fraction": 0.8,
+  "chosen_thresholds": null
+}
