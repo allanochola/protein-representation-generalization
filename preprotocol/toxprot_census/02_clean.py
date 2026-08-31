@@ -78,8 +78,16 @@ def _features(e: dict) -> list[dict]:
 
 
 def _has_fragment(e: dict) -> bool:
-    return any(f.get("type", "").lower() == "non-terminal residue"
-               for f in _features(e))
+    if e.get("fragment"):
+        return True
+    if e.get("sequence", {}).get("fragment"):
+        return True
+    if any(f.get("type", "").lower() == "non-terminal residue"
+           for f in _features(e)):
+        return True
+    if any(k.get("id", "") == "KW-0903" for k in e.get("keywords", [])):
+        return True
+    return False
 
 
 def _signal_propep_range(e: dict) -> tuple[int, int]:
@@ -205,7 +213,15 @@ def clean():
                                for f in _features(e))
             has_propep   = any(f.get("type","").lower() == "propep"
                                for f in _features(e))
-            mature_seq   = seq[mature_start - 1:]  # trim signal+propeptide
+
+            # Remove all annotated N-terminal signal/propeptide sequence.
+            # precursor_removable_end is 1-based inclusive.
+            mature_seq = (
+                seq[precursor_removable_end:]
+                if precursor_removable_end > 0
+                else seq
+            )
+            mature_start = precursor_removable_end + 1
             mature_length = len(mature_seq)
 
             # ── protein-existence code ────────────────────────────────────
