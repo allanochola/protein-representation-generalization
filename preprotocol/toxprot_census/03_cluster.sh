@@ -74,7 +74,37 @@ mkdir -p "${RESULTS}"
 cluster_fasta "precursor" "cleaned_precursor.fasta"
 
 # Sensitivity analysis: mature chains only
-cluster_fasta "mature" "cleaned_mature.fasta"
+# Enforce the same MIN_LENGTH=5 rule used by the cleaner.
+MATURE_VALID="${DATA}/cleaned_mature_min5.fasta"
+
+awk '
+    /^>/ {
+        if (name != "" && length(seq) >= 5) {
+            print name
+            print seq
+        }
+        name=$0
+        seq=""
+        next
+    }
+    {
+        seq = seq $0
+    }
+    END {
+        if (name != "" && length(seq) >= 5) {
+            print name
+            print seq
+        }
+    }
+' "${DATA}/cleaned_mature.fasta" > "${MATURE_VALID}"
+
+N_MATURE_ALL=$(grep -c "^>" "${DATA}/cleaned_mature.fasta")
+N_MATURE_VALID=$(grep -c "^>" "${MATURE_VALID}")
+N_MATURE_EXCLUDED=$((N_MATURE_ALL - N_MATURE_VALID))
+
+echo "Mature sensitivity filter: ${N_MATURE_EXCLUDED} sequence(s) <5 aa excluded"
+
+cluster_fasta "mature" "cleaned_mature_min5.fasta"
 
 echo ""
 echo "Clustering complete. Record the MMseqs2 version above for provenance."
