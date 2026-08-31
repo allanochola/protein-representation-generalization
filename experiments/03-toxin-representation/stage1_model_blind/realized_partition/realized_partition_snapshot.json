@@ -1,0 +1,84 @@
+{
+  "stage": "Experiment 03 realized discovery partition",
+  "status": "PRE_MODEL",
+  "partition_spec_commit": "69f0f07",
+  "candidate_universe_commit": "9fe8e0d",
+  "confirmatory": {
+    "positive_v2b_eligible": 161,
+    "negative_family_aware_eligible": 3541
+  },
+  "discovery": {
+    "sizes": [
+      100,
+      120,
+      139
+    ],
+    "n139_positive": 139,
+    "n139_negative": 139,
+    "n139_positive_source_counts": {
+      "divergent_non_v2b": 110,
+      "reference": 29
+    },
+    "length_targets": {
+      "100": {
+        "<30": 7,
+        "30-75": 16,
+        "76-150": 21,
+        ">150": 56
+      },
+      "120": {
+        "<30": 8,
+        "30-75": 19,
+        "76-150": 25,
+        ">150": 68
+      },
+      "139": {
+        "<30": 9,
+        "30-75": 22,
+        "76-150": 29,
+        ">150": 79
+      }
+    }
+  },
+  "ordering": {
+    "positive_salt": "exp03-stage1-positive-v1",
+    "negative_salt": "exp03-stage1-negative-v1",
+    "positive_source_priority": [
+      "divergent_non_v2b",
+      "reference"
+    ]
+  },
+  "leakage_invariants": {
+    "positive_cluster_overlap": 0,
+    "negative_accession_overlap": 0,
+    "candidate_positive_mmseqs_hits_to_v2b": 0,
+    "mmseqs_min_seq_id": 0.3,
+    "mmseqs_coverage": 0.8,
+    "mmseqs_cov_mode": 1
+  },
+  "eligibility": {
+    "min_residues": 1,
+    "max_residues": 1022,
+    "all_realized_discovery_sequences_eligible": true
+  },
+  "nestedness": {
+    "positive_100_subset_120": true,
+    "positive_120_subset_139": true,
+    "negative_100_subset_120": true,
+    "negative_120_subset_139": true
+  },
+  "model_contact": {
+    "esm_embeddings_observed": false,
+    "sae_activations_observed": false,
+    "feature_nomination_observed": false,
+    "confirmatory_representation_statistics_observed": false
+  },
+  "sha256": {
+    "discovery_positive_n139.tsv": "752f228f3941b0b95cd1dfb62c167ec053c6cb896d57d3663a1ecd1e01110a5e",
+    "discovery_positive_n120.tsv": "88d6cd608ccb5ab8d17491e8e10a4af724bdb6aa4ab20405dd8c69db218194a2",
+    "discovery_positive_n100.tsv": "8f9fa69bd843331e6158898b1ee59aa10feb779469dc4903bd1cc2f47028b7bf",
+    "discovery_negative_n139.tsv": "5cffb5554de4f8e2ccd68d01b29a08227cdad20eb56898dc55431777856032bb",
+    "discovery_negative_n120.tsv": "5ea2d3ff3edc56a0a45ea36ad5cc7f320d61de99a9a216284810361877420646",
+    "discovery_negative_n100.tsv": "d2951ff17c79a9bdfa6b69bbc7e2e4082fb051be3e63f23facce3e53e6e00f8b"
+  }
+}
