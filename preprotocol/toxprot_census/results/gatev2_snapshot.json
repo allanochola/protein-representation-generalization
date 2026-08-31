@@ -1,0 +1,51 @@
+{
+  "stage": "Tox-Prot Gate V2 family-disjoint census",
+  "primary_definition": "V2-B = usable sequence-divergent cluster with at least one Pfam annotation and no Pfam family shared with the frozen non-divergent, non-burned reference set.",
+  "v2a_usable_divergent": 796,
+  "v2b_family_disjoint": 180,
+  "gate_a_threshold": 90,
+  "gate_a_pass": true,
+  "missing_pfam": 557,
+  "shared_pfam_with_reference": 59,
+  "confirmed_disjoint": 180,
+  "gate_b_largest_family_fraction": 0.0088,
+  "gate_b_threshold": 0.25,
+  "gate_b_pass": true,
+  "stricter_corpuswide_sensitivity_v2b": 108,
+  "stricter_sensitivity_passes_gate_a": true,
+  "length_stratification": {
+    "<30": {
+      "n_v2a": 324,
+      "n_v2b": 11
+    },
+    "30-75": {
+      "n_v2a": 173,
+      "n_v2b": 23
+    },
+    "76-150": {
+      "n_v2a": 141,
+      "n_v2b": 38
+    },
+    ">150": {
+      "n_v2a": 158,
+      "n_v2b": 108
+    }
+  },
+  "singleton_stratification": {
+    "non_singleton": {
+      "n_v2a": 267,
+      "n_v2b": 102
+    },
+    "singleton": {
+      "n_v2a": 529,
+      "n_v2b": 78
+    }
+  },
+  "interpretive_caveat": "Pfam coverage is the main limiting factor, especially for short peptides and singleton clusters. Missing Pfam is treated as unknown, not as evidence of family independence.",
+  "code_commit": "c620a78",
+  "input_divergence_snapshot_commit": "dc199c5",
+  "gatev2_audit_sha256": "047ecaa58fee2be7c815ddc0aee2b329eb9a9c0708e3adc44c51863f6067d0c9",
+  "annotation_coverage_sha256": "fe2c595ded258f835e4e5fbf5721ae99486bd7338c2a2f16a3a6999cd8d9fe79",
+  "family_concentration_sha256": "7c850e7a3d4ca86595ac54a2d2560508e2067a103c0e042be466ff4345d27cc0",
+  "length_stratification_sha256": "cc1efc7d4317b08d1ed55eaa8c88e04977a7843eaed6172f99d768305f3c27ca"
+}
