@@ -2,3 +2,8 @@ __pycache__/
 *.py[cod]
 .ipynb_checkpoints/
 .DS_Store
+
+# Tox-Prot preprotocol census generated data
+preprotocol/toxprot_census/data/
+preprotocol/toxprot_census/results/*
+!preprotocol/toxprot_census/results/toxprot_snapshot.json

@@ -1,0 +1,10 @@
+{
+  "dataset": "UniProtKB/Swiss-Prot Toxin keyword KW-0800",
+  "query": "reviewed:true AND keyword:KW-0800",
+  "pulled_at_utc": "2026-08-31T00:47:13.208751Z",
+  "api_total": 7916,
+  "entries_written": 7916,
+  "raw_file": "data/raw_toxprot.jsonl",
+  "raw_sha256": "221b55c00b6aa12742219d1448cfc8dcf58ba013153aa4003b31ea0fd189126f",
+  "code_commit": "b8e7f2502fb479114cea111463e46b8bf7b53b98"
+}
