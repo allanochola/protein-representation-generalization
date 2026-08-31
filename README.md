@@ -1,10 +1,19 @@
 # Protein representation generalization
 
-**Does biological information encoded inside a protein foundation model survive explicit sequence-divergence controls?**
+**Can biological information inside protein foundation models survive explicit sequence-divergence controls — and can interpretable internal features provide functional evidence beyond sequence and family shortcuts?**
 
-This project tests internal biological representations under explicit sequence divergence rather than assuming that in-distribution probe performance transfers.
+This project studies whether biological information encoded inside protein foundation models remains accessible when homologous shortcuts are explicitly disrupted.
 
-The experiments use frozen representation choices, explicit local-sequence comparators, sequence-identity cluster holdouts, cluster-level uncertainty estimates, and pre-data decision rules.
+The research progresses from representation generalization to function-relevant interpretability:
+
+1. test whether a fixed representation survives sequence divergence;
+2. determine whether the available biological labels can support the intended inference;
+3. test whether interpretable internal features carry function-relevant evidence beyond strong model-blind sequence controls;
+4. examine whether that evidence can be inspected and contested rather than treated as an opaque prediction.
+
+The experiments use frozen representation choices, explicit sequence comparators, sequence-identity and family controls, cluster-level uncertainty estimates, model-blind feasibility checks, and pre-data decision rules.
+
+The current work does **not** claim a production biosecurity screening system or robustness to deliberately engineered evasion. Those require separate evaluation beyond natural evolutionary divergence.
 
 ---
 
@@ -93,6 +102,77 @@ See the [draft protocol](experiments/02-catalytic-residues/PROTOCOL.md), [pre-da
 
 **Zenodo:** [10.5281/zenodo.22164680](https://doi.org/10.5281/zenodo.22164680)
 
+---
+
+## Experiment 03 — Interpretable toxin-function signatures
+
+**Preregistered pre-data. No Experiment 03 model result has been observed.**
+
+Experiment 03 asks whether a model-derived toxin-relevant internal feature can provide functional evidence that survives natural evolutionary divergence and adds information beyond strong sequence-only controls.
+
+The primary question is:
+
+> Can a model-derived toxin-relevant feature, nominated without using confirmatory labels, discriminate family-disjoint toxin proteins from sequence-clean family-aware non-toxin proteins beyond a strong model-blind sequence baseline?
+
+This is deliberately **not** a generic toxin-classification benchmark.
+
+The experiment requires three evidence layers:
+
+1. **Representation evidence** — confirmatory performance beyond sequence-only controls.
+2. **Mechanistic characterization** — inspection of what biological or representational property drives a validated feature.
+3. **Contestability analysis** — examination of cases where representation evidence disagrees with conventional sequence or family evidence.
+
+### Preprotocol Tox-Prot census
+
+Before any Experiment 03 embedding or SAE activation was inspected, a model-blind Tox-Prot census tested whether the intended evaluation geometry was viable.
+
+| Gate | Frozen criterion | Observed | Verdict |
+|---|---|---:|---|
+| A — independent positives | ≥90 usable sequence-divergent, family-disjoint clusters | 180 V2-B clusters | PASS |
+| B — family concentration | largest family ≤25% of divergent clusters | 0.9% | PASS |
+| C — negative support | ≥1,000 at 5% FPR; ≥3,000 at 1% FPR | 4,120 untouched sequence-clean family-aware negatives after diagnostic burn | PASS |
+| D — model-blind shortcut | family-aware AUROC/AUPRC must not exceed frozen 0.95 rejection boundary | RF AUROC 0.9494, AUPRC 0.9011 | PASS |
+
+The Gate D result is intentionally close to the rejection boundary. Simple sequence properties already carry substantial toxin signal. Experiment 03 therefore tests **incremental representation value**, not raw toxin discrimination.
+
+After the permanent diagnostic burn and the frozen ESM-2 sequence-eligibility rule:
+
+- **161** family-disjoint V2-B positive cluster representatives remain eligible;
+- **3,541** untouched sequence-clean family-aware negatives remain eligible;
+- both positive and negative support gates still pass.
+
+Sequences longer than 1,022 biological residues are excluded rather than truncated or chunked. This removes 19 of the original 180 V2-B clusters, so the primary claim is explicitly scoped to the ESM-eligible universe.
+
+### Frozen primary estimand
+
+The primary quantity is:
+
+`ΔTPR@FPR5 = TPR_representation@5%FPR − TPR_sequence@5%FPR`
+
+with a 95% paired cluster-bootstrap confidence interval over the 161 eligible positive clusters.
+
+The preregistered materiality boundary is **+0.05**:
+
+- **H_repr-functional** — `CI_low(ΔTPR@FPR5) >= +0.05`
+- **H_sequence** — `CI_high(ΔTPR@FPR5) <= +0.05`
+- **Mixed / unresolved** — the interval overlaps `+0.05`
+
+The pre-data feasibility simulator showed that the design is substantially better at establishing a moderate-to-large positive representation increment than at proving equivalence to the sequence baseline. A null effect may therefore remain Mixed rather than automatically producing `H_sequence`.
+
+`ΔTPR@FPR1` and `ΔAUROC` are frozen secondary quantities and carry no independent verdict.
+
+### Threat-model boundary
+
+Experiment 03 tests **natural evolutionary divergence**. It does not establish robustness to deliberately engineered, function-preserving sequence changes designed to evade screening.
+
+The intended contribution is narrower: determine whether interpretable representation-level evidence can survive substantial natural departure from known toxin families, add information beyond model-blind sequence evidence, and support inspection of disagreement cases.
+
+See the [frozen Experiment 03 protocol](experiments/03-toxin-representation/PROTOCOL.md).
+
+**Preregistration tag:** `exp03-predata-protocol-v1.0`
+
+---
+
 ## Split audit — Experiment 01
 
 The final canonical dataset contains **11,373 proteins, 11,043 clusters, and 2,875,432 residues**.
@@ -140,6 +220,23 @@ The final simulator was accepted only after its bootstrap uncertainty agreed wit
 
 The final stopping decision therefore rests on a validated feasibility instrument rather than the earlier defective simulations.
 
+Experiment 03 extends the same discipline one step further.
+
+Before any Experiment 03 embedding, SAE activation, feature nomination, or confirmatory representation statistic was inspected:
+
+- the Tox-Prot positive and negative support census was closed;
+- sequence-divergence and family-disjointness rules were committed;
+- family-aware negatives were filtered against all positives at the frozen 30% identity rule;
+- a permanent model-blind diagnostic burn was created;
+- simple sequence shortcuts were measured;
+- the ESM-2 sequence-length eligibility rule was frozen at 1–1,022 biological residues;
+- the final eligible geometry was fixed at 161 positive clusters and 3,541 family-aware negatives;
+- a paired-outcome feasibility simulator was used to size the confirmatory decision rule;
+- the +0.05 ΔTPR materiality boundary was frozen;
+- the complete pre-data protocol was tagged `exp03-predata-protocol-v1.0`.
+
+The protocol and the simulation outputs used to select the decision rule are committed together, so the inferential standard is traceable to the state that existed before model contact.
+
 ---
 
 ## Structure
@@ -152,22 +249,16 @@ protein-representation-generalization/
 ├── notebooks/
 ├── experiments/
 │   ├── 01-secondary-structure/
-│   │   ├── PROTOCOL.md
-│   │   ├── IMPLEMENTATION_NOTES.md
-│   │   └── results.md
-│   └── 02-catalytic-residues/
+│   ├── 02-catalytic-residues/
+│   └── 03-toxin-representation/
 │       ├── PROTOCOL.md
-│       ├── PRE_DATA_PRECISION.md
-│       ├── IMPLEMENTATION_NOTES.md
-│       └── results.md
+│       ├── protocol_feasibility_check.py
+│       ├── code/
+│       └── results/
+├── preprotocol/
+│   └── toxprot_census/
 ├── results/
-│   ├── ss_generalization.csv
-│   ├── ss_summary.json
-│   ├── provenance.json
-│   └── power_sim/
 └── figures/
-    ├── exp01_q3_generalization.png
-    └── exp02_retention_feasibility.png
 ```
 
 ---
@@ -178,11 +269,18 @@ protein-representation-generalization/
 
 **Experiment 02:** closed pre-data — insufficient precision for the planned retention criterion; **no biological verdict**.
 
-Together, the two experiments separate two questions that are easy to conflate:
+**Experiment 03:** **preregistered pre-data** at tag `exp03-predata-protocol-v1.0`; no Experiment 03 ESM embedding, SAE activation, feature nomination, or confirmatory representation result has yet been inspected.
+
+The program now separates three questions that are easy to conflate:
 
 - Does a fixed protein-model representation retain biological information across explicit sequence divergence?
-- Is the available dataset large enough to measure that retention with a decision rule strong enough to support the claim?
+- Is the available biological dataset large and independent enough to support the intended inferential claim?
+- Can an interpretable internal feature provide function-relevant evidence beyond sequence and family shortcuts, and can that evidence be inspected when it disagrees with conventional signals?
 
 Experiment 01 answers the first positively for secondary structure.
 
-Experiment 02 shows that for a smaller, function-relevant catalytic-residue benchmark, the second question can become the binding constraint before the biological hypothesis is tested.
+Experiment 02 demonstrates that the second question can become the binding constraint before a functional biological hypothesis is tested.
+
+The Tox-Prot preprotocol census establishes sufficient support for a harder function-relevant experiment while revealing a strong sequence-only shortcut baseline.
+
+Experiment 03 is the preregistered test of the third question under **natural evolutionary divergence**. Its confirmatory result remains unknown.
