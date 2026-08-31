@@ -1,0 +1,61 @@
+{
+  "stage": "Tox-Prot preprotocol census closure",
+  "decision": "PROCEED_TO_REPRESENTATION_EXPERIMENT",
+  "gate_a": {
+    "decision": "PASS",
+    "criterion": "V2-B >= 90 usable sequence-divergent and family-disjoint clusters",
+    "observed_v2b": 180,
+    "threshold": 90,
+    "note": "Primary \u00a74.3 reference-set definition. Stricter corpus-wide sensitivity also passed with V2-B=108."
+  },
+  "gate_b": {
+    "decision": "PASS",
+    "criterion": "largest Pfam family <=25% of divergent clusters",
+    "largest_family": "PF03496",
+    "largest_family_fraction": 0.0088,
+    "threshold": 0.25
+  },
+  "gate_c": {
+    "decision": "PASS",
+    "criterion_primary": ">=1000 sequence-clean negatives for FPR=0.05",
+    "criterion_secondary": ">=3000 sequence-clean negatives for FPR=0.01",
+    "family_aware_after_positive_overlap_filter": 4862,
+    "family_aware_after_diagnostic_burn": 4120,
+    "primary_threshold": 1000,
+    "secondary_threshold": 3000,
+    "primary_pass": true,
+    "secondary_pass": true
+  },
+  "gate_d": {
+    "decision": "PASS",
+    "primary_pool": "family_aware",
+    "feature_set": "sequence length + 20 amino-acid composition fractions",
+    "positive_diagnostic_clusters": 187,
+    "negative_diagnostic_sequences": 561,
+    "logistic_regression": {
+      "auroc": 0.8468,
+      "auprc": 0.7182
+    },
+    "random_forest": {
+      "auroc": 0.9494,
+      "auprc": 0.9011
+    },
+    "reject_if_auroc_gt": 0.95,
+    "reject_if_auprc_gt": 0.95,
+    "caveat": "Gate D passes under the frozen rule, but nonlinear sequence-only signal remains strong. The representation experiment must therefore compare against a strong sequence-derived baseline rather than interpreting raw toxin discrimination as representation-specific."
+  },
+  "selected_negative_control": {
+    "primary": "family_aware",
+    "secondary": "phenotype_matched",
+    "background_role": "easy/background diagnostic",
+    "rationale": "Family-aware negatives provide the hardest available sequence-clean contrast and directly test whether representation-level performance extends beyond toxin-associated family membership."
+  },
+  "positive_support": {
+    "total_cleaned_positive_sequences": 7534,
+    "total_30pct_clusters": 1215,
+    "usable_sequence_divergent_clusters": 796,
+    "confirmed_v2b_clusters": 180
+  },
+  "closure_statement": "The Tox-Prot census establishes adequate positive independence, family diversity, negative support, and non-trivial model-blind task geometry. Further census expansion is not justified. The project should proceed to freeze the toxin-representation experiment before observing any ESM, SAE, probe, or toxin-prediction statistic.",
+  "head_commit": "8bf845a"
+}
