@@ -100,14 +100,16 @@ Gate D passing does not imply that sequence shortcuts are weak. The nonlinear se
 
 ### 4.1 Positive evaluation set
 
-Primary positive universe:
+Primary positive census universe:
 
-- all 180 V2-B clusters from the frozen census;
+- 180 V2-B clusters from the frozen census;
 - sequence-divergent under the frozen 30%-identity rule;
 - family-disjoint under the frozen §4.3 reference-set definition;
 - diagnostic-burn clusters excluded from confirmatory evaluation.
 
-Length strata are reported descriptively and as sensitivity analyses. They do not redefine the primary positive universe after outcome inspection.
+After the frozen §5.1 ESM eligibility rule, the **primary model-eligible confirmatory positive universe is 161 V2-B cluster representatives**.
+
+The 19 length-ineligible clusters are excluded mechanically, not by toxin subtype, model score, feature activation, or outcome. Length strata are reported descriptively and as sensitivity analyses; they are not used to select a favorable post-result positive subset.
 
 ### 4.2 Negative evaluation set
 
@@ -116,7 +118,8 @@ Primary negative pool:
 - sequence-clean family-aware negatives;
 - all Step-06B overlap exclusions applied;
 - Gate-D diagnostic-burn negatives permanently unavailable;
-- 4,120 untouched candidates remain before final model-eligibility filtering.
+- 4,120 untouched candidates before model eligibility;
+- **3,541 model-eligible confirmatory negatives** after the frozen <=1,022-residue rule.
 
 Secondary robustness pool:
 
@@ -134,15 +137,40 @@ Background negatives:
 - No post-result layer sweep.
 - Any representation layer, pooling rule, SAE source, SAE width, normalization rule, and latent-selection procedure must be frozen before confirmatory labels are inspected.
 
-### 5.1 Sequence eligibility
+### 5.1 Sequence eligibility (frozen)
 
-ESM-2 sequence-length eligibility must be checked before any embedding is extracted.
+Primary ESM eligibility is assessed on the individual biological sequence that is actually embedded.
 
-The handling rule for sequences exceeding the model's frozen eligibility limit must be declared before model execution.
+Eligible sequences contain **1–1,022 biological residues**.
 
-No post-result chunking rescue is permitted.
+Sequences longer than 1,022 residues are excluded before any representation extraction. The primary analysis does not use truncation, sliding windows, chunking, window averaging, or any other procedure that would allow an otherwise ineligible sequence back into the experiment.
 
-If eligibility filtering causes a frozen support gate to fail, the experiment reports that outcome rather than redesigning after seeing model statistics.
+For positive clusters, eligibility is determined by the frozen cluster-representative sequence used as the biological evaluation unit. A cluster is not excluded merely because another member of that cluster is longer than 1,022 residues.
+
+The rule was frozen model-blind from the closed census before any Experiment 03 ESM embedding or SAE activation was inspected.
+
+Observed eligibility geometry:
+
+- original primary V2-B universe: 180 clusters;
+- eligible V2-B representatives at <=1,022 residues: **161**;
+- excluded V2-B representatives: **19**;
+- retained positive fraction: **89.4%**;
+- Gate A remains PASS: 161 >= 90.
+
+Primary family-aware negative geometry after the permanent Gate-D burn:
+
+- untouched family-aware negatives before ESM eligibility: 4,120;
+- eligible at <=1,022 residues: **3,541**;
+- excluded for length: **579**;
+- retained negative fraction: **85.9%**;
+- Gate C primary remains PASS: 3,541 >= 1,000;
+- Gate C secondary remains PASS: 3,541 >= 3,000.
+
+The 1,022-residue ceiling is preferred over lower computational cutoffs because it preserves substantially more of the frozen biological universe while retaining both support gates. Raising the ceiling to 1,024 would add no positive cluster and only one negative, so it does not materially alter the experiment.
+
+Length-based exclusion is not assumed biologically random. All 19 excluded V2-B representatives are in the >150-residue stratum. This restriction is therefore reported as a scope limitation, and the primary claim applies to the ESM-eligible V2-B universe rather than automatically to all 180 census-qualified clusters.
+
+If later implementation constraints make the frozen 1,022-residue rule impossible to execute, that is a technical failure or protocol deviation; the cutoff is not changed after model statistics are visible.
 
 ## 6. Discovery versus confirmatory separation
 
