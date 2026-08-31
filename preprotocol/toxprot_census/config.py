@@ -46,6 +46,20 @@ MMSEQS2_BINARY = os.environ.get("MMSEQS2_BINARY", "mmseqs")
 # ── Divergence rule (§4.2) ───────────────────────────────────────────────────
 DIVERGENCE_IDENTITY_CUTOFF = 0.30  # same cutoff as clustering
 
+# Frozen reference/evaluation geometry.
+# Assignment is deterministic by cluster-representative hash and occurs before
+# any candidate→reference sequence-similarity result is observed.
+DIVERGENCE_BURN_FRAC       = 0.15
+DIVERGENCE_REFERENCE_FRAC  = 0.65
+DIVERGENCE_CANDIDATE_FRAC  = 0.20
+
+assert abs(
+    DIVERGENCE_BURN_FRAC
+    + DIVERGENCE_REFERENCE_FRAC
+    + DIVERGENCE_CANDIDATE_FRAC
+    - 1.0
+) < 1e-9
+
 # ── Family-disjoint classification (§4.3, §7) ────────────────────────────────
 # A divergent cluster is family-disjoint when no member of the reference set
 # shares the same Pfam family accession (e.g. PF00012, not just clan CL0001).
