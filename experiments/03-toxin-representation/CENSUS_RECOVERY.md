@@ -266,10 +266,56 @@ Recovered frozen artifacts reproduced exactly:
 
 The exact post-overlap family-aware pool of 4,862 sequences required for the permanent diagnostic partition is therefore recovered.
 
-## Remaining recovery
+## Step 07 — permanent diagnostic partition / Gate D
 
-Not yet accepted:
+Status: **EXACT REPRODUCTION**
 
-1. Step 07 — permanent diagnostic partition
+The permanent negative diagnostic partition and model-blind shortcut diagnostic reproduced the frozen census exactly.
 
-Recovery remains entirely model-blind.
+Family-aware negative geometry:
+
+- post-overlap family-aware sequences: 4,862
+- permanently burned: 742
+- selected for Gate D: 561
+- untouched confirmatory remainder: 4,120
+
+Recovered `negative_diagnostic_partition.tsv` SHA-256:
+
+`e2354c3e97c347abd6a6f0a3433ba47dfa0090d5bed2e233cdba3434f4196761`
+
+Frozen SHA-256:
+
+`e2354c3e97c347abd6a6f0a3433ba47dfa0090d5bed2e233cdba3434f4196761`
+
+Exact hash match: yes.
+
+The model-blind Gate D statistics also reproduced the frozen values:
+
+- family-aware logistic regression: AUROC 0.8468, AUPRC 0.7182
+- family-aware random forest: AUROC 0.9494, AUPRC 0.9011
+- Gate D: PASS
+
+## Recovery closure
+
+Status: **COMPLETE — FROZEN MEMBERSHIP STATE RECOVERED**
+
+The recovery chain required for Experiment 03 membership reconstruction is complete.
+
+Accepted recovery state:
+
+1. raw Tox-Prot source — exact SHA reproduction;
+2. cleaned positive corpus — exact output hashes;
+3. MMseqs2 clustering — identical representative/member assignments with nondeterministic raw TSV row ordering;
+4. divergence assignment — exact frozen SHA reproduction;
+5. Gate V2 / V2-B membership — exact frozen SHA reproduction;
+6. candidate negative pools — exact frozen hashes after a predeclared single live-UniProt regeneration attempt;
+7. positive-overlap filtering — exact frozen hashes;
+8. permanent negative diagnostic partition — exact frozen SHA reproduction.
+
+No Experiment 03 ESM embedding, SAE activation, feature nomination, probe result, or confirmatory representation statistic was inspected during recovery.
+
+No negative-set amendment or Experiment 03 protocol re-freeze was required.
+
+The recovered intermediate files may now be used only to implement the still-unfrozen discovery/confirmatory partition and other pre-model requirements listed in §14 of the frozen Experiment 03 protocol.
+
+The census-recovery thread ends here.
