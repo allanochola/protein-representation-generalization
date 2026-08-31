@@ -1,0 +1,67 @@
+{
+  "stage": "Experiment 03 Stage 1 model-blind discovery geometry",
+  "status": "PRE_MODEL",
+  "sequence_eligibility_max_residues": 1022,
+  "confirmatory_positive_universe": {
+    "v2b_eligible_clusters": 161,
+    "length_strata": {
+      "<30": 11,
+      "30-75": 25,
+      "76-150": 34,
+      ">150": 91
+    }
+  },
+  "candidate_discovery_positive_universe": {
+    "total_outside_v2b": 845,
+    "divergent_non_v2b": 615,
+    "reference": 230,
+    "length_strata": {
+      "<30": 351,
+      "30-75": 234,
+      "76-150": 181,
+      ">150": 79
+    },
+    "qualifying_30pct_hits_to_confirmatory_v2b": 0
+  },
+  "discovery_negative_universe": {
+    "family_aware_burned_total": 742,
+    "family_aware_burned_eligible": 638,
+    "length_strata": {
+      "<30": 9,
+      "30-75": 34,
+      "76-150": 155,
+      ">150": 440
+    }
+  },
+  "confirmatory_negative_universe": {
+    "family_aware_untouched_total": 4120,
+    "family_aware_eligible": 3541
+  },
+  "leakage_checks": {
+    "positive_cluster_overlap": 0,
+    "negative_accession_overlap": 0,
+    "discovery_positive_vs_v2b_mmseqs_hits": 0,
+    "mmseqs_min_seq_id": 0.3,
+    "mmseqs_coverage": 0.8,
+    "mmseqs_cov_mode": 1,
+    "mmseqs_version": "eec9c354be4276d2373996af2e50808b1390d527"
+  },
+  "target_matched_positive_discovery": {
+    "practical_max_n_with_slack": 139,
+    "binding_stratum": ">150",
+    "available_long_clusters": 79,
+    "note": "N=140 is arithmetically feasible under integer allocation but exhausts all 79 >150-aa outside-V2B clusters. 139 is retained as the practical upper bound before feature-stability design is frozen."
+  },
+  "model_contact": {
+    "esm_embeddings_observed": false,
+    "sae_activations_observed": false,
+    "feature_nomination_observed": false,
+    "confirmatory_representation_statistics_observed": false
+  },
+  "membership_sha256": {
+    "discovery_positive_candidates.tsv": "aa6c8bdf89bbc9803f25233270b34a4ae76b72345009fdeed4ad4c992dc40917",
+    "confirmatory_positive_universe.tsv": "42a08582492ff8ec9cd38604b425e20ee795c1479f4f3aa47a0949ebf52479e1",
+    "discovery_negative_candidates.tsv": "f2a6b9908f8e948c82f6e2af8e670e8013e3fc05bcd989a5245f09871e3ff86c",
+    "confirmatory_negative_universe.tsv": "9705f964fd26ce786f080bed29758ece2283f00c406a885e92c4b8f7b9c53e64"
+  }
+}
