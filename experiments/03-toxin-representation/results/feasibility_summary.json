@@ -1,0 +1,57 @@
+{
+  "status": "PRE_DATA_ONLY",
+  "n_positive_clusters": 161,
+  "n_family_aware_negatives": 3541,
+  "primary_fpr": 0.05,
+  "secondary_fpr": 0.01,
+  "n_sim": 2000,
+  "bootstrap_reps": 1000,
+  "baseline_tpr_grid": [
+    0.2,
+    0.35,
+    0.5,
+    0.65,
+    0.8
+  ],
+  "delta_tpr_grid": [
+    0.0,
+    0.03,
+    0.05,
+    0.075,
+    0.08,
+    0.1,
+    0.125,
+    0.13,
+    0.15,
+    0.2
+  ],
+  "loss_frac_grid": [
+    0.0,
+    0.25,
+    0.5,
+    0.75
+  ],
+  "candidate_bands": [
+    {
+      "name": "material05_negligible05",
+      "material": 0.05,
+      "negligible": 0.05
+    },
+    {
+      "name": "material10_negligible03",
+      "material": 0.1,
+      "negligible": 0.03
+    },
+    {
+      "name": "material08_negligible03",
+      "material": 0.08,
+      "negligible": 0.03
+    },
+    {
+      "name": "material075_negligible025",
+      "material": 0.075,
+      "negligible": 0.025
+    }
+  ],
+  "modeling_boundary": "Paired positive hit/miss outcomes are simulated at a fixed operating threshold. Finite-negative FPR precision is reported separately because propagating threshold uncertainty into TPR would require an assumed score distribution near the threshold."
+}

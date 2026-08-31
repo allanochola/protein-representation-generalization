@@ -1,6 +1,6 @@
 # Experiment 03 — Interpretable toxin-function signatures in ESM-2 under natural evolutionary divergence
 
-**Status:** DRAFT — must be frozen before any ESM embedding, SAE activation, probe result, or confirmatory toxin statistic is inspected.
+**Status:** v1.0 FROZEN PRE-DATA — frozen before any Experiment 03 ESM embedding, SAE activation, feature nomination, probe result, or confirmatory toxin statistic was inspected.
 
 **Repository:** `protein-representation-generalization`
 
@@ -293,23 +293,49 @@ Primary comparisons are paired:
 
 Negative resampling, if used, must be frozen in advance and preserve the paired arm comparison.
 
-## 10. Decision rule
+## 10. Decision rule (frozen pre-data)
 
-Exact numerical decision bands are frozen using the pre-data feasibility simulator before any confirmatory ESM/SAE statistic is observed.
+The primary decision quantity is:
 
-Allowed outcomes:
+`ΔTPR@FPR5 = TPR_representation@5%FPR − TPR_sequence@5%FPR`
+
+evaluated on the same untouched confirmatory positive clusters and the same frozen family-aware negative set.
+
+Uncertainty is a **95% paired cluster-bootstrap confidence interval**, resampling the 161 eligible V2-B positive clusters with identical bootstrap draws for both arms.
+
+The frozen materiality boundary is:
+
+`δ = +0.05`
 
 ### H_repr-functional
 
-The representation feature provides material incremental value over the frozen sequence-only comparator under natural evolutionary divergence.
+Declare **H_repr-functional** only if:
+
+`CI_low(ΔTPR@FPR5) >= +0.05`
+
+Interpretation: the data support a representation-derived improvement of at least five percentage points in TPR at the frozen 5% FPR operating point.
 
 ### H_sequence
 
-The representation feature does not provide material incremental value over the frozen sequence-only comparator.
+Declare **H_sequence** only if:
+
+`CI_high(ΔTPR@FPR5) <= +0.05`
+
+Interpretation: the data are compatible only with an incremental representation effect below the same five-percentage-point materiality boundary.
 
 ### Mixed / unresolved
 
-The observed effect falls between the frozen decision bands.
+Declare **Mixed / unresolved** if the 95% confidence interval overlaps `+0.05`.
+
+Failure to reach H_repr-functional is **not** automatically evidence for H_sequence.
+
+The pre-data feasibility simulator showed that with 161 eligible positive clusters, the experiment has materially greater ability to establish a moderate-to-large positive representation increment than to prove that the increment is negligible. A true null may therefore remain Mixed rather than producing H_sequence. This experiment is not designed as an equivalence test around zero.
+
+The same confirmatory decision rule applies whether the discovery stage freezes one SAE latent or the preregistered small feature-set fallback. Feature-selection stability is handled entirely in the discovery-stage stability gate and does not alter the confirmatory inferential standard.
+
+`ΔTPR@FPR1` is a frozen secondary operational metric and carries no independent verdict.
+
+`ΔAUROC` and the combined sequence-plus-representation arm are secondary diagnostics and carry no independent verdict.
 
 ### No verdict — unstable feature
 
@@ -323,7 +349,7 @@ Final model-eligible positive or negative support fails a frozen feasibility gat
 
 Embedding extraction, SAE loading, sequence eligibility, split integrity, or other predeclared technical requirements fail.
 
-Decision bands are not moved after confirmatory results are visible.
+The +0.05 boundary was selected from the model-blind feasibility analysis before any Experiment 03 ESM embedding, SAE activation, feature nomination, or confirmatory representation statistic was inspected. It is not moved after confirmatory results become visible.
 
 ## 11. Mechanistic characterization of validated features
 
