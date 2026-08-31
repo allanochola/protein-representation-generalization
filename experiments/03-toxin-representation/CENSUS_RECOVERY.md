@@ -137,11 +137,44 @@ Exact hash match: yes.
 
 The exact V2-B membership state required for Experiment 03 positive-set reconstruction is therefore recovered.
 
+## Negative-artifact recovery boundary
+
+The original generated negative candidate and partition files were not committed to Git.
+
+Repository policy intentionally ignored:
+
+- `preprotocol/toxprot_census/data/`
+- generated `preprotocol/toxprot_census/results/*` except selected snapshots.
+
+The following original files were searched for in:
+
+- all Git objects and branches;
+- Git LFS;
+- `/kaggle/working`;
+- `/kaggle/input`;
+- `/tmp`.
+
+No recoverable copy was found for:
+
+- `negatives_family_aware.fasta`
+- `negatives_family_aware_filtered.fasta`
+- `negative_family_aware.tsv`
+- `negative_diagnostic_partition.tsv`
+
+The committed snapshots preserve the original candidate counts and SHA-256 hashes but not the sequence files themselves.
+
+Therefore Step 06 recovery now proceeds as a **hash-gated regeneration attempt** from the frozen code and live UniProt API.
+
+This is not yet a dataset re-freeze.
+
+The regenerated candidate pools are accepted only if their frozen candidate counts and SHA-256 hashes reproduce exactly. Any mismatch stops recovery before Step 06B and is treated as a preregistration-relevant deviation rather than silently substituting a new negative set.
+
 ## Remaining recovery
 
 Not yet accepted:
 
-1. Step 06/06B — negative reconstruction and positive-overlap filtering
-2. Step 07 — permanent diagnostic partition
+1. Step 06 — candidate-negative regeneration and frozen-hash comparison
+2. Step 06B — positive-overlap filtering
+3. Step 07 — permanent diagnostic partition
 
 Recovery remains entirely model-blind.
