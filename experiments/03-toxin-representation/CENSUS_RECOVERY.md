@@ -89,13 +89,35 @@ Stable canonical sorted-row SHA-256 values across both recovery runs:
 
 The representative assignments and biological cluster membership are therefore reproduced exactly across recovery runs. Step 04 is retained as an independent downstream check that this serialization-order difference does not alter the frozen divergence state.
 
+## Step 04 — divergence assignment
+
+Status: **EXACT REPRODUCTION**
+
+Recovered divergence geometry matched the frozen census exactly:
+
+- total clusters: 1,215
+- sequence-divergent clusters: 936
+- diagnostic-burn clusters: 187
+- usable divergent clusters: 796
+
+Recovered `divergence_assignment.tsv` SHA-256:
+
+`fd2b1e1ac5fdca1657a59fb713e7b0305dd5488f0db16b4bb18ccfdf76912a83`
+
+Frozen SHA-256:
+
+`fd2b1e1ac5fdca1657a59fb713e7b0305dd5488f0db16b4bb18ccfdf76912a83`
+
+Exact hash match: yes.
+
+This independently confirms that the Step-03 raw TSV row-order nondeterminism does not alter the downstream frozen divergence state.
+
 ## Remaining recovery
 
 Not yet accepted:
 
-1. Step 04 — divergence assignment
-2. Step 05 — family annotation / V2-B membership
-3. Step 06/06B — negative reconstruction and positive-overlap filtering
-4. Step 07 — permanent diagnostic partition
+1. Step 05 — family annotation / V2-B membership
+2. Step 06/06B — negative reconstruction and positive-overlap filtering
+3. Step 07 — permanent diagnostic partition
 
 Recovery remains entirely model-blind.
