@@ -41,7 +41,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).parent))
 from config import (DATA_DIR, RESULTS_DIR,
                     MMSEQS2_MIN_SEQ_ID, MMSEQS2_COVERAGE, MMSEQS2_COV_MODE,
-                    MMSEQS2_THREADS, MMSEQS2_SENSITIVITY,
+                    MMSEQS2_THREADS, MMSEQS2_SENSITIVITY, MMSEQS2_BINARY,
                     DIVERGENCE_IDENTITY_CUTOFF,
                     DIAGNOSTIC_BURN_THRESHOLD_BYTE)
 
@@ -86,7 +86,7 @@ def run_all_vs_all(fasta: Path, tmpdir: Path) -> Path:
     tmpdir.mkdir(parents=True, exist_ok=True)
     out = tmpdir / "all_vs_all.m8"
     cmd = [
-        "mmseqs", "easy-search",
+        MMSEQS2_BINARY, "easy-search",
         str(fasta), str(fasta), str(out), str(tmpdir / "tmp"),
         # Search below the 30% gate so nearest-identity bands (<20%, 20-25%,
         # 25-30%) are actually observable. The divergence decision itself is
@@ -196,7 +196,9 @@ def assign(label: str = "precursor"):
     Path(burn_path).write_text("\n".join(burn_ids) + "\n")
 
     # ── write divergent FASTA for downstream use ─────────────────────────────
-    divergent_reps = set(df[df["is_divergent"] == 1]["cluster_rep"])
+    divergent_reps = set(
+        df[df["usable_divergent"] == 1]["cluster_rep"]
+    )
     reference_reps = set(df[(df["is_divergent"] == 0) &
                             (df["in_diagnostic_burn"] == 0)]["cluster_rep"])
 
