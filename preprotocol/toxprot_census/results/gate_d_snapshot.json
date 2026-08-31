@@ -1,0 +1,45 @@
+{
+  "stage": "Tox-Prot Gate D model-blind shortcut diagnostic",
+  "primary_pool": "family_aware",
+  "feature_set": "sequence length + 20 amino-acid composition fractions",
+  "positive_diagnostic_clusters": 187,
+  "negative_diagnostic_burn": {
+    "family_aware_burned_total": 742,
+    "family_aware_selected_for_gate_d": 561,
+    "family_aware_confirmatory_remaining": 4120
+  },
+  "family_aware_results": {
+    "logistic_regression": {
+      "auroc_mean": 0.8468,
+      "auprc_mean": 0.7182,
+      "shortcut_flag": false
+    },
+    "random_forest": {
+      "auroc_mean": 0.9494,
+      "auprc_mean": 0.9011,
+      "shortcut_flag": false
+    }
+  },
+  "thresholds": {
+    "auroc_reject_if_gt": 0.95,
+    "auprc_reject_if_gt": 0.95
+  },
+  "gate_d_decision": "PASS",
+  "interpretation": "The family-aware sequence-clean task is not rejected by the frozen model-blind shortcut thresholds. Strong nonlinear sequence signal remains, especially in the random forest, so PASS should not be interpreted as absence of shortcut structure.",
+  "background_random_forest_warning": {
+    "auroc_mean": 0.9741,
+    "auprc_mean": 0.9536,
+    "shortcut_flag": true
+  },
+  "phenotype_random_forest": {
+    "auroc_mean": 0.9173,
+    "auprc_mean": 0.8525,
+    "shortcut_flag": false
+  },
+  "code_commit": "b4f4b41",
+  "provenance_note": "The Gate D implementation was inspected and syntax-checked before execution but was committed immediately after the first observed run. No code changes were made between execution and commit.",
+  "shortcut_results_sha256": "ad37f0c935d9884f582d3a55ccc0f76e40f950fed3aa5f9dd68fd9db9453d4c5",
+  "shortcut_importance_sha256": "fc1322e91447a3ebdbbb284b228cc04c3581b5b48c3ee3c874c1fe099dc11a7d",
+  "negative_partition_sha256": "e2354c3e97c347abd6a6f0a3433ba47dfa0090d5bed2e233cdba3434f4196761",
+  "gate_d_decision_sha256": "e0928b43651e5afa7281ca04c36b062d8126f668f6d1794b73a7d834dc6f19f5"
+}
