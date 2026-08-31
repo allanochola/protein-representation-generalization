@@ -220,12 +220,38 @@ If a deviation occurs, the amendment must re-run the model-blind negative pipeli
 
 This prediction and acceptance rule are committed before the regeneration result is observed.
 
+## Step 06 — candidate-negative regeneration
+
+Status: **EXACT REPRODUCTION**
+
+The single predeclared live-UniProt regeneration attempt reproduced the frozen candidate-negative state exactly.
+
+Recovered candidate counts:
+
+- background: 15,000
+- phenotype-matched: 6,113
+- family-aware partial census: 7,110
+
+All frozen candidate artifacts reproduced byte-for-byte:
+
+- `negative_pool_counts.tsv`:
+  `c53f13c9cbb69a0ec90038cef5e7e131ea18f8e80065f08109f9b9dd8ad708b2`
+- `negative_background.tsv`:
+  `307aaa8a46a82dd44ec762b411ca147398e4383736c4a3f6a2f966f7126fbb08`
+- `negative_phenotype.tsv`:
+  `081cfa42b2333f7cdb558fab899c542e4fd26a9961fc73e09a8ca155fb3a3a4f`
+- `negative_family_aware.tsv`:
+  `62bb2ad97679b0dc6eebe48813813b54804e33800501a20a0acb6899de519ec4`
+
+Exact hash match: yes for all four files.
+
+Therefore the regenerated candidate-negative membership and metadata match the original frozen Step-06 state. No negative-set amendment or re-freeze is required at this stage.
+
 ## Remaining recovery
 
 Not yet accepted:
 
-1. Step 06 — candidate-negative regeneration and frozen-hash comparison
-2. Step 06B — positive-overlap filtering
-3. Step 07 — permanent diagnostic partition
+1. Step 06B — positive-overlap filtering
+2. Step 07 — permanent diagnostic partition
 
 Recovery remains entirely model-blind.
