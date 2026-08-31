@@ -163,11 +163,62 @@ No recoverable copy was found for:
 
 The committed snapshots preserve the original candidate counts and SHA-256 hashes but not the sequence files themselves.
 
-Therefore Step 06 recovery now proceeds as a **hash-gated regeneration attempt** from the frozen code and live UniProt API.
+Therefore Step 06 recovery now proceeds as a **single hash-gated regeneration attempt** from the frozen code and live UniProt API.
 
 This is not yet a dataset re-freeze.
 
-The regenerated candidate pools are accepted only if their frozen candidate counts and SHA-256 hashes reproduce exactly. Any mismatch stops recovery before Step 06B and is treated as a preregistration-relevant deviation rather than silently substituting a new negative set.
+### Predeclared Step-06 recovery configuration
+
+The regeneration attempt uses the frozen `06_negatives.py` implementation from candidate-census commit `9fd9347`.
+
+The load-bearing query configuration is unchanged:
+
+- background: `reviewed:true AND NOT keyword:KW-0800 AND existence:1`
+- phenotype-short: `reviewed:true AND NOT keyword:KW-0800 AND length:[5 TO 100] AND ft_signal:* AND existence:1`
+- phenotype-long: `reviewed:true AND NOT keyword:KW-0800 AND length:[101 TO 1000] AND cc_subcellular_location:Secreted AND existence:1`
+- family-aware: `reviewed:true AND NOT keyword:KW-0800 AND xref:pfam-{pf}`
+- family-aware scope: first 50 lexicographically sorted positive Pfam families
+- maximum 300 returned entries per queried family
+- background cap: 15,000
+- accession-level deduplication as implemented in the frozen code
+
+The exact expected candidate counts are:
+
+- background: 15,000
+- phenotype-matched: 6,113
+- family-aware partial census: 7,110
+
+### Predeclared exact-recovery hashes
+
+The committed snapshot preserves hashes for the candidate metadata tables and count table, not for the FASTA files themselves.
+
+Exact Step-06 recovery requires all four regenerated files to match:
+
+- `negative_pool_counts.tsv`:
+  `c53f13c9cbb69a0ec90038cef5e7e131ea18f8e80065f08109f9b9dd8ad708b2`
+- `negative_background.tsv`:
+  `307aaa8a46a82dd44ec762b411ca147398e4383736c4a3f6a2f966f7126fbb08`
+- `negative_phenotype.tsv`:
+  `081cfa42b2333f7cdb558fab899c542e4fd26a9961fc73e09a8ca155fb3a3a4f`
+- `negative_family_aware.tsv`:
+  `62bb2ad97679b0dc6eebe48813813b54804e33800501a20a0acb6899de519ec4`
+
+All four hashes must match exactly. Candidate-count agreement without hash agreement is insufficient for exact recovery.
+
+### Expected recovery risk
+
+Exact reproduction is possible but is **not assumed**.
+
+Step 06 depends on live UniProt search results. Database releases, annotation changes, entry additions/removals, or changes affecting the first-50-family query results can alter candidate membership even when the frozen query code is unchanged.
+
+Therefore the outcomes are predeclared:
+
+1. **All four hashes match** — Step 06 is exact recovery and downstream 06B/07 reconstruction may proceed.
+2. **Any hash differs** — recovery stops before 06B. The negative set is treated as a genuine post-reset deviation requiring an explicit pre-model amendment/re-freeze rather than silently replacing the frozen membership.
+
+If a deviation occurs, the amendment must re-run the model-blind negative pipeline and verify Gate C, diagnostic burn geometry, <=1,022-residue eligibility, and whether the changed eligible-negative count materially alters the frozen feasibility analysis.
+
+This prediction and acceptance rule are committed before the regeneration result is observed.
 
 ## Remaining recovery
 
