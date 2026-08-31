@@ -98,18 +98,20 @@ def run():
             cluster_toxin_kw[rep].add(kw)
         cluster_lineages[rep].append(str(row.get("lineage", "")))
 
-    # ── corpus-wide Pfam occurrence map ──────────────────────────────────────
-    # Family-disjointness is a property of the frozen positive corpus.
-    # For cluster C, compare its Pfam families against ALL OTHER positive
-    # clusters. Diagnostic burn affects later data use, not whether biological
-    # relatives exist in the corpus.
-    pfam_to_clusters = defaultdict(set)
+    # ── frozen §4.3 reference set ─────────────────────────────────────────────
+    # Family-disjointness is evaluated against non-divergent, non-burned
+    # reference clusters, as specified in §4.3.
+    ref_mask = (
+        (div["is_divergent"] == 0)
+        & (div["in_diagnostic_burn"] == 0)
+    )
+    ref_reps = set(div.loc[ref_mask, "cluster_rep"])
 
-    for rep, pfams in cluster_pfam_families.items():
-        for pf in pfams:
-            pfam_to_clusters[pf].add(rep)
-
-    all_pfam_families = set(pfam_to_clusters)
+    reference_pfam_families = set()
+    for rep in ref_reps:
+        reference_pfam_families.update(
+            cluster_pfam_families.get(rep, set())
+        )
 
     # ── cluster length metadata ───────────────────────────────────────────────
     acc_to_length = {
@@ -143,13 +145,7 @@ def run():
 
         pfams = cluster_pfam_families.get(rep, set())
         has_pfam = len(pfams) > 0
-        shared_pfam = {
-            pf for pf in pfams
-            if any(
-                other_rep != rep
-                for other_rep in pfam_to_clusters.get(pf, set())
-            )
-        }
+        shared_pfam = pfams & reference_pfam_families
 
         # V2-A: sequence-divergent and not diagnostically burned.
         v2a = is_div and not is_burned
@@ -325,7 +321,7 @@ def run():
 
     # ── console summary ───────────────────────────────────────────────────────
     print(f"\n── Family structure & Gate V2 ────────────────────────────────")
-    print(f"  Unique Pfam families in positive corpus: {len(all_pfam_families)}")
+    print(f"  Unique Pfam families in reference set: {len(reference_pfam_families)}")
     print(f"  V2-A (sequence-divergent):             {n_div}")
     print(f"  V2-B (divergent + family-disjoint):    {n_v2b}")
     print(f"    of which: missing Pfam → uncounted:  {n_no_pfam}")
