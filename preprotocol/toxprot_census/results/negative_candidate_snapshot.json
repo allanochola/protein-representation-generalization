@@ -1,0 +1,26 @@
+{
+  "stage": "Tox-Prot Gate C candidate-negative census",
+  "gate_c_status": "PENDING_OVERLAP_FILTER",
+  "candidate_counts": {
+    "background": 15000,
+    "phenotype_matched": 6113,
+    "family_aware_partial": 7110
+  },
+  "thresholds": {
+    "primary_fpr": 0.05,
+    "primary_min_negatives": 1000,
+    "secondary_fpr": 0.01,
+    "secondary_min_negatives": 3000
+  },
+  "pool_scope": {
+    "background": "capped at 15000",
+    "phenotype_matched": "deduplicated candidate pool",
+    "family_aware": "partial census; first 50 sorted positive Pfam families"
+  },
+  "interpretation": "Candidate supply exceeds both planning thresholds in all three pools. This is not a Gate C pass. Step 06B must remove negatives with qualifying >=30% sequence identity to any cleaned positive.",
+  "code_commit": "9fd9347",
+  "negative_pool_counts_sha256": "c53f13c9cbb69a0ec90038cef5e7e131ea18f8e80065f08109f9b9dd8ad708b2",
+  "negative_background_sha256": "307aaa8a46a82dd44ec762b411ca147398e4383736c4a3f6a2f966f7126fbb08",
+  "negative_phenotype_sha256": "081cfa42b2333f7cdb558fab899c542e4fd26a9961fc73e09a8ca155fb3a3a4f",
+  "negative_family_aware_sha256": "62bb2ad97679b0dc6eebe48813813b54804e33800501a20a0acb6899de519ec4"
+}
