@@ -93,14 +93,13 @@ def _features(e: dict) -> list[dict]:
 
 
 def _has_fragment(e: dict) -> bool:
+    """Return True only for explicit UniProt fragment/incomplete-sequence signals."""
     if e.get("fragment"):
         return True
     if e.get("sequence", {}).get("fragment"):
         return True
     if any(f.get("type", "").lower() == "non-terminal residue"
            for f in _features(e)):
-        return True
-    if any(k.get("id", "") == "KW-0903" for k in e.get("keywords", [])):
         return True
     return False
 
