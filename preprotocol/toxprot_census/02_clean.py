@@ -107,22 +107,37 @@ def _has_fragment(e: dict) -> bool:
 
 def _signal_propep_range(e: dict) -> tuple[int, int]:
     """
-    Return (mature_start_1based, propep_end_1based) after signal + propeptide.
-    Returns (1, 0) if no annotations found (full precursor used).
-    Positions are 1-based, inclusive on both ends.
+    Return (mature_start_1based, removable_end_1based) using only
+    signal/propeptide annotations with explicit finite end positions.
+
+    Features with UNKNOWN or missing boundaries are not trimmed.
+    Returns (1, 0) if no removable region has an explicit boundary.
     """
-    sig_end   = 0
+    sig_end = 0
     propep_end = 0
+
     for f in _features(e):
         ftype = f.get("type", "").lower()
-        loc   = f.get("location", {})
-        start = loc.get("start", {}).get("value", 0)
-        end   = loc.get("end",   {}).get("value", 0)
+
+        if ftype not in {"signal", "propep"}:
+            continue
+
+        loc = f.get("location", {})
+        end_obj = loc.get("end", {})
+        end = end_obj.get("value")
+        modifier = end_obj.get("modifier")
+
+        # Never invent a cleavage boundary.
+        if not isinstance(end, int) or modifier == "UNKNOWN":
+            continue
+
         if ftype == "signal":
             sig_end = max(sig_end, end)
         elif ftype == "propep":
             propep_end = max(propep_end, end)
-    return sig_end + 1, max(sig_end, propep_end)  # mature start, precursor end of removable region
+
+    removable_end = max(sig_end, propep_end)
+    return removable_end + 1, removable_end
 
 
 def _pfam_ids(e: dict) -> list[str]:
