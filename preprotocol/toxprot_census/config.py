@@ -40,6 +40,9 @@ MMSEQS2_CLUSTER_MODE  = 0      # greedy set cover
 MMSEQS2_THREADS       = 8
 MMSEQS2_SENSITIVITY   = 7.5    # high sensitivity for low-identity search
 
+# MMseqs2 executable. Override when mmseqs is not on PATH.
+MMSEQS2_BINARY = os.environ.get("MMSEQS2_BINARY", "mmseqs")
+
 # ── Divergence rule (§4.2) ───────────────────────────────────────────────────
 DIVERGENCE_IDENTITY_CUTOFF = 0.30  # same cutoff as clustering
 
