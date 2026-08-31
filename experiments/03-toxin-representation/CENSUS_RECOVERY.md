@@ -112,12 +112,36 @@ Exact hash match: yes.
 
 This independently confirms that the Step-03 raw TSV row-order nondeterminism does not alter the downstream frozen divergence state.
 
+## Step 05 — family annotation / Gate V2
+
+Status: **EXACT REPRODUCTION**
+
+Recovered Gate V2 geometry matched the frozen census exactly:
+
+- usable sequence-divergent V2-A clusters: 796
+- family-disjoint V2-B clusters: 180
+- missing Pfam within V2-A: 557
+- shared Pfam with frozen reference set: 59
+- confirmed family-disjoint: 180
+- largest divergent Pfam family fraction: 0.0088
+
+Recovered `gatev2_audit.tsv` SHA-256:
+
+`047ecaa58fee2be7c815ddc0aee2b329eb9a9c0708e3adc44c51863f6067d0c9`
+
+Frozen SHA-256:
+
+`047ecaa58fee2be7c815ddc0aee2b329eb9a9c0708e3adc44c51863f6067d0c9`
+
+Exact hash match: yes.
+
+The exact V2-B membership state required for Experiment 03 positive-set reconstruction is therefore recovered.
+
 ## Remaining recovery
 
 Not yet accepted:
 
-1. Step 05 — family annotation / V2-B membership
-2. Step 06/06B — negative reconstruction and positive-overlap filtering
-3. Step 07 — permanent diagnostic partition
+1. Step 06/06B — negative reconstruction and positive-overlap filtering
+2. Step 07 — permanent diagnostic partition
 
 Recovery remains entirely model-blind.
