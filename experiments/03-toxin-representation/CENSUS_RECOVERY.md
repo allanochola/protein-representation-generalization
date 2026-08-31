@@ -247,11 +247,29 @@ Exact hash match: yes for all four files.
 
 Therefore the regenerated candidate-negative membership and metadata match the original frozen Step-06 state. No negative-set amendment or re-freeze is required at this stage.
 
+## Step 06B — positive-overlap filtering / Gate C
+
+Status: **EXACT REPRODUCTION**
+
+Recovered overlap-filter geometry matched the frozen census exactly:
+
+- background: 15,000 candidate -> 331 removed -> 14,669 retained
+- phenotype-matched: 6,113 candidate -> 786 removed -> 5,327 retained
+- family-aware: 7,110 candidate -> 2,248 removed -> 4,862 retained
+
+All three pools remain above both frozen Gate C support thresholds.
+
+Recovered frozen artifacts reproduced exactly:
+
+- `negative_overlap_report.tsv`: PASS
+- `negative_pool_counts.tsv`: PASS
+
+The exact post-overlap family-aware pool of 4,862 sequences required for the permanent diagnostic partition is therefore recovered.
+
 ## Remaining recovery
 
 Not yet accepted:
 
-1. Step 06B — positive-overlap filtering
-2. Step 07 — permanent diagnostic partition
+1. Step 07 — permanent diagnostic partition
 
 Recovery remains entirely model-blind.
