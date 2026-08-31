@@ -1,0 +1,37 @@
+{
+  "stage": "Tox-Prot final Gate C negative-overlap census",
+  "overlap_definition": "Candidate negative excluded if it has any qualifying MMseqs2 hit to any of the 7,534 cleaned positive sequences at >=30% identity with >=80% shorter-sequence coverage, cov-mode 1.",
+  "pools": {
+    "background": {
+      "candidate": 15000,
+      "overlap_removed": 331,
+      "retained": 14669,
+      "removed_fraction": 0.0221
+    },
+    "phenotype_matched": {
+      "candidate": 6113,
+      "overlap_removed": 786,
+      "retained": 5327,
+      "removed_fraction": 0.1286
+    },
+    "family_aware": {
+      "candidate": 7110,
+      "overlap_removed": 2248,
+      "retained": 4862,
+      "removed_fraction": 0.3162,
+      "scope": "partial first-50-positive-Pfam census"
+    }
+  },
+  "gate_c": {
+    "primary_fpr": 0.05,
+    "primary_min_negatives": 1000,
+    "primary_pass": true,
+    "secondary_fpr": 0.01,
+    "secondary_min_negatives": 3000,
+    "secondary_pass": true
+  },
+  "interpretation": "All three candidate pools remain above both frozen negative-support thresholds after positive-sequence overlap filtering. Candidate-negative supply is therefore not the experiment bottleneck.",
+  "filter_code_commit": "14538a5",
+  "negative_overlap_report_sha256": "73e12ce13c639c4c504419529bbe79e9b8ca8b4eafb59b8fa9f28b8edf1d7a1d",
+  "negative_pool_counts_sha256": "57802460a1475733011d21d684003c08fe2aa1ab3a13368ca417d7ffd6ea79d0"
+}
