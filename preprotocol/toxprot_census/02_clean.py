@@ -49,7 +49,22 @@ def _organism(e: dict) -> tuple[str, int]:
 
 def _lineage(e: dict) -> str:
     lins = e.get("lineages", [])
-    return "; ".join(lins)
+    names = []
+
+    for item in lins:
+        if isinstance(item, str):
+            names.append(item)
+        elif isinstance(item, dict):
+            name = (
+                item.get("scientificName")
+                or item.get("name")
+                or item.get("value")
+                or ""
+            )
+            if name:
+                names.append(name)
+
+    return "; ".join(names)
 
 
 def _keywords(e: dict) -> list[str]:
