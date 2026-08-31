@@ -7,3 +7,4 @@ __pycache__/
 preprotocol/toxprot_census/data/
 preprotocol/toxprot_census/results/*
 !preprotocol/toxprot_census/results/toxprot_snapshot.json
+!preprotocol/toxprot_census/results/cleaned_snapshot.json

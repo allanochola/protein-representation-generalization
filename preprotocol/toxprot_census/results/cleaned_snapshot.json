@@ -1,0 +1,20 @@
+{
+  "stage": "Tox-Prot cleaned positive census",
+  "raw_snapshot_sha256": "221b55c00b6aa12742219d1448cfc8dcf58ba013153aa4003b31ea0fd189126f",
+  "raw_entries": 7916,
+  "retained_entries": 7534,
+  "protein_level_evidence": 4472,
+  "transcript_level_evidence": 1895,
+  "homology_inferred": 1159,
+  "predicted_or_uncertain": 8,
+  "median_length": 80.0,
+  "fraction_le_75aa": 0.44292540483143084,
+  "file_sha256": {
+    "cleaned_entries.tsv": "057f1bbb551aeb3ff3589e5578391bcca097d0ca0044f037c0cbbabf4a55061d",
+    "evidence_summary.tsv": "9fff3c7d750467c27ae3ac7e6765e0f9fc6e530a807d399db065ed8ef6e6e706",
+    "duplicate_report.tsv": "9d294ccdd1756c224143c322616316111ae3c58b67098ba0eacc31b4d52542e7",
+    "length_composition.tsv": "00772b16a97c2120d97a2f97df19ad86fa47c7b46e9fcbf5549bd0134e51a69c",
+    "mature_chain_sensitivity.tsv": "56b639e9365089cacce29d258f159dd6fb7514fabf8a2cb6ffc27d622f88c797"
+  },
+  "cleaner_commit": "1a6ed7c00b613350e886847fc99f4d2ada5b2206"
+}
