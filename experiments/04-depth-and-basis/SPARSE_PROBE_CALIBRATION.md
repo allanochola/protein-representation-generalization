@@ -1330,6 +1330,381 @@ No feature standardization is performed inside the probe pipeline because the
 synthetic generator contract already defines the coordinate scales used for
 calibration.
 
+### Frozen calibration seed derivation
+
+Calibration uses exactly the frozen seed block:
+
+    1000-1099
+
+Each calibration seed is one perturbation identity.
+
+Throughout the runner specification:
+
+- `calibration seed` means the frozen seed value `c` from `1000-1099`;
+- `perturbation identity` means that calibration replicate identity for a
+  particular scenario/tau/rho/N cell;
+- `perturbation_ss` means the derived `SeedSequence` root for runner-level
+  stochastic operations in that cell.
+
+The term `perturbation seed` in earlier prose is interpreted operationally as
+the frozen calibration seed together with its derived runner streams specified
+in this section. It does not define an additional independent seed variable.
+
+No additional perturbation-index or perturbation-seed axis is introduced.
+
+Thus each `(scenario, tau, rho, N)` calibration cell is evaluated over exactly
+100 perturbations, corresponding one-to-one with calibration seeds `1000-1099`.
+
+The same calibration seed represents the same replicate identity across
+scenario cells and discovery sizes.
+
+### Integer cell identifiers
+
+Seed derivation uses integer identifiers rather than floating-point values.
+
+Frozen scenario identifiers are:
+
+    S0 = 0
+    S1 = 1
+    S2 = 2
+    S3 = 3
+    S4 = 4
+    S5 = 5
+    S6 = 6
+    S7 = 7
+
+Tau is represented by its zero-based index in the frozen master tau ladder:
+
+    tau_index in {0, ..., 8}
+
+For S1 and S2, only indices belonging to their already-frozen tau subsets are
+valid.
+
+S0 has no public tau parameter and uses:
+
+    tau_index = 0
+
+solely as a seed-namespace sentinel.
+
+Rho is represented by a scenario-specific zero-based frozen ladder index.
+
+For S3:
+
+    rho values = (0.70, 0.90, 0.99)
+    rho_index  = (0,    1,    2)
+
+For S6:
+
+    rho values = (0.30, 0.60, 0.90)
+    rho_index  = (0,    1,    2)
+
+Scenarios without a public rho axis use:
+
+    rho_index = 0
+
+solely as a seed-namespace sentinel.
+
+Raw floating-point tau or rho values may not be inserted directly into a
+`SeedSequence` entropy vector.
+
+### Synthetic-dataset seed
+
+For calibration seed `c`, scenario identifier `s`, master-ladder tau index `t`
+and scenario-specific rho index `r`, define:
+
+    dataset_ss =
+        SeedSequence([
+            c,
+            s,
+            t,
+            r,
+            100
+        ])
+
+The final integer `100` is the frozen synthetic-dataset namespace identifier.
+
+### Frozen SeedSequence materialization
+
+Whenever this calibration specification requires a NumPy or scikit-learn
+integer seed to be obtained from a `SeedSequence`, the conversion is exactly:
+
+    seed_int =
+        int(
+            seed_sequence.generate_state(
+                1,
+                dtype=np.uint32
+            )[0]
+        )
+
+No alternative conversion is permitted.
+
+In particular, the implementation may not substitute:
+
+- Python `hash`;
+- modulo arithmetic;
+- direct entropy-vector summation;
+- `seed + k`;
+- `default_rng(...).integers(...)`;
+- a different `generate_state` length;
+- a different integer dtype.
+
+The same materialization rule applies to:
+
+- synthetic-dataset seeds;
+- target-N subsampling seeds where an integer API is required;
+- Stage-A split seeds;
+- Stage-A CV seeds;
+- Stage-A model-fit child seeds;
+- Stage-B model-fit seeds.
+
+Where a NumPy `Generator` is required directly rather than an integer
+`random_state`, the runner constructs it as:
+
+    np.random.default_rng(seed_sequence)
+
+without first converting through another random draw.
+
+The integer seed supplied to `generate_s0` through `generate_s7` is therefore:
+
+    dataset_seed =
+        int(
+            dataset_ss.generate_state(
+                1,
+                dtype=np.uint32
+            )[0]
+        )
+
+All scenario generators must be called using keyword arguments.
+
+In particular:
+
+    generate_s3(seed=..., rho=..., tau=...)
+    generate_s6(seed=..., tau=..., rho=...)
+
+must never be called positionally.
+
+The synthetic-dataset seed does not depend on target discovery size N.
+
+Therefore, for fixed:
+
+    calibration seed,
+    scenario,
+    tau,
+    rho,
+
+the N = 100, N = 120 and N = 139 analyses begin from exactly the same generated
+139-positive / 139-negative synthetic discovery dataset.
+
+This isolates the discovery-size comparison from synthetic-dataset variation.
+
+### Runner perturbation root
+
+For calibration seed `c`, scenario identifier `s`, master-ladder tau index `t`,
+scenario-specific rho index `r`, and target discovery size `N`, define:
+
+    perturbation_ss =
+        SeedSequence([
+            c,
+            s,
+            t,
+            r,
+            N,
+            200
+        ])
+
+The final integer `200` is the frozen runner-perturbation namespace identifier.
+
+This perturbation root controls only operations applied after synthetic-data
+generation.
+
+It does not control synthetic-data generation.
+
+### Frozen runner stream identifiers
+
+All runner-level stochastic streams use the same explicit SeedSequence
+construction:
+
+    SeedSequence([
+        c,
+        s,
+        t,
+        r,
+        N,
+        200,
+        stream_id
+    ])
+
+The frozen runner stream identifiers are:
+
+    21 = target-N stratified subsampling
+    22 = Stage-A stratified train/evaluation split
+    23 = Stage-A five-fold CV construction
+    24 = Stage-A model fitting
+    25 = Stage-B full-target-N model fitting
+
+These stream identifiers are disjoint from the stream identifiers currently
+used internally by the frozen synthetic generators.
+
+Runner streams may not use arithmetic shortcuts such as:
+
+    seed + k
+    seed * k
+    seed XOR k
+
+as substitutes for the frozen `SeedSequence` construction.
+
+### Target-N subsampling stream
+
+Stream 21 determines the without-replacement, class-stratified selection of N
+positive and N negative observations from the generated 139/139 synthetic
+discovery dataset.
+
+For N = 139, the complete dataset is retained.
+
+The stream remains defined at N = 139 for reproducibility, but it may not
+introduce resampling or observation loss.
+
+### Stage-A split stream
+
+Stream 22 determines the frozen stratified Stage-A internal
+training/evaluation split.
+
+The per-class counts remain:
+
+    N = 100 -> 80 training / 20 evaluation
+    N = 120 -> 96 training / 24 evaluation
+    N = 139 -> 111 training / 28 evaluation
+
+No other runner stream may alter this split.
+
+### Stage-A CV stream
+
+Stream 23 determines the shuffled five-fold `StratifiedKFold` construction
+inside the Stage-A internal-training portion.
+
+Every candidate C is evaluated using exactly the same five folds within a
+perturbation.
+
+Fold construction may not depend on:
+
+- candidate C;
+- fold AUROC;
+- selected C;
+- scenario outcome;
+- gate outcome.
+
+### Stage-A model-fitting stream
+
+Stream 24 is the deterministic Stage-A model-fitting root.
+
+Child fit seeds are allocated in the frozen order:
+
+1. candidate C values in ascending frozen C-grid order;
+2. within each candidate C, folds 1 through 5 in fold order;
+3. after all candidate-C fold fits, one additional child seed for the final
+   selected-C Stage-A refit used to obtain held-out prediction.
+
+The Stage-A fit root is:
+
+    fit_ss =
+        SeedSequence([
+            c,
+            s,
+            t,
+            r,
+            N,
+            200,
+            24
+        ])
+
+Exactly:
+
+    9 * 5 + 1 = 46
+
+child `SeedSequence` objects are created in one call:
+
+    fit_children = fit_ss.spawn(46)
+
+Children `0-44` correspond to the 45 candidate-C/fold fits in the frozen
+C-major, fold-minor order.
+
+Child `45` is reserved for the final selected-C Stage-A refit.
+
+Each child's integer `random_state` is materialized using the frozen
+`generate_state(1, dtype=np.uint32)` rule above.
+
+All candidate-C/fold child seeds are allocated before observed CV scores are
+used to select C.
+
+The identity of the winning C may not change the random seeds assigned to any
+candidate-C/fold fit.
+
+No child seed may be skipped merely because an earlier candidate performs
+poorly.
+
+### Stage-B model-fitting stream
+
+Stream 25 determines the Stage-B full-target-N refit after Stage A has selected
+C.
+
+It is independent of:
+
+- target-N subsampling;
+- Stage-A train/evaluation splitting;
+- Stage-A CV construction;
+- every Stage-A model-fit child seed.
+
+The Stage-B seed root is:
+
+    stage_b_ss =
+        SeedSequence([
+            c,
+            s,
+            t,
+            r,
+            N,
+            200,
+            25
+        ])
+
+Its scikit-learn `random_state` is materialized using the same frozen
+`generate_state(1, dtype=np.uint32)` rule.
+
+The Stage-B fit seed may not be reused by Stage A.
+
+### Seed independence and outcome firewall
+
+No seed, namespace or stream identifier may depend on:
+
+- AUROC;
+- selected C;
+- coefficient sparsity;
+- coefficient identity;
+- coefficient sign;
+- P, S, I or G;
+- whether a scenario behaves as intended;
+- whether a gate passes or fails;
+- any numerical threshold;
+- any previously observed calibration statistic.
+
+The seed mapping is frozen before calibration seed `1000` is opened.
+
+Changing any of the following after calibration execution begins:
+
+- scenario identifiers;
+- tau-index definitions;
+- rho-index definitions;
+- namespace identifiers;
+- runner stream identifiers;
+- SeedSequence entropy-vector layout;
+- Stage-A child-seed ordering;
+
+consumes the current calibration block and requires a fresh untouched
+calibration block before the amended instrument may be evaluated.
+
+Validation seeds `2000-2099` use the same frozen derivation mechanism only after
+the complete instrument and validation acceptance criteria have been frozen.
+
 The deterministic fit seed must be derived from the relevant perturbation seed
 through a dedicated seed stream and must not depend on:
 
