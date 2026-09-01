@@ -1,0 +1,4 @@
+n_per_class	median_pairwise_jaccard	jaccard_threshold	jaccard_pass	n_recurrent_of_5	recurrence_threshold	min_recurrent_features	recurrence_pass	median_fixed_top5_concentration	concentration_threshold	concentration_pass	three_way_pass	signed_top5_overlap_with_n139	modal_top1_signed_identity	modal_top1_frequency	pairwise_top1_agreement	primary_decision
+100	0.42857142857142855	0.6	False	2	0.8	4	False	0.005742788657889792	0.35	False	False	3	9573:-	0.55	0.39636363636363636	False
+120	0.42857142857142855	0.6	False	3	0.8	4	False	0.005954991281521476	0.35	False	False	3	4983:-	0.67	0.5094949494949494	False
+139	0.42857142857142855	0.6	False	1	0.8	4	False	0.005881843677577358	0.35	False	False	5	2073:+	0.33	0.2834343434343434	True

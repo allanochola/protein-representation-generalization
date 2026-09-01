@@ -1,0 +1,84 @@
+{
+  "stage": "Experiment 03 Stage 1 biological SAE stability sweep",
+  "status": "FAIL",
+  "primary_n_per_class": 139,
+  "n139_top5_signed_features": [
+    {
+      "rank": 1,
+      "latent_id": 4983,
+      "sign": "-",
+      "signed_identity": "4983:-",
+      "signed_mean_difference": -0.18881773948669434
+    },
+    {
+      "rank": 2,
+      "latent_id": 9573,
+      "sign": "-",
+      "signed_identity": "9573:-",
+      "signed_mean_difference": -0.18728044629096985
+    },
+    {
+      "rank": 3,
+      "latent_id": 2073,
+      "sign": "+",
+      "signed_identity": "2073:+",
+      "signed_mean_difference": 0.1863788366317749
+    },
+    {
+      "rank": 4,
+      "latent_id": 1679,
+      "sign": "-",
+      "signed_identity": "1679:-",
+      "signed_mean_difference": -0.18288731575012207
+    },
+    {
+      "rank": 5,
+      "latent_id": 2221,
+      "sign": "-",
+      "signed_identity": "2221:-",
+      "signed_mean_difference": -0.18202196061611176
+    }
+  ],
+  "gates": {
+    "median_pairwise_jaccard": {
+      "value": 0.42857142857142855,
+      "threshold": 0.6,
+      "pass": false
+    },
+    "recurrence": {
+      "n_recurrent_of_5": 1,
+      "inclusion_threshold": 0.8,
+      "minimum_recurrent_features": 4,
+      "pass": false
+    },
+    "fixed_top5_concentration": {
+      "value": 0.005881843677577358,
+      "threshold": 0.35,
+      "pass": false
+    }
+  },
+  "three_way_and_pass": false,
+  "single_feature_statistics": {
+    "status": "DESCRIPTIVE_ONLY",
+    "modal_top1_signed_identity": "2073:+",
+    "modal_top1_frequency": 0.33,
+    "pairwise_top1_agreement": 0.2834343434343434,
+    "single_feature_verdict_permitted": false
+  },
+  "length_geometry": {
+    "n139_joint_matching": {
+      "<30": 9,
+      "30-75": 22,
+      "76-150": 29,
+      ">150": 79
+    },
+    "long_stratum_exhaustion_limited": true,
+    "interpretation": "N=139 >150 behavior is conditional on the frozen realized discovery pool and must not be interpreted as independent stability over alternative long-protein memberships."
+  },
+  "analysis_boundary": {
+    "latent_ranking_observed": true,
+    "feature_nomination_observed": true,
+    "confirmatory_sequences_processed": false,
+    "confirmatory_representation_statistics_observed": false
+  }
+}

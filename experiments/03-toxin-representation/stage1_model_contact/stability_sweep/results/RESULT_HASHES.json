@@ -1,0 +1,10 @@
+{
+  "n139_signed_latent_scores.tsv": "226ca984ae805e9fd342d2e49d188874367bcb950c243c4c49b9e43c804e879d",
+  "full_dataset_top5.tsv": "9fd2e89887956222adf2a67a80dcee03587f6051f0be88590817c03b44e8bbbe",
+  "stability_summary.tsv": "c3e40b55c8e3a1a1a8d2a00847c9ef8fa3f892ca79075a1995aae0e69be33487",
+  "feature_recurrence.tsv": "b23cfa112aaa30d08fc61086d0f94bf4edc57b4753a15f18d44de5d3a94ca027",
+  "perturbation_membership.tsv": "55fc904aead03b3f22cf35d25e9a532505d61ae3a6b96ac0effb948806bf40e3",
+  "perturbation_length_composition.tsv": "df4c37a3424c55e2006eebd789b0948a53046827749a83481467d556c855aa23",
+  "n139_top5_length_stratum_descriptives.tsv": "7e1572464e3af6835e92fe7f100392be5891e24f00a371288f82a3f173e92dfa",
+  "STAGE1_DECISION.json": "8a4076a63dd8b7d93e20e83d039461ac4ef9f89600c471eda9b73f31c233b6a5"
+}

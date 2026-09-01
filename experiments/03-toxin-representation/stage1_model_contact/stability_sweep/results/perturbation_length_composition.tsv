@@ -1,0 +1,25 @@
+n_per_class	class_name	length_stratum	mean_count	min_count	max_count	exhaustion_limited_note
+100	negative	30-75	12.74	9	16	
+100	negative	76-150	16.59	13	20	
+100	negative	<30	5.57	3	7	
+100	negative	>150	45.1	40	49	
+100	positive	30-75	12.87	9	16	
+100	positive	76-150	16.64	13	21	
+100	positive	<30	5.62	2	7	
+100	positive	>150	44.87	40	50	
+120	negative	30-75	15.04	10	19	
+120	negative	76-150	20.29	16	24	
+120	negative	<30	6.33	3	8	
+120	negative	>150	54.34	48	60	
+120	positive	30-75	15.16	11	19	
+120	positive	76-150	19.77	16	24	
+120	positive	<30	6.7	5	8	
+120	positive	>150	54.37	50	60	
+139	negative	30-75	17.52	13	21	
+139	negative	76-150	23.24	18	27	
+139	negative	<30	7.21	4	9	
+139	negative	>150	63.03	59	69	N=139 >150 discovery-positive source membership is exhaustion-limited; perturbation stability is conditional on the frozen realized pool.
+139	positive	30-75	17.26	13	20	
+139	positive	76-150	23.56	19	27	
+139	positive	<30	7.11	4	9	
+139	positive	>150	63.07	58	69	N=139 >150 discovery-positive source membership is exhaustion-limited; perturbation stability is conditional on the frozen realized pool.
