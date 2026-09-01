@@ -449,3 +449,133 @@ def generate_s5(
 
     _validate_dataset(ds)
     return ds
+
+
+def _spawn_rng(seed: int, stream_id: int) -> np.random.Generator:
+    """Deterministic independent RNG stream derived from scenario seed."""
+    if not isinstance(stream_id, (int, np.integer)):
+        raise TypeError("stream_id must be an integer")
+
+    ss = np.random.SeedSequence([int(seed), int(stream_id)])
+    return np.random.default_rng(ss)
+
+
+def generate_s6(
+    seed: int,
+    tau: float,
+    rho: float,
+) -> SyntheticDataset:
+    """S6: stable sparse signal plus correlated nuisance.
+
+    Public arguments must be supplied by keyword at experiment call sites.
+
+    Tau controls only the five-coordinate true label-generating signal.
+    Rho controls only covariance between each true signal coordinate and
+    its 20 zero-direct-effect nuisance coordinates.
+    """
+    allowed_rho = {0.30, 0.60, 0.90}
+
+    if not _matches_allowed_tau(tau, MASTER_TAU):
+        raise ValueError(f"S6 tau must be one of {MASTER_TAU}")
+
+    if float(rho) not in allowed_rho:
+        raise ValueError(
+            f"S6 rho must be one of {sorted(allowed_rho)}"
+        )
+
+    tau = float(tau)
+    rho = float(rho)
+
+    b = _tau_to_b(tau=tau, k=5)
+
+    # Frozen observed-space layout.
+    signal_idx = np.arange(0, 5, dtype=int)
+    nuisance_idx = np.arange(5, 105, dtype=int)
+    background_idx = np.arange(105, P, dtype=int)
+
+    nuisance_per_signal = 20
+
+    nuisance_blocks = [
+        list(
+            range(
+                5 + j * nuisance_per_signal,
+                5 + (j + 1) * nuisance_per_signal,
+            )
+        )
+        for j in range(5)
+    ]
+
+    # Separate deterministic RNG streams.
+    rng_signal = _spawn_rng(seed, 1)
+    rng_nuisance = _spawn_rng(seed, 2)
+    rng_background = _spawn_rng(seed, 3)
+    rng_label = _spawn_rng(seed, 4)
+
+    X = np.zeros((N_TOTAL, P), dtype=float)
+
+    # True signal coordinates.
+    signal_values = rng_signal.normal(
+        size=(N_TOTAL, 5)
+    )
+    X[:, signal_idx] = signal_values
+
+    # Correlated nuisance residuals are drawn independently of rho.
+    nuisance_eps = rng_nuisance.normal(
+        size=(N_TOTAL, 100)
+    )
+
+    residual_scale = np.sqrt(1.0 - rho ** 2)
+
+    for j, block in enumerate(nuisance_blocks):
+        X[:, block] = (
+            rho * signal_values[:, [j]]
+            + residual_scale
+            * nuisance_eps[
+                :,
+                j * nuisance_per_signal:
+                (j + 1) * nuisance_per_signal
+            ]
+        )
+
+    # Independent background.
+    X[:, background_idx] = rng_background.normal(
+        size=(N_TOTAL, len(background_idx))
+    )
+
+    # Only the five true signal coordinates have direct effect.
+    beta = np.zeros(P, dtype=float)
+    beta[signal_idx] = b * S1_SIGNS
+
+    score = X[:, signal_idx] @ beta[signal_idx]
+
+    y = _balanced_labels_from_score(
+        score=score,
+        rng=rng_label,
+        noise_scale=1.0,
+    )
+
+    ds = SyntheticDataset(
+        X=X,
+        y=y,
+        beta=beta,
+        scenario="S6",
+        seed=int(seed),
+        metadata={
+            "tau": tau,
+            "rho": rho,
+            "b": b,
+            "signal_idx": signal_idx.tolist(),
+            "signal_signs": S1_SIGNS.astype(int).tolist(),
+            "nuisance_idx": nuisance_idx.tolist(),
+            "nuisance_blocks": nuisance_blocks,
+            "background_idx": background_idx.tolist(),
+            "nuisance_per_signal": nuisance_per_signal,
+            "n_nuisance": 100,
+            "nuisance_direct_beta": 0.0,
+            "residual_scale": float(residual_scale),
+            "noise_scale": 1.0,
+        },
+    )
+
+    _validate_dataset(ds)
+    return ds
