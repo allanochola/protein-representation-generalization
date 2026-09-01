@@ -7,6 +7,11 @@
 This document freezes the synthetic environment used to design and independently
 validate the Experiment 04 supervised sparse-probe stability instrument.
 
+This calibration applies **exclusively to Arm B**, the supervised probe on the
+raw 1,280-dimensional ESM representation. It does not recalibrate, modify, or
+provide new validation for Arm A's 10,240-latent InterPLM SAE stability
+instrument, which is inherited unchanged from Experiment 03.
+
 It does **not** freeze the final numerical sparse-probe PASS thresholds.
 
 No fresh Experiment-04 biological ESM activation may be inspected during this
