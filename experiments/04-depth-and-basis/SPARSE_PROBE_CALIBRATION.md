@@ -1409,19 +1409,22 @@ Raw floating-point tau or rho values may not be inserted directly into a
 
 ### Synthetic-dataset seed
 
-For calibration seed `c`, scenario identifier `s`, master-ladder tau index `t`
-and scenario-specific rho index `r`, define:
+Synthetic-data generation is separate from the 100 calibration perturbation
+identities.
+
+Calibration seeds `1000-1099` control only post-generation perturbation
+operations and do not alter synthetic-data generation.
+
+For scenario identifier `s` and master-ladder tau index `t`, define:
 
     dataset_ss =
         SeedSequence([
-            c,
             s,
             t,
-            r,
             100
         ])
 
-The final integer `100` is the frozen synthetic-dataset namespace identifier.
+The integer `100` is the frozen synthetic-dataset namespace identifier.
 
 ### Frozen SeedSequence materialization
 
@@ -1464,7 +1467,23 @@ Where a NumPy `Generator` is required directly rather than an integer
 
 without first converting through another random draw.
 
-The integer seed supplied to `generate_s0` through `generate_s7` is therefore:
+The synthetic-dataset seed is independent of:
+
+- calibration seed `c`;
+- discovery size N;
+- rho index `r`;
+- all runner stream identifiers.
+
+Thus all 100 calibration perturbations for a fixed scenario/tau setting begin
+from the same generated 139-positive / 139-negative discovery dataset.
+
+For S3 and S6, the same generator seed is reused across the complete frozen rho
+ladder at fixed scenario and tau.
+
+This preserves rho as the intended geometry/covariance manipulation rather than
+allowing rho to change unrelated generator randomness.
+
+The integer generator seed is:
 
     dataset_seed =
         int(
@@ -1474,28 +1493,16 @@ The integer seed supplied to `generate_s0` through `generate_s7` is therefore:
             )[0]
         )
 
-All scenario generators must be called using keyword arguments.
+All generators are called by keyword.
 
 In particular:
 
     generate_s3(seed=..., rho=..., tau=...)
     generate_s6(seed=..., tau=..., rho=...)
 
-must never be called positionally.
-
-The synthetic-dataset seed does not depend on target discovery size N.
-
-Therefore, for fixed:
-
-    calibration seed,
-    scenario,
-    tau,
-    rho,
-
-the N = 100, N = 120 and N = 139 analyses begin from exactly the same generated
-139-positive / 139-negative synthetic discovery dataset.
-
-This isolates the discovery-size comparison from synthetic-dataset variation.
+At N = 139, all perturbations therefore retain the same complete 139/139
+synthetic discovery dataset. Perturbation variation enters only through the
+frozen post-generation runner streams.
 
 ### Runner perturbation root
 
