@@ -579,3 +579,105 @@ def generate_s6(
 
     _validate_dataset(ds)
     return ds
+
+
+def generate_s7(
+    seed: int,
+    tau: float,
+) -> SyntheticDataset:
+    """S7: predictive signed-interchangeable shortcut.
+
+    One latent predictive direction z generates the label score.
+
+    Five globally active observed coordinates are highly correlated signed
+    proxies for z using the frozen orientation template (+,+,-,+,-).
+
+    Tau controls only label-generating strength. The signed interchangeable
+    observed basis is intended to challenge coefficient identity and signed
+    recurrence under sparse probing.
+    """
+    if not _matches_allowed_tau(tau, MASTER_TAU):
+        raise ValueError(f"S7 tau must be one of {MASTER_TAU}")
+
+    tau = float(tau)
+
+    rho_shortcut = 0.95
+
+    shortcut_idx = np.arange(0, 5, dtype=int)
+    background_idx = np.arange(5, P, dtype=int)
+
+    shortcut_orientations = np.array(
+        [1.0, 1.0, -1.0, 1.0, -1.0],
+        dtype=float,
+    )
+
+    # Separate deterministic RNG streams.
+    rng_z = _spawn_rng(seed, 11)
+    rng_proxy = _spawn_rng(seed, 12)
+    rng_background = _spawn_rng(seed, 13)
+    rng_label = _spawn_rng(seed, 14)
+
+    # One latent predictive direction.
+    z = rng_z.normal(size=N_TOTAL)
+
+    # Frozen noiseless label-generating score.
+    score = tau * z
+
+    # Observed shortcut proxies.
+    proxy_eps = rng_proxy.normal(
+        size=(N_TOTAL, len(shortcut_idx))
+    )
+
+    shared_scale = np.sqrt(rho_shortcut)
+    residual_scale = np.sqrt(1.0 - rho_shortcut)
+
+    shortcut = (
+        shared_scale * z[:, None]
+        + residual_scale * proxy_eps
+    )
+
+    shortcut = shortcut * shortcut_orientations[None, :]
+
+    X = np.zeros((N_TOTAL, P), dtype=float)
+    X[:, shortcut_idx] = shortcut
+
+    # Remaining coordinates are independent standard-normal noise.
+    X[:, background_idx] = rng_background.normal(
+        size=(N_TOTAL, len(background_idx))
+    )
+
+    # No unique observed-space coefficient vector generates the labels.
+    # The label depends on latent z, while several signed proxy coordinates
+    # provide interchangeable observed predictive directions.
+    beta = np.zeros(P, dtype=float)
+
+    y = _balanced_labels_from_score(
+        score=score,
+        rng=rng_label,
+        noise_scale=1.0,
+    )
+
+    ds = SyntheticDataset(
+        X=X,
+        y=y,
+        beta=beta,
+        scenario="S7",
+        seed=int(seed),
+        metadata={
+            "tau": tau,
+            "rho_shortcut": rho_shortcut,
+            "shortcut_idx": shortcut_idx.tolist(),
+            "shortcut_orientations":
+                shortcut_orientations.astype(int).tolist(),
+            "background_idx": background_idx.tolist(),
+            "n_shortcut": 5,
+            "n_background": P - 5,
+            "shared_scale": float(shared_scale),
+            "residual_scale": float(residual_scale),
+            "observed_beta_identifiable": False,
+            "noise_scale": 1.0,
+        },
+    )
+
+    _validate_dataset(ds)
+    return ds
