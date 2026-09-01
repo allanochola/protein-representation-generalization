@@ -1604,6 +1604,129 @@ High prediction cannot rescue failed sparsity or stability.
 
 ---
 
+### Positive-control detection floor
+
+The final calibrated Arm-B instrument must demonstrate that it can return
+`PROBE STABLE` for genuine stable sparse signal.
+
+This is a mandatory calibration acceptance condition, not a descriptive result.
+
+The detection floor is evaluated under the frozen preferred regularization
+rule R2 unless calibration rejects R2 at the rule level and freezes R1 or R3
+before independent validation.
+
+### S1 requirement at every discovery size
+
+For each target discovery size:
+
+    N = 100
+    N = 120
+    N = 139
+
+there must exist at least one tau value from S1's already-frozen tau subset at
+which S1 satisfies the complete candidate instrument:
+
+    P AND S AND I AND G
+
+under the same numerical gate definitions being proposed for validation.
+
+Success at N = 120 or N = 139 may not compensate for failure at N = 100.
+
+Success at N = 139 may not compensate for failure at N = 120.
+
+Each N is therefore a separate required positive-control regime.
+
+This requirement is intentionally most stringent at smaller N, where:
+
+- Stage-A internal-CV folds contain fewer observations;
+- fold-level AUROC uncertainty may widen the R2 one-standard-error band;
+- R2 may therefore select stronger regularization and collapse real sparse
+  signal to zero or near-zero coefficient solutions.
+
+The calibration analysis must inspect R2 collapse at all three N values, with
+particular attention to N = 100.
+
+### S1/S6 moderate-covariance common-tau requirement
+
+For each target discovery size:
+
+    N = 100
+    N = 120
+    N = 139
+
+and for each moderate S6 nuisance-correlation level:
+
+    rho = 0.30
+    rho = 0.60
+
+there must exist at least one **identical frozen tau value** at which both:
+
+1. S1 satisfies `P AND S AND I AND G`; and
+2. S6 at that rho satisfies `P AND S AND I AND G`.
+
+The same numerical P/S/I/G thresholds and the same regularization rule must be
+used for both scenarios.
+
+The common tau must come from the frozen master tau ladder and must also belong
+to the S1 subset where applicable.
+
+No scenario-specific tau interpolation, rescaling or threshold adjustment is
+permitted.
+
+This requirement tests whether moderate correlated nuisance creates a false
+negative for an otherwise recoverable stable sparse signal.
+
+### Failure semantics
+
+The positive-control detection floor fails if any of the following occurs:
+
+- S1 has no full-gate PASS tau at N = 100;
+- S1 has no full-gate PASS tau at N = 120;
+- S1 has no full-gate PASS tau at N = 139;
+- S1 and S6(rho = 0.30) have no common full-gate PASS tau at any required N;
+- S1 and S6(rho = 0.60) have no common full-gate PASS tau at any required N.
+
+A detection-floor failure means the candidate instrument is not acceptable for
+independent validation.
+
+It may not be rescued by:
+
+- averaging performance across N values;
+- dropping N = 100;
+- weakening requirements only for S6;
+- using different thresholds for different scenarios;
+- selecting scenario-specific C values outside the frozen rule;
+- altering the tau ladder;
+- using S6 rho = 0.90 success to compensate for moderate-rho failure.
+
+### R2-collapse interpretation
+
+If the detection floor fails because R2 repeatedly selects zero or
+non-informative Stage-B coefficient solutions on the stable sparse controls,
+that is evidence against R2 as the final regularization-selection rule.
+
+The response must be a rule-level calibration decision among the already
+specified R1/R2/R3 candidates.
+
+The one-standard-error formula, five-fold CV count, Stage-A 80/20 split and
+perturbation architecture remain frozen.
+
+A replacement rule must then be evaluated against the same detection-floor
+requirements before independent validation.
+
+### Relationship to negative controls
+
+Passing the positive-control detection floor is necessary but not sufficient.
+
+The final instrument must also reject the appropriate synthetic negative
+controls through the intended failed limbs.
+
+Positive-control success may not be used to weaken the negative-control
+requirements, and negative-control rejection may not compensate for failure of
+this detection floor.
+
+---
+
 # Calibration / validation firewall
 
 ## 21. Seed separation
