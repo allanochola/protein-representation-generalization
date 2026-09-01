@@ -264,21 +264,291 @@ Required behavior:
 
 ## 12. Signal-strength targeting
 
-The synthetic suite should span approximately:
+### Frozen cross-scenario strength parameter
 
-- AUROC ~0.50
-- AUROC ~0.60
-- AUROC ~0.70
-- AUROC ~0.80
-- AUROC >=0.90
+The sole public signal-strength parameter for synthetic scenarios S1-S5 is:
 
-Dense and sparse scenarios must overlap in predictive discrimination.
+    tau
 
-Otherwise AUROC alone could trivially identify the scenario family.
+defined as the **population standard deviation of the noiseless
+label-generating score** before logistic label noise is added and before the
+exact 139/139 class split is constructed.
+
+The fixed logistic-noise scale remains:
+
+    noise_scale = 1.0
+
+for every non-null scenario.
+
+All scenario-specific coefficient magnitudes are internal implementation
+details derived deterministically from tau.
+
+Raw coefficient magnitude `b` is no longer a caller-facing calibration
+parameter.
+
+This establishes one common generative-strength scale across sparse, correlated
+and distributed scenarios.
 
 ---
 
-# Perturbation geometry
+### Generative SNR versus recoverable discrimination
+
+Tau equalizes the population scale of the noiseless label-generating score
+relative to the fixed logistic-noise process.
+
+Tau therefore equalizes **generative signal-to-noise ratio**.
+
+It does **not** require equal fitted-probe AUROC across scenario families.
+
+At equal tau, differences in probe discrimination caused by:
+
+- sparsity;
+- dimensionality;
+- observed-coordinate interchangeability;
+- correlation;
+- nuisance structure;
+- distributed coding;
+
+are part of the construct being tested.
+
+For example, at fixed tau, a five-coordinate sparse signal may be substantially
+more recoverable at N=278 and p=1,280 than a 128-coordinate or 1,280-coordinate
+distributed signal.
+
+That residual discrimination gap is not a calibration defect.
+
+Scenario-specific tau values must **not** be increased or decreased post hoc to
+force fitted-probe AUROC matching across scenario families.
+
+Doing so would remove the sparse-versus-distributed recoverability distinction
+that the instrument is designed to measure.
+
+Predictive discrimination is a necessary limb of the final probe instrument,
+but it is never sufficient for a stable-sparse PASS.
+
+AUROC or any other discrimination statistic may not be used to infer synthetic
+scenario family, substitute for the sparsity/identity/sign-stability limbs, or
+rescue failure of those limbs.
+
+### Discrimination coverage is descriptive only
+
+The realized predictive-discrimination range produced by the frozen tau ladder
+must be reported for each scenario family during calibration.
+
+This may include descriptive characterization of datasets as approximately
+chance, weak, moderate, strong, or very strong discrimination regimes.
+
+These descriptions are not calibration targets.
+
+There is no requirement that every scenario family attain a particular AUROC,
+that sparse and dense scenarios overlap in AUROC, or that tau be modified to
+produce a desired discrimination range.
+
+Observed discrimination coverage may characterize the operating regime of the
+frozen synthetic suite but may not determine scenario-specific tau values.
+
+---
+
+### S1 and S2
+
+S1 and S2 use five independent unit-variance observed coordinates with
+equal-magnitude coefficients.
+
+For k = 5:
+
+    SD(score) = ||beta||_2 = sqrt(5) * b
+
+Therefore:
+
+    b = tau / sqrt(5)
+
+The old S1/S2 raw-b ladders are retired as public interfaces.
+
+Their implied generative strengths are preserved exactly through the tau ladder
+defined below.
+
+---
+
+### S3
+
+S3 generates labels from five independent unit-variance latent factors:
+
+    score = Z @ latent_beta
+
+with five equal-magnitude latent coefficients.
+
+Therefore:
+
+    SD(score) = sqrt(5) * b
+
+and:
+
+    b = tau / sqrt(5)
+
+The S3 correlation parameter rho changes how each latent factor is represented
+by correlated observed proxy coordinates.
+
+Rho does not enter the label-generating score.
+
+Therefore rho varies observed-coordinate interchangeability at fixed population
+generative difficulty.
+
+Tau and rho are separate experimental axes.
+
+---
+
+### S4
+
+S4 contains 128 independent unit-variance signal coordinates with equal
+coefficient magnitude.
+
+Therefore:
+
+    SD(score) = sqrt(128) * b
+
+and:
+
+    b = tau / sqrt(128)
+
+---
+
+### S5
+
+S5 contains 1,280 independent unit-variance signal coordinates with equal
+coefficient magnitude.
+
+Therefore:
+
+    SD(score) = sqrt(1280) * b
+
+and:
+
+    b = tau / sqrt(1280)
+
+---
+
+### Frozen tau ladder
+
+The master tau ladder preserves exactly the generative strengths implied by the
+previous S1 and S2 raw-b ladders.
+
+The authoritative symbolic ladder is:
+
+    tau in sqrt(5) * {
+        0.10,
+        0.20,
+        0.30,
+        0.40,
+        0.50,
+        0.75,
+        1.00,
+        1.25,
+        1.50
+    }
+
+S2 owns the weak-signal subset:
+
+    tau in sqrt(5) * {
+        0.10,
+        0.20,
+        0.30,
+        0.40
+    }
+
+S1 owns the identifiable-sparse subset:
+
+    tau in sqrt(5) * {
+        0.50,
+        0.75,
+        1.00,
+        1.25,
+        1.50
+    }
+
+S3, S4 and S5 use the full master tau ladder.
+
+No scenario-specific subset of the master tau ladder may be selected after
+synthetic execution begins.
+
+Any computationally motivated reduction requires an explicit protocol amendment
+made before any diagnostic or calibration result from the affected scenario is
+inspected.
+
+The symbolic values above are authoritative.
+
+Rounded decimal values are descriptive only and must not replace the symbolic
+definitions in validation or implementation checks.
+
+---
+
+### Public generator interface
+
+After refactoring, the synthetic generators must expose strength as tau:
+
+    generate_s1(seed, tau)
+    generate_s2(seed, tau)
+    generate_s3(seed, rho, tau)
+    generate_s4(seed, tau)
+    generate_s5(seed, tau)
+
+Each generator computes its internal coefficient magnitude from tau.
+
+No S1-S5 generator may expose unrestricted raw `b` as the calibration-facing
+strength parameter.
+
+The internally derived `b` value may be retained in metadata for auditability.
+
+---
+
+### Implementation diagnostics
+
+Before calibration seeds are used, the refactored generators must pass
+diagnostic-only implementation checks using seeds outside all calibration and
+validation blocks.
+
+The reserved diagnostic seed block is:
+
+    900001-900100
+
+These seeds are permanently excluded from calibration and independent
+validation.
+
+These diagnostics may verify:
+
+1. the expected mapping from tau to internal b;
+2. empirical score SD near tau using N = 200,000 diagnostic observations per
+   scenario/strength setting, so the population-scale derivation can be checked
+   with negligible sampling uncertainty relative to the biological N;
+3. empirical SD(score) for S3 remains invariant across rho = 0.70, 0.90 and
+   0.99 at fixed tau over independent diagnostic seeds;
+4. no generator changes the fixed logistic-noise scale;
+5. exact 139/139 class balance remains intact at biological-matched N = 278.
+
+Diagnostic outputs must not be used to select thresholds, alter the tau ladder,
+or tune scenario-specific strengths.
+
+They are software verification only.
+
+Calibration seeds 1000-1099 and validation seeds 2000-2099 remain untouched
+during these diagnostics.
+
+Diagnostic seeds 900001-900100 may never be reused for threshold calibration or
+independent validation.
+
+---
+
+### S6 and S7
+
+S6 and S7 must also be parameterized from the same tau definition before their
+implementations are frozen.
+
+Their internal coefficient or shortcut-strength parameters must be derived so
+that tau retains the same meaning:
+
+    population SD of the noiseless label-generating score.
+
+No S6 or S7 implementation may introduce a second public strength scale without
+a protocol amendment made before calibration execution.
 
 ## 13. Candidate discovery sizes
 
