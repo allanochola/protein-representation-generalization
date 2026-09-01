@@ -1,0 +1,45 @@
+{
+  "stage": "Experiment 03 first biological model contact",
+  "status": "PASS",
+  "identifier": "P85006",
+  "class": "positive",
+  "sequence_length": 28,
+  "sequence_sha256": "4650bfdfac229fc19979dd57ed6b1fa5218085f0a4d5d309f4fee58867395ec9",
+  "esm": {
+    "repo": "facebook/esm2_t33_650M_UR50D",
+    "revision": "08e4846e537177426273712802403f7ba8261b6c",
+    "layer": 18,
+    "token_count": 30,
+    "residue_embedding_shape": [
+      28,
+      1280
+    ]
+  },
+  "sae": {
+    "repo": "Elana/InterPLM-esm2-650m",
+    "revision": "5121c4c7f3ad0b5fbe0f3b9a457969192bb9912f",
+    "file": "layer_18/ae_normalized.pt",
+    "encoding": "relu(encoder(x - pre_bias))",
+    "residue_activation_shape": [
+      28,
+      10240
+    ],
+    "protein_pooling": "residue_max",
+    "protein_vector_shape": [
+      10240
+    ]
+  },
+  "checks": {
+    "token_count_equals_sequence_plus_2": true,
+    "special_tokens_excluded": true,
+    "esm_hidden_dim_1280": true,
+    "sae_dim_10240": true,
+    "finite_embeddings": true,
+    "finite_sae_activations": true
+  },
+  "analysis_boundary": {
+    "feature_ranking_observed": false,
+    "feature_nomination_observed": false,
+    "confirmatory_sequences_processed": false
+  }
+}
