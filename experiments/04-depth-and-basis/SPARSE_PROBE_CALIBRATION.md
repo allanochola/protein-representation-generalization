@@ -238,27 +238,284 @@ Extreme-correlation degradation is acceptable if quantified.
 
 ---
 
-## 11. S7 — Predictive shortcut / unstable signal
+## 11. S7 — Predictive signed-interchangeable shortcut
 
 Purpose:
 
-Test whether discovery-set shortcuts can generate high discrimination without
-stable coefficients.
+Provide a negative control that can remain predictively useful and sparse while
+failing observed-coordinate identity and/or signed-recurrence stability.
 
-Specification:
-
-- introduce a small set of shortcut coordinates associated with class;
-- make shortcut-label association heterogeneous across predefined sample groups;
-- perturbation subsets alter group composition;
-- no globally invariant sparse coefficient vector generates the label.
-
-Required behavior:
-
-- some fits may be strongly predictive;
-- coefficient identity and/or sign stability should fail;
-- the joint sparse-stability gate should reject the case.
+S7 is intended to challenge the stability limbs directly rather than fail
+because prediction is absent, because the representation is dense, or because
+the shortcut is restricted to a small sample subgroup.
 
 ---
+
+### Label-generating score
+
+For each observation:
+
+    z ~ Normal(0, 1)
+
+The noiseless label-generating score is:
+
+    score = tau * z
+
+Therefore:
+
+    population SD(score) = tau
+
+exactly.
+
+Labels are produced by the same frozen balanced-label mechanism used by the
+other non-null scenarios:
+
+    latent = score + Logistic(0, 1)
+
+followed by the exact 139/139 rank-based split.
+
+Tau is the sole public signal-strength parameter.
+
+No second shortcut-strength parameter is introduced.
+
+---
+
+### Shortcut block
+
+S7 contains one globally active block of five observed shortcut coordinates.
+
+All 278 observations contain all five shortcut coordinates.
+
+The five coordinates are redundant signed proxies for the same hidden z.
+
+The frozen orientation template is:
+
+    (+1, +1, -1, +1, -1)
+
+The frozen proxy-quality constant is:
+
+    rho_shortcut = 0.95
+
+This is a structural constant, not a public calibration axis.
+
+For shortcut coordinate j:
+
+    x_j =
+        orientation_j * (
+            sqrt(rho_shortcut) * z
+            + sqrt(1 - rho_shortcut) * epsilon_j
+        )
+
+where:
+
+    epsilon_j ~ Normal(0, 1)
+
+independently.
+
+The remaining 1,275 coordinates are independent standard-normal noise.
+
+---
+
+### Correlation structure
+
+Under this construction:
+
+- same-orientation shortcut proxies have population correlation
+  approximately +rho_shortcut;
+- opposite-orientation shortcut proxies have population correlation
+  approximately -rho_shortcut.
+
+The mixed sign orientation belongs only to the observed shortcut basis.
+
+It does not alter:
+
+- z;
+- the noiseless label-generating score;
+- tau;
+- the fixed logistic-noise scale.
+
+Thus tau controls generative difficulty while the signed proxy basis controls
+observed-coordinate instability.
+
+---
+
+### Intended sparse predictive representation
+
+Because all five shortcut coordinates carry the same underlying signal,
+a sparse linear model can predict using one or a small number of them.
+
+The planted shortcut representation is therefore sparse relative to:
+
+    p = 1,280
+
+despite having five interchangeable signal-associated coordinates.
+
+At sufficiently strong frozen tau values, S7 is intended to satisfy the
+predictive limb P without requiring a dense coefficient vector.
+
+---
+
+### Intended instability mechanism
+
+The five shortcut coordinates are highly correlated representations of the same
+underlying z.
+
+Several coordinates therefore provide nearly interchangeable predictive
+directions.
+
+Because the frozen basis contains both positive and negative orientations,
+equivalent predictive directions can be represented by different
+coordinate/sign combinations.
+
+Across finite-sample discovery perturbations, an L1 probe may therefore:
+
+- select different members of the shortcut block;
+- change which signed coordinate identity represents the same underlying
+  predictive direction;
+- retain useful discrimination while coefficient identity and/or signed
+  recurrence deteriorate.
+
+S7 is therefore intended to produce:
+
+- useful predictive discrimination at sufficiently strong tau;
+- sparse fitted solutions;
+- unstable observed-coordinate identity and/or signed recurrence.
+
+The final empirical behavior is a calibration result and is not guaranteed by
+construction.
+
+---
+
+### Distinction from S3
+
+S3 and S7 test different failure modes.
+
+S3 contains five latent signal factors, each represented by its own correlated
+observed block. Its primary purpose is to test instability caused by
+interchangeable observed coordinates for multiple stable latent factors.
+
+S7 contains one latent predictive direction represented by a single
+mixed-orientation shortcut block.
+
+Its primary purpose is to test whether signed coordinate identity and recurrence
+remain stable when several positive- and negative-oriented observed coordinates
+encode the same predictive direction.
+
+S7 therefore serves as the intended signed-instability control rather than a
+subpopulation-conditional shortcut control.
+
+Any future subpopulation-conditional shortcut scenario must be specified
+separately rather than folded into S7.
+
+---
+
+### Required interpretation
+
+S7 must not be rejected merely because its shortcut is predictive.
+
+A successful sparse-stability instrument should distinguish stable sparse
+accessibility from this signed-interchangeable shortcut.
+
+If S7 is predictive and sparse but fails coefficient-identity and/or
+signed-recurrence stability, that is the intended negative-control behavior.
+
+If S7 instead:
+
+- consistently fails the predictive limb;
+- consistently requires a dense solution; or
+- becomes strongly coordinate/sign stable;
+
+then S7 is not serving its intended calibration role and the
+generator/instrument design must be reviewed before biological use.
+
+---
+
+### Frozen S7 public interface
+
+The intended generator interface is:
+
+    generate_s7(seed, tau)
+
+S7 uses every value in the frozen master tau ladder.
+
+No S7-specific tau subset may be selected after diagnostic or calibration
+execution begins.
+
+Frozen structural constants:
+
+- latent signal dimensions = 1;
+- shortcut coordinates = 5;
+- shortcut coordinates active for every observation;
+- orientation template = (+1, +1, -1, +1, -1);
+- rho_shortcut = 0.95;
+- background noise coordinates = 1,275;
+- logistic noise scale = 1.0.
+
+Any change to these structural constants after S7 diagnostic execution begins
+requires an explicit pre-calibration protocol amendment.
+
+---
+
+### S7 diagnostics before calibration
+
+Before any calibration seed is used, diagnostic-only checks from the reserved
+900001-900100 block must verify:
+
+1. population SD(score) tracks tau;
+2. labels remain exactly 139/139;
+3. tau maps to the label-generating score without a second strength parameter;
+4. same-orientation shortcut correlations are near +rho_shortcut;
+5. opposite-orientation shortcut correlations are near -rho_shortcut;
+6. the shortcut orientation template is exactly (+1, +1, -1, +1, -1);
+7. the remaining 1,275 coordinates contain independent standard-normal noise;
+8. metadata records tau, rho_shortcut, shortcut indices and shortcut
+   orientations.
+
+These diagnostics may not:
+
+- fit a probe;
+- compute AUROC;
+- select a threshold;
+- inspect calibration seeds;
+- inspect validation seeds;
+- alter the frozen S7 construction.
+
+---
+
+### Calibration-stage operating-window requirement
+
+Generator diagnostics do not determine whether S7 occupies the intended probe
+operating regime.
+
+During calibration with seeds 1000-1099, the realized S7 behavior across the
+frozen master tau ladder must be characterized.
+
+The calibration report must determine whether there is a non-empty tau region
+in which S7 is:
+
+- predictively useful;
+- sparse under the candidate probe instrument; and
+- unstable on coefficient identity and/or signed recurrence.
+
+The calibration suite requires at least one **identical frozen tau value** at
+which both of the following hold:
+
+1. S1 satisfies the frozen stable-sparse positive-control behavior; and
+2. S7 satisfies the predictive and sparsity limbs while failing coefficient
+   identity and/or signed-recurrence stability.
+
+This common-tau requirement prevents trivial instrument validation in which S1
+and S7 can be distinguished only because one scenario is predictive and the
+other is not.
+
+The common tau value must come from the already-frozen master ladder.
+
+Tau may not be altered, scenario-specifically rescaled, interpolated, or
+selected outside the frozen ladder to manufacture this overlap.
+
+If no common frozen tau value satisfies the required S1/S7 operating behaviors,
+the calibration suite fails this control-design requirement and must be reviewed
+before independent validation or biological use.
 
 # Discrimination overlap
 
