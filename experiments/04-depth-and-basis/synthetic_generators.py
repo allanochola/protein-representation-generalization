@@ -300,3 +300,114 @@ def generate_s3(
 
     _validate_dataset(ds)
     return ds
+
+
+def generate_s4(
+    seed: int,
+    b: float,
+) -> SyntheticDataset:
+    """S4: dense distributed signal over 128 observed coordinates.
+
+    Signal is intentionally spread across many coordinates so that strong
+    prediction need not imply a compact sparse representation.
+
+    The coefficient signs are deterministic and balanced as closely as
+    possible. All 128 signal coordinates have equal absolute magnitude.
+    """
+    if b <= 0:
+        raise ValueError("b must be positive")
+
+    rng = _rng(seed)
+
+    n_signal = 128
+    signal_idx = np.arange(n_signal, dtype=int)
+
+    # Deterministic alternating signs.
+    signs = np.ones(n_signal, dtype=float)
+    signs[1::2] = -1.0
+
+    X = rng.normal(size=(N_TOTAL, P))
+
+    beta = np.zeros(P, dtype=float)
+    beta[signal_idx] = float(b) * signs
+
+    score = X @ beta
+
+    y = _balanced_labels_from_score(
+        score=score,
+        rng=rng,
+        noise_scale=1.0,
+    )
+
+    ds = SyntheticDataset(
+        X=X,
+        y=y,
+        beta=beta,
+        scenario="S4",
+        seed=int(seed),
+        metadata={
+            "b": float(b),
+            "n_signal": n_signal,
+            "signal_idx": signal_idx.tolist(),
+            "sign_pattern": "alternating",
+            "noise_scale": 1.0,
+            "representation": "dense_distributed",
+        },
+    )
+
+    _validate_dataset(ds)
+    return ds
+
+
+def generate_s5(
+    seed: int,
+    b: float,
+) -> SyntheticDataset:
+    """S5: very dense weak signal across all 1,280 coordinates.
+
+    Every observed coordinate carries weak predictive signal. This is the
+    strongest negative control against equating predictive discrimination with
+    sparse accessibility.
+
+    Signs are deterministic and balanced by alternating across coordinates.
+    """
+    if b <= 0:
+        raise ValueError("b must be positive")
+
+    rng = _rng(seed)
+
+    signal_idx = np.arange(P, dtype=int)
+
+    signs = np.ones(P, dtype=float)
+    signs[1::2] = -1.0
+
+    X = rng.normal(size=(N_TOTAL, P))
+
+    beta = float(b) * signs
+
+    score = X @ beta
+
+    y = _balanced_labels_from_score(
+        score=score,
+        rng=rng,
+        noise_scale=1.0,
+    )
+
+    ds = SyntheticDataset(
+        X=X,
+        y=y,
+        beta=beta,
+        scenario="S5",
+        seed=int(seed),
+        metadata={
+            "b": float(b),
+            "n_signal": P,
+            "signal_idx": signal_idx.tolist(),
+            "sign_pattern": "alternating",
+            "noise_scale": 1.0,
+            "representation": "very_dense_distributed",
+        },
+    )
+
+    _validate_dataset(ds)
+    return ds
