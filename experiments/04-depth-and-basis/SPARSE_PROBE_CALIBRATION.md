@@ -210,33 +210,375 @@ High discrimination alone must not produce sparse-stability PASS.
 
 ---
 
-## 10. S6 — Sparse signal plus correlated nuisance
+## 10. S6 — Stable sparse signal plus correlated nuisance
 
 Purpose:
 
-Test robustness to biological-like covariance.
+Test whether the sparse-probe stability instrument can recover a genuine stable
+five-coordinate signal when many observed nuisance coordinates are correlated
+with the true signal coordinates but have zero direct effect on the
+label-generating score.
 
-Specification:
+S6 is a robustness-positive control.
 
-- retain the 5 planted S1 signal coordinates;
-- add 100 nuisance coordinates;
-- nuisance coordinates have no direct coefficient;
-- nuisance coordinates correlate with signal coordinates.
-
-Correlation ladder:
-
-- rho = 0.30
-- rho = 0.60
-- rho = 0.90
-
-Required behavior:
-
-Moderate nuisance correlation should not destroy recognition of a genuine
-stable sparse signal.
-
-Extreme-correlation degradation is acceptable if quantified.
+It is not intended to create a second predictive mechanism.
 
 ---
+
+### True sparse signal
+
+S6 retains the same five true signal coordinates and fixed sign template as S1:
+
+    (+1, +1, -1, +1, -1)
+
+The five true signal coordinates are independent standard-normal variables.
+
+For frozen tau:
+
+    b = tau / sqrt(5)
+
+and the noiseless label-generating score is:
+
+    score =
+        b * (
+            +x_1
+            +x_2
+            -x_3
+            +x_4
+            -x_5
+        )
+
+Therefore:
+
+    population SD(score) = tau
+
+exactly.
+
+Labels use the same frozen mechanism as S1-S5:
+
+    latent = score + Logistic(0, 1)
+
+followed by the exact 139/139 rank-based split.
+
+Tau is the sole public signal-strength parameter.
+
+---
+
+### Correlated nuisance structure
+
+S6 contains:
+
+- 5 true signal coordinates;
+- 20 nuisance coordinates associated with each true signal coordinate;
+- 100 correlated nuisance coordinates total;
+- 1,175 additional independent standard-normal background coordinates.
+
+The observed-space coordinate layout is frozen as:
+
+- true signal indices: 0-4;
+- nuisance indices: 5-104;
+- background indices: 105-1279.
+
+The nuisance coordinates are arranged in five contiguous 20-coordinate blocks:
+
+- signal index 0 -> nuisance indices 5-24;
+- signal index 1 -> nuisance indices 25-44;
+- signal index 2 -> nuisance indices 45-64;
+- signal index 3 -> nuisance indices 65-84;
+- signal index 4 -> nuisance indices 85-104.
+
+No coordinate permutation may be introduced after S6 diagnostic execution
+begins.
+
+For true signal coordinate x_j and nuisance replicate l:
+
+    nuisance_(j,l) =
+        rho * x_j
+        + sqrt(1 - rho^2) * epsilon_(j,l)
+
+where:
+
+    epsilon_(j,l) ~ Normal(0, 1)
+
+independently.
+
+Because both x_j and epsilon_(j,l) are independent unit-variance variables:
+
+    Var(nuisance_(j,l))
+        = rho^2 + (1 - rho^2)
+        = 1
+
+and:
+
+    Corr(x_j, nuisance_(j,l)) = rho
+
+in the population.
+
+Thus each nuisance coordinate remains marginally standard normal while its
+simple Pearson correlation with its own true signal coordinate is exactly rho.
+
+The implementation must use:
+
+    sqrt(1 - rho^2)
+
+for the residual scale.
+
+It must not use:
+
+    sqrt(1 - rho)
+
+or any other alternative scaling.
+
+Nuisance coordinates attached to different true signal coordinates share no
+planted covariance beyond finite-sample variation.
+
+---
+
+### Zero direct nuisance effect
+
+Only the five true signal coordinates enter the label-generating score.
+
+Every nuisance coordinate has direct coefficient:
+
+    beta_nuisance = 0
+
+The 100 nuisance coordinates may therefore be predictive marginally because
+they correlate with true signal coordinates, but they do not generate the
+label independently.
+
+This distinction is frozen.
+
+The generator must not add nuisance coordinates to the true score and must not
+rescale tau as rho changes.
+
+---
+
+### Frozen covariance ladder
+
+The nuisance-correlation ladder is:
+
+    rho in {
+        0.30,
+        0.60,
+        0.90
+    }
+
+Rho is a frozen covariance axis, not a signal-strength parameter.
+
+S6 uses the full master tau ladder at every frozen rho value.
+
+No S6-specific tau subset or rho subset may be selected after diagnostic or
+calibration execution begins.
+
+The full frozen S6 grid is therefore:
+
+    9 tau values x 3 rho values = 27 settings
+
+---
+
+### Separation of tau and rho
+
+Tau controls the population SD of the noiseless label-generating score.
+
+Rho controls only covariance between true signal coordinates and zero-direct-
+effect nuisance coordinates.
+
+Changing rho must not change:
+
+- the five true signal coordinates for a fixed underlying diagnostic draw;
+- their direct coefficient magnitudes;
+- the noiseless score definition;
+- tau;
+- the logistic-noise scale.
+
+Thus S6 varies nuisance ambiguity while holding generative difficulty fixed.
+
+### Deterministic RNG stream separation
+
+For a fixed scenario seed, the generator must derive separate deterministic RNG
+streams for:
+
+1. the five true signal coordinates;
+2. nuisance residual epsilon draws;
+3. the 1,175 independent background coordinates;
+4. logistic label-generating noise.
+
+Changing rho must affect only the deterministic transformation applied to the
+already-fixed true-signal and nuisance-residual draws.
+
+At fixed seed and tau, changing rho must therefore leave exactly unchanged:
+
+- the five true signal coordinates;
+- the noiseless label-generating score;
+- the logistic-noise realization;
+- the final class labels;
+- the 1,175 background coordinates.
+
+Only nuisance indices 5-104 may change as a function of rho.
+
+This stream separation is part of the frozen S6 construction, not an
+implementation convenience.
+
+---
+
+### Intended probe behavior
+
+S6 is intended to test robustness rather than create an automatic failure case.
+
+At moderate nuisance correlation:
+
+    rho = 0.30
+    rho = 0.60
+
+a well-calibrated sparse-stability instrument should remain capable of
+recognizing the underlying stable sparse signal at tau values where S1 itself
+is detectable.
+
+At extreme nuisance correlation:
+
+    rho = 0.90
+
+degradation in coefficient identity, sparsity, or prediction is permitted as a
+stress response, but it must be reported rather than silently reclassified.
+
+The empirical behavior remains a calibration result; it is not guaranteed by
+generator construction.
+
+---
+
+### Distinction from S3 and S7
+
+S3 tests non-identifiable observed coordinate identity when several correlated
+coordinates represent the same latent factor without a unique observed-space
+ground-truth coefficient.
+
+S7 tests signed instability when one predictive latent direction is represented
+by a mixed-orientation interchangeable shortcut block.
+
+S6 differs from both.
+
+In S6:
+
+- exactly five observed coordinates are the true direct-effect coordinates;
+- their signed identity is globally defined;
+- the additional 100 coordinates are correlated distractors with zero direct
+  coefficient.
+
+S6 therefore asks whether a stable sparse basis remains recoverable in the
+presence of correlated nuisance structure.
+
+---
+
+### Frozen S6 public interface
+
+The intended generator interface is:
+
+    generate_s6(seed, tau, rho)
+
+For implementation and all experiment call sites, S6 arguments must be supplied
+by keyword:
+
+    generate_s6(seed=..., tau=..., rho=...)
+
+This avoids confusion with the already-frozen S3 interface, whose positional
+order differs. S3 is not reopened by this convention.
+
+Tau must come from the full frozen master tau ladder.
+
+Rho must be exactly one of:
+
+    0.30
+    0.60
+    0.90
+
+Frozen structural constants:
+
+- true signal coordinates = 5;
+- true signal indices = 0-4;
+- true signal signs = (+1, +1, -1, +1, -1);
+- nuisance coordinates per signal coordinate = 20;
+- nuisance indices = 5-104;
+- total nuisance coordinates = 100;
+- background indices = 105-1279;
+- independent background coordinates = 1,175;
+- nuisance direct coefficient = 0;
+- logistic noise scale = 1.0.
+
+Any change to these constants after S6 diagnostic execution begins requires an
+explicit pre-calibration protocol amendment.
+
+---
+
+### S6 diagnostics before calibration
+
+Before any calibration seed is used, diagnostic-only checks from the reserved
+900001-900100 block must verify:
+
+1. the internal true-signal coefficient magnitude is
+   `b = tau / sqrt(5)`;
+2. population SD(score) tracks tau at every tested rho;
+3. exact 139/139 class balance is retained;
+4. empirical simple Pearson correlations between each true signal coordinate
+   and its own nuisance coordinates track rho itself at 0.30, 0.60 and 0.90;
+5. nuisance coordinates have empirical variance near 1.0 at every frozen rho,
+   verifying the `sqrt(1 - rho^2)` residual scaling;
+6. nuisance coordinates associated with different true signal coordinates have
+   no planted cross-block covariance;
+7. nuisance direct coefficients are exactly zero;
+8. at fixed seed and tau, changing rho leaves the true signal coordinates,
+   noiseless score, logistic-noise realization, final labels and background
+   coordinates exactly unchanged;
+9. only nuisance indices 5-104 change as rho changes;
+10. true signal indices are exactly 0-4, nuisance indices exactly 5-104, and
+    background indices exactly 105-1279;
+11. the 1,175 background coordinates remain independent standard-normal noise;
+12. metadata records tau, rho, true signal indices, true signal signs, nuisance
+    indices, nuisance block assignments and background indices.
+
+These diagnostics may not:
+
+- fit a probe;
+- compute AUROC;
+- select a threshold;
+- inspect calibration seeds;
+- inspect validation seeds;
+- alter the frozen S6 construction.
+
+---
+
+### Calibration-stage robustness requirement
+
+Generator diagnostics verify only construction.
+
+During calibration with seeds 1000-1099, S6 must be evaluated across its full
+frozen tau-by-rho grid.
+
+For each moderate rho value:
+
+    rho = 0.30
+    rho = 0.60
+
+the calibration report must determine whether there is at least one identical
+frozen tau value at which:
+
+1. S1 satisfies the stable-sparse positive-control behavior; and
+2. S6 also satisfies the stable-sparse behavior despite correlated nuisance.
+
+This common-tau comparison tests whether moderate nuisance correlation causes a
+false stability failure that is absent in the corresponding clean S1 control.
+
+The rho = 0.90 condition is a stress condition.
+
+Failure at rho = 0.90 does not by itself invalidate the instrument, but the
+failure mode and affected gate or gates must be reported.
+
+Tau may not be rescaled, interpolated, or selected outside the frozen master
+ladder to manufacture S6 robustness.
+
+If no common frozen tau satisfies the required S1/S6 behavior at rho = 0.30 or
+rho = 0.60, the calibration suite fails its moderate-covariance robustness
+requirement and must be reviewed before independent validation or biological
+use.
 
 ## 11. S7 — Predictive signed-interchangeable shortcut
 
