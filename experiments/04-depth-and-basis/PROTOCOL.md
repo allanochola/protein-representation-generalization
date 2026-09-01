@@ -119,6 +119,15 @@ Experiment 04 protocol and sparse-probe instrument are frozen.
 
 The Experiment 03 stability instrument is reused without modification.
 
+This SAE stability instrument was independently validated before Experiment 03
+biological evaluation and is inherited as a frozen instrument. It is **not**
+recalibrated in Experiment 04.
+
+The new synthetic calibration and independent-validation exercise described for
+Experiment 04 applies **exclusively to Arm B**, the 1,280-dimensional supervised
+sparse probe. It does not provide or alter the provenance of the 10,240-latent
+InterPLM SAE gates.
+
 ### Candidate discovery sizes
 
 - N = 100
@@ -192,6 +201,11 @@ Fresh adjacent pairs are frozen as:
 
 Layer 18 cannot satisfy the requirement for a previously unobserved layer and
 cannot by itself create primary depth-profile success.
+
+The already-observed layer-18 Experiment 03 summary statistics may be reproduced
+in Experiment 04 tables or figures as a fixed comparative reference. They may
+not be recomputed, retuned, treated as fresh evidence, or used to relax or
+reconstruct the frozen Experiment 04 decision rule.
 
 An isolated fresh-layer PASS is descriptive/localized only.
 
@@ -379,11 +393,16 @@ sparse linearly accessible toxin-associated signal under this design.
 
 It is not evidence of information absence in ESM-2.
 
-### Isolated SAE-layer PASS
+### Isolated or non-adjacent fresh SAE-layer PASS
 
 Descriptive/localized only.
 
-It does not satisfy the primary SAE depth-profile criterion.
+One or more fresh-layer PASS results that do not satisfy the frozen adjacent-pair
+requirement do not constitute primary SAE depth-profile success. This remains
+true even if multiple non-adjacent fresh layers pass.
+
+Such results may be reported descriptively but cannot be reorganized post hoc
+into a different depth-profile criterion.
 
 ### Preferential early-layer success
 
