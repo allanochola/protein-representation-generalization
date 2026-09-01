@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "validation_type": "independent_synthetic",
+  "n_latents": 32,
+  "n_outer": 500,
+  "n_perturbations": 100,
+  "subsample_fraction": 0.8,
+  "feature_set": {
+    "k": 5,
+    "jaccard_threshold": 0.6,
+    "recurrence_threshold": 0.8,
+    "min_recurrent_features": 4,
+    "concentration_threshold": 0.35
+  },
+  "decision": {
+    "status": "PASS",
+    "concentration_threshold": 0.35,
+    "N": 139,
+    "pass_rate_B_near_tie": 0.1,
+    "pass_rate_C_stable_five": 0.816,
+    "pass_rate_D_diffuse_sixteen": 0.064,
+    "criteria": {
+      "B_near_tie_max": 0.1,
+      "C_stable_five_min": 0.7,
+      "D_diffuse_sixteen_max": 0.1
+    }
+  }
+}
