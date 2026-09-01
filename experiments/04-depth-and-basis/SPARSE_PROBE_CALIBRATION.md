@@ -1286,10 +1286,14 @@ consumed and moving to a fresh untouched seed block.
 
 Frozen:
 
-- logistic regression;
+- binary logistic regression;
 - L1 penalty;
+- `solver = "liblinear"`;
 - intercept enabled;
-- 1,280 input features.
+- `fit_intercept = True`;
+- 1,280 input features;
+- `max_iter = 10000`;
+- `tol = 1e-6`.
 
 Candidate regularization grid:
 
@@ -1308,8 +1312,50 @@ C \in
 \}
 \]
 
-Solver, iteration cap, tolerance and deterministic behavior must be frozen
-before independent validation.
+### Frozen solver and convergence mechanics
+
+Every Arm-B logistic fit uses the same frozen solver configuration:
+
+    LogisticRegression(
+        penalty = "l1",
+        solver = "liblinear",
+        C = selected_or_candidate_C,
+        fit_intercept = True,
+        max_iter = 10000,
+        tol = 1e-6,
+        random_state = deterministic_fit_seed
+    )
+
+No feature standardization is performed inside the probe pipeline because the
+synthetic generator contract already defines the coordinate scales used for
+calibration.
+
+The deterministic fit seed must be derived from the relevant perturbation seed
+through a dedicated seed stream and must not depend on:
+
+- scenario outcome;
+- AUROC;
+- coefficient sparsity;
+- coefficient identity;
+- sign stability;
+- whether a fit passes or fails a candidate gate.
+
+A convergence warning or failure at the frozen `max_iter` and `tol` is recorded
+as a fit failure.
+
+After calibration seeds are opened, convergence failure may not be repaired by
+scenario-specific changes to:
+
+- solver;
+- iteration cap;
+- tolerance;
+- coefficient cutoff;
+- feature scaling.
+
+If the frozen solver configuration proves unsuitable during calibration, that
+is an instrument-level calibration failure requiring an explicit amendment and
+a fresh untouched calibration seed block before rerunning the amended
+instrument.
 
 ---
 
@@ -1339,6 +1385,17 @@ the sparsest.
 
 R3 introduces an additional tunable tolerance and should only be adopted if R2
 fails calibration.
+
+R3 is not fully operational until its discrimination tolerance has been frozen.
+
+Calibration may diagnose that R2 fails and may motivate consideration of R3,
+but no R3 result may be treated as a candidate final instrument using a
+tolerance chosen after inspecting scenario-specific R3 outcomes.
+
+If R3 is to replace R2, its discrimination-tolerance definition and numerical
+value must first be written explicitly into this specification. The amended
+rule must then be evaluated under the applicable calibration-seed firewall
+before independent validation.
 
 No rule may use biological or independent-validation outcomes.
 
@@ -1535,28 +1592,70 @@ decision and frozen before independent validation.
 
 ## 16. Prediction
 
-Primary candidate:
+### Frozen predictive statistic P
 
-- held-out AUROC.
+For each of the 100 deterministic perturbations, the perturbation-level
+predictive statistic is the Stage-A AUROC computed once on the untouched
+internal-evaluation set after C selection and refitting on the complete
+Stage-A internal-training set.
 
-Training AUROC is prohibited as a stability gate.
+Training AUROC is prohibited.
 
-Candidate aggregate:
+Internal-CV AUROC used for C selection may not substitute for this held-out
+Stage-A AUROC.
 
-- median held-out AUROC across perturbations.
+The frozen aggregate statistic is:
+
+    P_stat =
+        median of the 100 Stage-A held-out AUROCs
+
+The final numerical predictive threshold remains a calibration output.
+
+The predictive gate has the form:
+
+    P = (P_stat >= gamma_P)
+
+where `gamma_P` is selected using calibration seeds only and frozen before
+independent validation.
 
 ## 17. Sparsity
 
-Primary candidate:
+### Frozen sparsity statistic S
 
-- number of non-zero coefficients.
+For perturbation t, sparsity is measured from the Stage-B full-N refit at the C
+selected by Stage A.
 
-Candidate aggregate:
+Define:
 
-- median number of non-zero coefficients across perturbations.
+    K_t =
+        number of feature coefficients for which beta_(t,j) != 0.0
 
-No arbitrary coefficient-magnitude cutoff should be introduced unless solver
-numerical behavior requires one.
+The intercept is excluded.
+
+A feature coefficient is non-zero if and only if the coefficient returned by
+the frozen solver is numerically unequal to exactly `0.0`.
+
+No absolute-magnitude epsilon, post-fit coefficient threshold or
+scenario-specific cutoff is permitted.
+
+The frozen aggregate statistic is:
+
+    S_stat =
+        median of K_t across the 100 perturbations
+
+The final numerical sparsity threshold remains a calibration output.
+
+The sparsity gate has the form:
+
+    S = (S_stat <= gamma_S)
+
+where `gamma_S` is selected using calibration seeds only and frozen before
+independent validation.
+
+If exact-zero behavior from the frozen solver proves unsuitable during
+calibration, this is an instrument-level calibration issue. It may not be
+repaired by introducing a coefficient-magnitude cutoff after calibration
+outcomes have been inspected.
 
 ## 18. Coefficient identity stability
 
@@ -1617,6 +1716,13 @@ pairwise comparisons.
 
 The final numerical PASS threshold for `I_stat` remains a calibration-stage
 quantity.
+
+The coefficient-identity gate has the form:
+
+    I = (I_stat >= gamma_I)
+
+where `gamma_I` is selected using calibration seeds only and frozen before
+independent validation.
 
 No biological or independent-validation outcome may determine it.
 
