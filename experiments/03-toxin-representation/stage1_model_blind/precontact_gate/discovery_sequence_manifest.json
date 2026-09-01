@@ -37,5 +37,14 @@
     "sae_activations_observed": false,
     "feature_nomination_observed": false,
     "confirmatory_representation_statistics_observed": false
+  },
+  "census_consistency": {
+    "frozen_census_pulled_at_utc": "2026-08-31T00:47:13.208751Z",
+    "frozen_raw_toxprot_sha256": "221b55c00b6aa12742219d1448cfc8dcf58ba013153aa4003b31ea0fd189126f",
+    "sequence_freeze_uniprot_release": "2026_02",
+    "sequence_freeze_uniprot_release_date": "10-June-2026",
+    "no_post_census_release_detected": true,
+    "supporting_reason": "The sequence-byte freeze was retrieved from UniProt release 2026_02 dated 10-June-2026, which predates the frozen census pull on 2026-08-31. The census recovery also reproduced the frozen raw Tox-Prot source SHA-256 exactly from the live UniProt state.",
+    "scope_note": "The original census did not preserve per-entry sequenceVersion fields for these 278 accessions. Consistency is therefore established by frozen identifier membership, exact frozen sequence lengths, same-release provenance, and the exact reproduced census source state rather than by a stored historical per-entry sequenceVersion comparison."
   }
 }
