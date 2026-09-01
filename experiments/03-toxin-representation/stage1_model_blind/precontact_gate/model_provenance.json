@@ -1,0 +1,71 @@
+{
+  "stage": "Experiment 03 model provenance gate",
+  "status": "PASS",
+  "model_contact": false,
+  "esm": {
+    "repo_id": "facebook/esm2_t33_650M_UR50D",
+    "resolved_revision": "08e4846e537177426273712802403f7ba8261b6c",
+    "config_file": "config.json",
+    "weights_file": "model.safetensors",
+    "config_sha256": "539095c22efc52a09d6147074ba4ca119f76a890df5901213b2b55f7d2f96b2b",
+    "weights_sha256": "a08adabb949fa67ad3c14b509d04fd60368b35007b0095e3358f81200c4f4db0",
+    "hidden_size": 1280,
+    "num_hidden_layers": 33,
+    "frozen_representation_layer": 18,
+    "max_position_embeddings": 1026
+  },
+  "sae": {
+    "repo_id": "Elana/InterPLM-esm2-650m",
+    "resolved_revision": "5121c4c7f3ad0b5fbe0f3b9a457969192bb9912f",
+    "file": "layer_18/ae_normalized.pt",
+    "sha256": "bf0dfb992321cf4d1ce80fced0db0256f5c7a1f9fdd8a7fe4834e786c1f6472a",
+    "esm_input_dimension": 1280,
+    "feature_dimension": 10240,
+    "matching_weight_matrices": [
+      {
+        "name": "encoder.weight",
+        "shape": [
+          10240,
+          1280
+        ],
+        "dtype": "torch.float32"
+      },
+      {
+        "name": "decoder.weight",
+        "shape": [
+          1280,
+          10240
+        ],
+        "dtype": "torch.float32"
+      }
+    ]
+  },
+  "interplm_source": {
+    "repository": "https://github.com/ElanaPearl/InterPLM.git",
+    "resolved_head_commit": "5f4cbf90a0b3c1c031951ffd0b3b8e11b6f2ed61"
+  },
+  "environment": {
+    "python": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+    "platform": "Linux-6.12.90+-x86_64-with-glibc2.35",
+    "torch": "2.10.0+cpu",
+    "transformers": "5.0.0",
+    "huggingface_hub": "1.11.0",
+    "safetensors": "0.7.0",
+    "cuda_available": false,
+    "torch_cuda_version": null,
+    "device": "CPU"
+  },
+  "checks": {
+    "esm_hidden_size_1280": true,
+    "esm_layer_18_exists": true,
+    "sae_1280_to_10240_verified": true,
+    "normalized_sae_file": true,
+    "biological_sequence_processed": false
+  },
+  "model_contact_state": {
+    "esm_embeddings_observed": false,
+    "sae_activations_observed": false,
+    "feature_nomination_observed": false,
+    "confirmatory_representation_statistics_observed": false
+  }
+}
