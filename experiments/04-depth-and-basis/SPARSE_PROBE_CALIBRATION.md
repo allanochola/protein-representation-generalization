@@ -1560,27 +1560,218 @@ numerical behavior requires one.
 
 ## 18. Coefficient identity stability
 
-Candidate statistic:
+### Frozen identity statistic I
 
-- pairwise Jaccard similarity of selected non-zero feature sets.
+For perturbation t, define the selected-coordinate set:
 
-Candidate aggregate:
+    A_t = {
+        j :
+        beta_(t,j) != 0
+    }
 
-- median pairwise Jaccard across perturbations.
+where `beta_(t,j)` is the Stage-B coefficient for feature j.
+
+No coefficient-magnitude threshold is introduced.
+
+Selection uses the solver's exact zero/non-zero coefficient result.
+
+For perturbations t and u, define unsigned pairwise Jaccard:
+
+    J_I(t,u) =
+        |A_t intersection A_u|
+        /
+        |A_t union A_u|
+
+when the union is non-empty.
+
+If:
+
+    A_t = empty
+    and
+    A_u = empty
+
+then define:
+
+    J_I(t,u) = 0
+
+rather than 1.
+
+If exactly one set is empty, ordinary Jaccard already gives:
+
+    J_I(t,u) = 0
+
+The all-empty convention prevents two zero-coefficient models from being
+classified as perfectly identity-stable.
+
+The perturbation-level identity aggregate is:
+
+    I_stat =
+        median of J_I(t,u)
+        over all unordered perturbation pairs t < u
+
+With 100 perturbations, the aggregate therefore uses:
+
+    choose(100, 2) = 4,950
+
+pairwise comparisons.
+
+The final numerical PASS threshold for `I_stat` remains a calibration-stage
+quantity.
+
+No biological or independent-validation outcome may determine it.
 
 ## 19. Sign stability
 
-For selected coordinates, quantify whether the same coordinate recurs with the
-same coefficient sign.
+### Frozen signed-recurrence statistic G
 
-Candidate summaries include:
+G extends the same-coordinate recurrence logic of I to **signed coordinate
+identity**.
 
-- signed recurrence;
-- median signed recurrence;
-- fraction of nominated coordinates exceeding a frozen signed-recurrence
-  threshold.
+The statistic is fixed before calibration outcomes are observed.
 
-The final definition must be fixed during calibration.
+Calibration may choose its final numerical PASS threshold, but may not redefine
+the statistic.
+
+For perturbation t, define the signed selected-coordinate set:
+
+    B_t = {
+        (j, sign(beta_(t,j))) :
+        beta_(t,j) != 0
+    }
+
+where:
+
+    sign(beta) = +1  if beta > 0
+    sign(beta) = -1  if beta < 0
+
+Zero coefficients do not enter `B_t`.
+
+No coefficient-magnitude cutoff is introduced.
+
+Thus:
+
+- coordinate j selected positively is the signed identity `(j, +1)`;
+- coordinate j selected negatively is the signed identity `(j, -1)`;
+- those two signed identities are different.
+
+For perturbations t and u, define signed pairwise Jaccard:
+
+    J_G(t,u) =
+        |B_t intersection B_u|
+        /
+        |B_t union B_u|
+
+when the union is non-empty.
+
+A coordinate contributes to the signed intersection only when:
+
+1. the same coordinate is non-zero in both perturbations; and
+2. its coefficient sign is the same in both perturbations.
+
+If the same coordinate recurs with opposite signs, it contributes to the union
+but not the intersection.
+
+### Empty-set convention
+
+If:
+
+    B_t = empty
+    and
+    B_u = empty
+
+define:
+
+    J_G(t,u) = 0
+
+rather than 1.
+
+If exactly one signed set is empty:
+
+    J_G(t,u) = 0
+
+This prevents repeated all-zero coefficient vectors from appearing perfectly
+sign-stable.
+
+### Aggregate G statistic
+
+The frozen aggregate is:
+
+    G_stat =
+        median of J_G(t,u)
+        over all unordered perturbation pairs t < u
+
+With 100 perturbations:
+
+    choose(100, 2) = 4,950
+
+signed pairwise comparisons enter `G_stat`.
+
+The final sign-stability gate has the form:
+
+    G =
+        G_stat >= gamma_G
+
+where:
+
+    gamma_G
+
+is a numerical threshold selected using calibration seeds `1000-1099` and
+frozen before independent validation.
+
+### Relationship between I and G
+
+I and G answer related but distinct questions.
+
+`I_stat` asks:
+
+    Do the same coordinate indices recur?
+
+`G_stat` asks:
+
+    Do the same coordinate indices recur with the same coefficient signs?
+
+Therefore:
+
+    G_stat <= I_stat
+
+up to exact numerical equality implied by the set definitions.
+
+A sign flip can reduce G without reducing unsigned coordinate overlap in I.
+
+Identity instability can reduce both I and G.
+
+This dependence is intentional.
+
+The joint rule remains conjunctive:
+
+    P AND S AND I AND G
+
+No attempt is made to orthogonalize I and G statistically.
+
+### No S7-driven definition selection
+
+S7 is a diagnostic negative control for instability.
+
+Its realized calibration behavior may test whether the frozen G statistic is
+useful, but S7 may not be used to choose among alternative definitions of G.
+
+In particular, the G definition may not be replaced after inspecting S7 merely
+because another sign statistic rejects S7 more strongly.
+
+If the frozen G statistic does not contribute useful discrimination under the
+complete calibration suite, that is a calibration result to document rather
+than a reason to redefine G post hoc.
+
+### No Arm-A numerical-threshold transfer
+
+The recurrence **logic** is structurally analogous to the stability principle
+used by Arm A.
+
+Arm A's numerical recurrence or Jaccard thresholds are not transferred to
+Arm B.
+
+`gamma_G` must be calibrated for the Arm-B supervised sparse-probe instrument
+using calibration seeds only.
 
 
 ---
