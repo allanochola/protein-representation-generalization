@@ -1344,6 +1344,193 @@ No rule may use biological or independent-validation outcomes.
 
 ---
 
+### Frozen Stage-A internal-CV mechanics
+
+R1 and R2 use the same internal cross-validation construction.
+
+This cross-validation occurs **only inside the Stage-A internal-training
+portion**.
+
+The untouched Stage-A internal-evaluation portion may not enter:
+
+- fold construction;
+- C selection;
+- mean CV AUROC;
+- standard-error calculation;
+- tie-breaking.
+
+The frozen CV construction is:
+
+    StratifiedKFold(
+        n_splits = 5,
+        shuffle = True,
+        deterministic seed = perturbation-derived CV seed
+    )
+
+Every candidate C must be evaluated on exactly the same five folds within a
+given perturbation.
+
+The CV seed must be derived deterministically from the perturbation seed using
+a dedicated seed stream distinct from:
+
+- target-N subsampling;
+- Stage-A train/evaluation splitting;
+- synthetic-data generation.
+
+### Fold-level AUROC
+
+For candidate C and fold f:
+
+1. fit the frozen L1 logistic model on four CV folds;
+2. compute AUROC on the held-out fold only;
+3. record one fold-level held-out AUROC.
+
+Training AUROC is prohibited.
+
+For each C:
+
+    mean_C =
+        arithmetic mean of the 5 held-out fold AUROCs
+
+and:
+
+    sd_C =
+        sample standard deviation of the 5 held-out fold AUROCs
+        using denominator 4
+
+The standard error is:
+
+    se_C = sd_C / sqrt(5)
+
+No pooled out-of-fold AUROC may replace the arithmetic mean of the five
+fold-level AUROCs for R1/R2 selection.
+
+### Frozen R1 definition
+
+R1 selects the C with the largest:
+
+    mean_C
+
+If multiple C values have exactly equal mean_C values, select the smallest C.
+
+Thus R1 ties favor stronger L1 regularization.
+
+### Frozen R2 one-standard-error definition
+
+R2 first identifies C_best using the frozen R1 definition.
+
+Define:
+
+    best_mean = mean_C_best
+
+and:
+
+    best_se = se_C_best
+
+The one-standard-error admissibility boundary is:
+
+    one_se_floor = best_mean - best_se
+
+A candidate C is admissible if:
+
+    mean_C >= one_se_floor
+
+R2 selects the **smallest C** among all admissible candidates.
+
+Because smaller C corresponds to stronger L1 regularization, this is the frozen
+sparse one-standard-error rule.
+
+The standard error used to construct the boundary is always:
+
+    se_C_best
+
+It is not:
+
+- the candidate C's own standard error;
+- the fold-level standard deviation itself;
+- a confidence-interval half-width;
+- a pooled standard error across C values;
+- uncertainty from the Stage-A held-out evaluation set.
+
+### Numerical handling and ties
+
+Candidate C values are evaluated in ascending order:
+
+    1e-4,
+    3e-4,
+    1e-3,
+    3e-3,
+    1e-2,
+    3e-2,
+    1e-1,
+    3e-1,
+    1
+
+Full floating-point AUROC values are retained.
+
+No rounding may occur before:
+
+- identifying C_best;
+- calculating one_se_floor;
+- testing admissibility.
+
+Exact ties are resolved toward the smallest C.
+
+No additional numerical epsilon or tolerance may be introduced into the
+one-standard-error comparison unless a solver pathology is demonstrated during
+calibration and documented before independent validation.
+
+### Stage-A sample sizes entering internal CV
+
+The five-fold CV operates only on the Stage-A internal-training portion.
+
+Nominal class counts are:
+
+- target N = 100:
+  - 80 per class enter internal CV;
+- target N = 120:
+  - 96 per class enter internal CV;
+- target N = 139:
+  - 111 per class enter internal CV.
+
+Fold sizes need not be identical because 96 and 111 are not divisible by 5.
+
+No observations may be dropped, duplicated or weighted to equalize fold sizes.
+
+### Stage-A held-out evaluation after C selection
+
+After R1, R2 or R3 selects C using only the Stage-A internal-training portion:
+
+1. refit the selected-C model on the complete Stage-A internal-training set;
+2. evaluate it once on the untouched Stage-A internal-evaluation set;
+3. record that AUROC as the perturbation-level predictive statistic.
+
+This held-out AUROC is the candidate input to P.
+
+The five internal-CV AUROCs used for C selection may not substitute for the
+Stage-A held-out AUROC used by P.
+
+### R2 calibration failure mode
+
+R2 is the preferred starting regularization rule.
+
+Calibration must explicitly test whether R2 collapses stable sparse positive
+controls to near-zero or otherwise non-informative coefficient solutions.
+
+Such behavior constitutes a candidate-rule calibration failure.
+
+It may not be repaired by:
+
+- changing the one-standard-error formula;
+- changing the number of CV folds;
+- changing the Stage-A split fraction;
+- choosing a larger C post hoc for selected scenarios.
+
+Any replacement of R2 by R1 or R3 must be made as a rule-level calibration
+decision and frozen before independent validation.
+
+---
+
 # Candidate statistics
 
 ## 16. Prediction
