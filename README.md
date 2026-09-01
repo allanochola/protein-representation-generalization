@@ -106,25 +106,26 @@ See the [draft protocol](experiments/02-catalytic-residues/PROTOCOL.md), [pre-da
 
 ## Experiment 03 — Interpretable toxin-function signatures
 
-**Preregistered pre-data. No Experiment 03 model result has been observed.**
+**Stage 1 complete — `FAIL / No verdict: unstable feature`. Confirmatory set remained unobserved.**
 
-Experiment 03 asks whether a model-derived toxin-relevant internal feature can provide functional evidence that survives natural evolutionary divergence and adds information beyond strong sequence-only controls.
+Experiment 03 asks whether a model-derived toxin-relevant internal feature can
+provide functional evidence that survives natural evolutionary divergence and
+adds information beyond strong sequence-only controls.
 
-The primary question is:
+The primary confirmatory question was:
 
-> Can a model-derived toxin-relevant feature, nominated without using confirmatory labels, discriminate family-disjoint toxin proteins from sequence-clean family-aware non-toxin proteins beyond a strong model-blind sequence baseline?
+> Can a model-derived toxin-relevant feature, nominated without using
+> confirmatory labels, discriminate family-disjoint toxin proteins from
+> sequence-clean family-aware non-toxin proteins beyond a strong model-blind
+> sequence baseline?
 
-This is deliberately **not** a generic toxin-classification benchmark.
-
-The experiment requires three evidence layers:
-
-1. **Representation evidence** — confirmatory performance beyond sequence-only controls.
-2. **Mechanistic characterization** — inspection of what biological or representational property drives a validated feature.
-3. **Contestability analysis** — examination of cases where representation evidence disagrees with conventional sequence or family evidence.
+Before that comparison was permitted, the protocol required Stage 1 to
+demonstrate that discovery produced a compact, identity-stable SAE feature set.
 
 ### Preprotocol Tox-Prot census
 
-Before any Experiment 03 embedding or SAE activation was inspected, a model-blind Tox-Prot census tested whether the intended evaluation geometry was viable.
+Before any Experiment 03 embedding or SAE activation was inspected, a
+model-blind Tox-Prot census established the evaluation geometry.
 
 | Gate | Frozen criterion | Observed | Verdict |
 |---|---|---:|---|
@@ -133,39 +134,82 @@ Before any Experiment 03 embedding or SAE activation was inspected, a model-blin
 | C — negative support | ≥1,000 at 5% FPR; ≥3,000 at 1% FPR | 4,120 untouched sequence-clean family-aware negatives after diagnostic burn | PASS |
 | D — model-blind shortcut | family-aware AUROC/AUPRC must not exceed frozen 0.95 rejection boundary | RF AUROC 0.9494, AUPRC 0.9011 | PASS |
 
-The Gate D result is intentionally close to the rejection boundary. Simple sequence properties already carry substantial toxin signal. Experiment 03 therefore tests **incremental representation value**, not raw toxin discrimination.
+After the permanent diagnostic burn and ESM-2 sequence-eligibility rule, the
+frozen confirmatory universe contained **161 family-disjoint positive
+clusters** and **3,541 sequence-clean family-aware negatives**.
 
-After the permanent diagnostic burn and the frozen ESM-2 sequence-eligibility rule:
+The Gate D result was deliberately close to the rejection boundary: simple
+sequence properties already carry substantial toxin signal. The intended
+confirmatory experiment therefore tested incremental representation value,
+not raw toxin discrimination.
 
-- **161** family-disjoint V2-B positive cluster representatives remain eligible;
-- **3,541** untouched sequence-clean family-aware negatives remain eligible;
-- both positive and negative support gates still pass.
+### Stage-1 stability instrument
 
-Sequences longer than 1,022 biological residues are excluded rather than truncated or chunked. This removes 19 of the original 180 V2-B clusters, so the primary claim is explicitly scoped to the ESM-eligible universe.
+The discovery set contained **139 toxin positives and 139 family-aware
+negatives**, jointly matched across the frozen protein-length strata.
 
-### Frozen primary estimand
+Using ESM-2 650M layer 18, the normalized InterPLM SAE, residue-max pooling,
+and a frozen `k=5` nomination rule, Stage 1 tested the nominated signed feature
+set with three independently calibrated criteria:
 
-The primary quantity is:
+1. median pairwise Jaccard ≥ **0.60**;
+2. at least **4 of 5** nominated signed features recurring in ≥ **80%** of
+   perturbations;
+3. median fixed-top-5 concentration ≥ **0.35**.
 
-`ΔTPR@FPR5 = TPR_representation@5%FPR − TPR_sequence@5%FPR`
+All three gates failed at the primary `N=139` analysis:
 
-with a 95% paired cluster-bootstrap confidence interval over the 161 eligible positive clusters.
+| Stability criterion | Frozen threshold | Observed | Verdict |
+|---|---:|---:|---|
+| Median pairwise Jaccard | ≥0.60 | **0.4286** | FAIL |
+| Recurrent nominated features | ≥4/5 at ≥0.80 | **1/5** | FAIL |
+| Median fixed-top-5 concentration | ≥0.35 | **0.00588** | FAIL |
 
-The preregistered materiality boundary is **+0.05**:
+The top five therefore captured only about **0.59% of total absolute latent
+mean-difference mass** under the frozen concentration statistic.
 
-- **H_repr-functional** — `CI_low(ΔTPR@FPR5) >= +0.05`
-- **H_sequence** — `CI_high(ΔTPR@FPR5) <= +0.05`
-- **Mixed / unresolved** — the interval overlaps `+0.05`
+One signed latent (`4983:-`) recurred in 95% of perturbations, but the protocol
+did not independently calibrate a single-feature decision rule. Single-feature
+statistics therefore remain descriptive and cannot rescue the failed set gate.
 
-The pre-data feasibility simulator showed that the design is substantially better at establishing a moderate-to-large positive representation increment than at proving equivalence to the sequence baseline. A null effect may therefore remain Mixed rather than automatically producing `H_sequence`.
+Length-stratum descriptives showed substantial heterogeneity: the full-sample
+top-five effects were strongest and sign-consistent in the `>150`-residue
+stratum, while several weakened or reversed sign in shorter strata. The
+`>150` stratum was preregistered as exhaustion-limited, so this observation is
+descriptive rather than an independent stability claim.
 
-`ΔTPR@FPR1` and `ΔAUROC` are frozen secondary quantities and carry no independent verdict.
+### Experiment 03 conclusion
+
+Under the preregistered **ESM-2 650M layer-18 / normalized InterPLM SAE /
+residue-max** representation, the toxin-versus-family-aware-negative discovery
+contrast did **not** yield a compact, identity-stable five-feature
+representation.
+
+This does **not** establish that ESM-2 contains no toxin-relevant information.
+It establishes that this frozen representation and nomination procedure did
+not expose that information as the compact, stable feature set required to
+enter confirmatory evaluation.
+
+Because Stage 1 failed:
+
+- no confirmatory feature specification was opened;
+- no confirmatory sequence was embedded;
+- no confirmatory representation statistic was computed;
+- the planned `ΔTPR@FPR5` representation-versus-sequence comparison was never
+  run.
+
+Experiment 03 therefore terminates as **No verdict — unstable feature**, not
+as `H_repr-functional` or `H_sequence`.
 
 ### Threat-model boundary
 
-Experiment 03 tests **natural evolutionary divergence**. It does not establish robustness to deliberately engineered, function-preserving sequence changes designed to evade screening.
+Experiment 03 tests **natural evolutionary divergence**. It does not establish
+robustness to deliberately engineered, function-preserving sequence changes
+designed to evade screening.
 
-The intended contribution is narrower: determine whether interpretable representation-level evidence can survive substantial natural departure from known toxin families, add information beyond model-blind sequence evidence, and support inspection of disagreement cases.
+The Stage-1 result is correspondingly narrow: under this frozen
+model/layer/SAE/pooling configuration, discovery did not produce the compact,
+stable interpretable feature set required for confirmatory evaluation.
 
 See the [frozen Experiment 03 protocol](experiments/03-toxin-representation/PROTOCOL.md).
 
@@ -237,6 +281,16 @@ Before any Experiment 03 embedding, SAE activation, feature nomination, or confi
 
 The protocol and the simulation outputs used to select the decision rule are committed together, so the inferential standard is traceable to the state that existed before model contact.
 
+Stage 1 subsequently demonstrated why this discipline matters. The biological
+SAE sweep failed all three frozen stability gates. The confirmatory set
+therefore remained dark rather than being used to search for an alternative
+feature, layer, pooling rule, feature-set size, or threshold.
+
+Experiment 03 thus provides a third form of controlled outcome in this
+program: a preregistered discovery instrument can terminate a biological
+experiment before confirmatory evaluation when the representation does not
+satisfy the stability assumptions required for the planned claim.
+
 ---
 
 ## Structure
@@ -253,8 +307,8 @@ protein-representation-generalization/
 │   └── 03-toxin-representation/
 │       ├── PROTOCOL.md
 │       ├── protocol_feasibility_check.py
-│       ├── code/
-│       └── results/
+│       ├── stage1_model_blind/
+│       └── stage1_model_contact/
 ├── preprotocol/
 │   └── toxprot_census/
 ├── results/
@@ -267,20 +321,25 @@ protein-representation-generalization/
 
 **Experiment 01:** complete — `H_repr`.
 
-**Experiment 02:** closed pre-data — insufficient precision for the planned retention criterion; **no biological verdict**.
+**Experiment 02:** closed pre-data — insufficient precision for the planned
+retention criterion; **no biological verdict**.
 
-**Experiment 03:** **preregistered pre-data** at tag `exp03-predata-protocol-v1.0`; no Experiment 03 ESM embedding, SAE activation, feature nomination, or confirmatory representation result has yet been inspected.
+**Experiment 03:** Stage 1 complete — **FAIL / No verdict: unstable feature**.
+The frozen biological SAE stability instrument failed Jaccard
+(`0.4286 < 0.60`), recurrence (`1/5 < 4/5`), and concentration
+(`0.00588 < 0.35`). The confirmatory set remained unobserved, so no
+representation-versus-sequence confirmatory verdict was made.
 
-The program now separates three questions that are easy to conflate:
+The program now demonstrates three distinct outcomes:
 
-- Does a fixed protein-model representation retain biological information across explicit sequence divergence?
-- Is the available biological dataset large and independent enough to support the intended inferential claim?
-- Can an interpretable internal feature provide function-relevant evidence beyond sequence and family shortcuts, and can that evidence be inspected when it disagrees with conventional signals?
+- Experiment 01 shows that a fixed protein-model representation can retain
+  biological information across explicit sequence divergence.
+- Experiment 02 shows that dataset geometry and statistical precision can
+  terminate a proposed biological experiment before data are consumed.
+- Experiment 03 shows that a model-derived feature nomination can fail a
+  preregistered stability requirement before confirmatory evaluation.
 
-Experiment 01 answers the first positively for secondary structure.
-
-Experiment 02 demonstrates that the second question can become the binding constraint before a functional biological hypothesis is tested.
-
-The Tox-Prot preprotocol census establishes sufficient support for a harder function-relevant experiment while revealing a strong sequence-only shortcut baseline.
-
-Experiment 03 is the preregistered test of the third question under **natural evolutionary divergence**. Its confirmatory result remains unknown.
+Together, these experiments separate representation generalization,
+experimental feasibility, and interpretable-feature stability rather than
+treating successful downstream prediction as sufficient evidence for all
+three.
