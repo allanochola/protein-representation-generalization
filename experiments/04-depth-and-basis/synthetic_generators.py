@@ -200,3 +200,103 @@ def generate_s2(seed: int, b: float) -> SyntheticDataset:
         b=float(b),
         scenario="S2",
     )
+
+
+def generate_s3(
+    seed: int,
+    rho: float,
+    b: float = 1.0,
+) -> SyntheticDataset:
+    """S3: correlated interchangeable sparse signal.
+
+    Five latent factors carry the predictive signal. Each latent factor is
+    represented by five correlated observed coordinates.
+
+    Labels depend on the latent factors themselves, not on a uniquely
+    privileged observed coordinate. As rho increases, observed coordinates
+    within each block become increasingly interchangeable.
+
+    This scenario tests whether the sparse-probe instrument mistakes stable
+    latent-factor predictability for stable observed-coordinate identity.
+    """
+    allowed_rho = {0.70, 0.90, 0.99}
+
+    if float(rho) not in allowed_rho:
+        raise ValueError(
+            f"S3 rho must be one of {sorted(allowed_rho)}"
+        )
+
+    if b <= 0:
+        raise ValueError("b must be positive")
+
+    rng = _rng(seed)
+
+    n_factors = 5
+    block_size = 5
+    n_block_features = n_factors * block_size
+
+    # Five independent latent signal factors.
+    Z = rng.normal(size=(N_TOTAL, n_factors))
+
+    # Independent residual variation for the 25 block coordinates.
+    E = rng.normal(size=(N_TOTAL, n_block_features))
+
+    # Background coordinates are independent Gaussian noise.
+    X = rng.normal(size=(N_TOTAL, P))
+
+    # For:
+    # x_j = sqrt(rho) * z + sqrt(1-rho) * e_j
+    #
+    # two coordinates from the same block have population correlation rho.
+    for factor in range(n_factors):
+        start = factor * block_size
+        stop = start + block_size
+
+        X[:, start:stop] = (
+            np.sqrt(rho) * Z[:, [factor]]
+            + np.sqrt(1.0 - rho) * E[:, start:stop]
+        )
+
+    latent_signs = S1_SIGNS.copy()
+    latent_beta = float(b) * latent_signs
+
+    # Critically, labels are generated from Z, not from one arbitrarily
+    # privileged member of each observed feature block.
+    score = Z @ latent_beta
+
+    y = _balanced_labels_from_score(
+        score=score,
+        rng=rng,
+        noise_scale=1.0,
+    )
+
+    # There is deliberately no unique ground-truth coefficient vector in
+    # observed coordinate space. A zero beta avoids falsely designating one
+    # member of each interchangeable block as "the" correct coordinate.
+    beta = np.zeros(P, dtype=float)
+
+    blocks = [
+        list(range(i * block_size, (i + 1) * block_size))
+        for i in range(n_factors)
+    ]
+
+    ds = SyntheticDataset(
+        X=X,
+        y=y,
+        beta=beta,
+        scenario="S3",
+        seed=int(seed),
+        metadata={
+            "rho": float(rho),
+            "b": float(b),
+            "n_latent_factors": n_factors,
+            "block_size": block_size,
+            "signal_blocks": blocks,
+            "latent_signs": latent_signs.astype(int).tolist(),
+            "noise_scale": 1.0,
+            "observed_beta_identifiable": False,
+        },
+    )
+
+    _validate_dataset(ds)
+    return ds
