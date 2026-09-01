@@ -1,0 +1,36 @@
+{
+  "stage": "Experiment 03 full discovery extraction",
+  "status": "PASS",
+  "matrix": {
+    "shape": [
+      278,
+      10240
+    ],
+    "dtype": "float32",
+    "pooling": "residue_max",
+    "path": "experiments/03-toxin-representation/stage1_model_contact/discovery_extraction/discovery_max_matrix.npy",
+    "sha256": "bd4b03181b79b4464721ba42e06cc03aeea05309571ec987c3a588f888ba1296"
+  },
+  "row_manifest": {
+    "path": "experiments/03-toxin-representation/stage1_model_contact/discovery_extraction/discovery_matrix_rows.tsv",
+    "sha256": "ef78d4c62a9142a03b72fd440e19d9093cab73e8d23106178d381838fa14112e"
+  },
+  "esm": {
+    "repo": "facebook/esm2_t33_650M_UR50D",
+    "revision": "08e4846e537177426273712802403f7ba8261b6c",
+    "layer": 18
+  },
+  "sae": {
+    "repo": "Elana/InterPLM-esm2-650m",
+    "revision": "5121c4c7f3ad0b5fbe0f3b9a457969192bb9912f",
+    "file": "layer_18/ae_normalized.pt",
+    "encoding": "relu(encoder(x - pre_bias))",
+    "feature_dimension": 10240
+  },
+  "analysis_boundary": {
+    "class_difference_computed": false,
+    "latent_ranking_observed": false,
+    "feature_nomination_observed": false,
+    "confirmatory_sequences_processed": false
+  }
+}
