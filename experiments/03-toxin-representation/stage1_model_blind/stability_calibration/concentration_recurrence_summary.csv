@@ -1,0 +1,13 @@
+regime,n_per_class,jaccard_threshold,recurrence_threshold,min_recurrent_features,median_n_recurrent,p05_n_recurrent,p95_n_recurrent,recurrence_only_pass_rate,combined_pass_rate
+A_stable_single,100,0.6,0.8,4,2.0,1.0,4.0,0.052,0.052
+A_stable_single,120,0.6,0.8,4,2.0,1.0,4.0,0.082,0.082
+A_stable_single,139,0.6,0.8,4,2.0,1.0,4.0,0.06,0.056
+B_near_tie,100,0.6,0.8,4,3.0,2.0,4.0,0.082,0.082
+B_near_tie,120,0.6,0.8,4,3.0,2.0,4.0,0.1,0.1
+B_near_tie,139,0.6,0.8,4,3.0,2.0,4.0,0.094,0.094
+C_distributed,100,0.6,0.8,4,4.0,2.0,5.0,0.558,0.558
+C_distributed,120,0.6,0.8,4,4.0,3.0,5.0,0.734,0.734
+C_distributed,139,0.6,0.8,4,4.0,3.0,5.0,0.8,0.8
+D_diffuse_sixteen,100,0.6,0.8,4,2.0,1.0,4.0,0.084,0.076
+D_diffuse_sixteen,120,0.6,0.8,4,2.0,1.0,4.0,0.098,0.09
+D_diffuse_sixteen,139,0.6,0.8,4,2.0,1.0,4.0,0.116,0.108
