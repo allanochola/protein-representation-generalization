@@ -1149,29 +1149,134 @@ that tau retains the same meaning:
 No S6 or S7 implementation may introduce a second public strength scale without
 a protocol amendment made before calibration execution.
 
-## 13. Candidate discovery sizes
+## 13. Discovery sizes and frozen perturbation architecture
 
-Inherited from Arm A:
+Discovery sizes are:
 
-- N = 100 per class
-- N = 120 per class
-- N = 139 per class
+- N = 100 per class;
+- N = 120 per class;
+- N = 139 per class.
 
-For N < 139:
+Here N means the number of observations per class available to the final
+coefficient-stability refit.
 
-- select N positives and N negatives without replacement;
-- sampling determined by frozen perturbation seeds.
+This meaning must remain identical across all three discovery sizes.
 
-For N = 139, instability must still be induced using one frozen method chosen
-during calibration.
+### Outer discovery perturbation
 
-Candidate methods:
+For each deterministic perturbation:
 
-1. stratified subsampling;
-2. stratified bootstrap;
-3. repeated stratified K-fold training partitions.
+- N positives and N negatives are selected without replacement from the
+  available 139 positives and 139 negatives;
+- selection is stratified by class;
+- the perturbation seed determines the selected observations and all subsequent
+  internal splits;
+- no observation outside the synthetic dataset may enter the perturbation.
 
-Only one primary perturbation construction will enter biological analysis.
+For N = 139, the selected target-N dataset is therefore the complete 139/139
+synthetic discovery dataset.
+
+No bootstrap resampling is used in the primary perturbation architecture.
+
+Repeated K-fold training subsets are not treated as substitutes for N = 139,
+because doing so would change the effective coefficient-fit sample size.
+
+### Separation of prediction estimation from coefficient-stability fitting
+
+Each perturbation has two distinct stages.
+
+#### Stage A — internal model selection and held-out prediction
+
+Within the target-N dataset:
+
+1. construct a deterministic stratified internal split;
+2. use only the internal-training portion to select C under candidate rule
+   R1, R2 or R3;
+3. evaluate the selected C on the untouched internal-evaluation portion;
+4. record held-out AUROC for the predictive limb P.
+
+No training AUROC may enter P.
+
+The internal-evaluation observations may not influence C selection.
+
+#### Stage B — full target-N coefficient refit
+
+After C has been selected using Stage A:
+
+1. refit the same L1 logistic model using all N positives and all N negatives
+   in the target-N perturbation;
+2. use this full target-N refit only for:
+   - non-zero coefficient count;
+   - selected-feature identity;
+   - coefficient sign;
+   - sparsity statistic S;
+   - coefficient-identity statistic I;
+   - sign-stability statistic G.
+
+The Stage-B full-N refit must not replace the Stage-A held-out AUROC.
+
+Thus:
+
+    P = held-out prediction from Stage A
+
+while:
+
+    S, I, G = coefficient properties from Stage B
+
+This separation is frozen because at N = 139 there is no discovery observation
+outside the target-N set that can simultaneously serve as an untouched
+evaluation set while preserving a 139-per-class coefficient fit.
+
+### Internal split fraction
+
+The candidate internal split fraction is frozen initially as:
+
+    80% internal training
+    20% internal evaluation
+
+with class stratification and deterministic seed control.
+
+The exact integer class counts must be deterministic for each N.
+
+For each class:
+
+- N = 100 -> 80 train / 20 evaluation;
+- N = 120 -> 96 train / 24 evaluation;
+- N = 139 -> 111 train / 28 evaluation.
+
+The N = 139 split uses 111 + 28 = 139 exactly.
+
+### Number of perturbations
+
+The candidate calibration implementation uses:
+
+    100 deterministic perturbations
+
+per scenario/strength/condition setting.
+
+This matches the perturbation count used by the inherited SAE stability
+instrument while remaining a separate Arm-B calibration procedure.
+
+### No cross-perturbation leakage
+
+For every perturbation:
+
+- Stage-A evaluation observations must remain untouched during C selection;
+- statistics from other perturbations may not determine that perturbation's C;
+- independent-validation seeds may never participate;
+- biological data may never participate.
+
+### Calibration status
+
+The architecture above is frozen before calibration execution.
+
+Calibration may still compare R1, R2 and R3 and may select final numerical
+P/S/I/G definitions and thresholds.
+
+The target-N meaning, Stage-A/Stage-B separation, 80/20 internal split,
+without-replacement outer sampling and 100-perturbation count may not be altered
+after calibration seeds are opened without declaring the calibration block
+consumed and moving to a fresh untouched seed block.
 
 ---
 
