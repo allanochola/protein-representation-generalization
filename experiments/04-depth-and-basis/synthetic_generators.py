@@ -20,6 +20,16 @@ P = 1280
 S1_SIGNAL_IDX = np.array([0, 1, 2, 3, 4], dtype=int)
 S1_SIGNS = np.array([1.0, 1.0, -1.0, 1.0, -1.0])
 
+SQRT5 = float(np.sqrt(5.0))
+
+S2_TAU_BASE = (0.10, 0.20, 0.30, 0.40)
+S1_TAU_BASE = (0.50, 0.75, 1.00, 1.25, 1.50)
+MASTER_TAU_BASE = S2_TAU_BASE + S1_TAU_BASE
+
+S2_TAU = tuple(SQRT5 * x for x in S2_TAU_BASE)
+S1_TAU = tuple(SQRT5 * x for x in S1_TAU_BASE)
+MASTER_TAU = tuple(SQRT5 * x for x in MASTER_TAU_BASE)
+
 
 @dataclass(frozen=True)
 class SyntheticDataset:
@@ -132,14 +142,32 @@ def generate_s0(seed: int) -> SyntheticDataset:
     return ds
 
 
+def _tau_to_b(tau: float, k: int) -> float:
+    """Convert frozen population score-SD target tau to equal-magnitude b."""
+    tau = float(tau)
+
+    if tau <= 0:
+        raise ValueError("tau must be positive")
+
+    if k <= 0:
+        raise ValueError("k must be positive")
+
+    return tau / float(np.sqrt(k))
+
+
+def _matches_allowed_tau(tau: float, allowed: tuple[float, ...]) -> bool:
+    """Floating-point-safe membership check for symbolic tau ladders."""
+    return any(np.isclose(float(tau), x, rtol=0.0, atol=1e-12) for x in allowed)
+
+
 def _generate_identifiable_sparse(
     seed: int,
-    b: float,
+    tau: float,
     scenario: str,
 ) -> SyntheticDataset:
-    """Shared generator for S1/S2 identifiable five-coordinate signal."""
-    if b <= 0:
-        raise ValueError("b must be positive")
+    """Shared S1/S2 generator using tau as the public strength parameter."""
+    tau = float(tau)
+    b = _tau_to_b(tau=tau, k=5)
 
     rng = _rng(seed)
 
@@ -162,7 +190,8 @@ def _generate_identifiable_sparse(
         scenario=scenario,
         seed=int(seed),
         metadata={
-            "b": float(b),
+            "tau": tau,
+            "b": b,
             "n_signal": 5,
             "signal_idx": S1_SIGNAL_IDX.tolist(),
             "signal_signs": S1_SIGNS.astype(int).tolist(),
@@ -174,30 +203,26 @@ def _generate_identifiable_sparse(
     return ds
 
 
-def generate_s1(seed: int, b: float) -> SyntheticDataset:
-    """S1: identifiable sparse signal."""
-    allowed = {0.50, 0.75, 1.00, 1.25, 1.50}
-
-    if float(b) not in allowed:
-        raise ValueError(f"S1 b must be one of {sorted(allowed)}")
+def generate_s1(seed: int, tau: float) -> SyntheticDataset:
+    """S1: identifiable sparse signal on the frozen S1 tau subset."""
+    if not _matches_allowed_tau(tau, S1_TAU):
+        raise ValueError(f"S1 tau must be one of {S1_TAU}")
 
     return _generate_identifiable_sparse(
         seed=seed,
-        b=float(b),
+        tau=float(tau),
         scenario="S1",
     )
 
 
-def generate_s2(seed: int, b: float) -> SyntheticDataset:
-    """S2: weak identifiable sparse signal."""
-    allowed = {0.10, 0.20, 0.30, 0.40}
-
-    if float(b) not in allowed:
-        raise ValueError(f"S2 b must be one of {sorted(allowed)}")
+def generate_s2(seed: int, tau: float) -> SyntheticDataset:
+    """S2: weak identifiable sparse signal on the frozen S2 tau subset."""
+    if not _matches_allowed_tau(tau, S2_TAU):
+        raise ValueError(f"S2 tau must be one of {S2_TAU}")
 
     return _generate_identifiable_sparse(
         seed=seed,
-        b=float(b),
+        tau=float(tau),
         scenario="S2",
     )
 
@@ -205,7 +230,7 @@ def generate_s2(seed: int, b: float) -> SyntheticDataset:
 def generate_s3(
     seed: int,
     rho: float,
-    b: float = 1.0,
+    tau: float,
 ) -> SyntheticDataset:
     """S3: correlated interchangeable sparse signal.
 
@@ -226,8 +251,11 @@ def generate_s3(
             f"S3 rho must be one of {sorted(allowed_rho)}"
         )
 
-    if b <= 0:
-        raise ValueError("b must be positive")
+    if not _matches_allowed_tau(tau, MASTER_TAU):
+        raise ValueError(f"S3 tau must be one of {MASTER_TAU}")
+
+    tau = float(tau)
+    b = _tau_to_b(tau=tau, k=5)
 
     rng = _rng(seed)
 
@@ -288,7 +316,8 @@ def generate_s3(
         seed=int(seed),
         metadata={
             "rho": float(rho),
-            "b": float(b),
+            "tau": tau,
+            "b": b,
             "n_latent_factors": n_factors,
             "block_size": block_size,
             "signal_blocks": blocks,
@@ -304,7 +333,7 @@ def generate_s3(
 
 def generate_s4(
     seed: int,
-    b: float,
+    tau: float,
 ) -> SyntheticDataset:
     """S4: dense distributed signal over 128 observed coordinates.
 
@@ -314,12 +343,16 @@ def generate_s4(
     The coefficient signs are deterministic and balanced as closely as
     possible. All 128 signal coordinates have equal absolute magnitude.
     """
-    if b <= 0:
-        raise ValueError("b must be positive")
+    if not _matches_allowed_tau(tau, MASTER_TAU):
+        raise ValueError(f"S4 tau must be one of {MASTER_TAU}")
+
+    tau = float(tau)
+
+    n_signal = 128
+    b = _tau_to_b(tau=tau, k=n_signal)
 
     rng = _rng(seed)
 
-    n_signal = 128
     signal_idx = np.arange(n_signal, dtype=int)
 
     # Deterministic alternating signs.
@@ -346,7 +379,8 @@ def generate_s4(
         scenario="S4",
         seed=int(seed),
         metadata={
-            "b": float(b),
+            "tau": tau,
+            "b": b,
             "n_signal": n_signal,
             "signal_idx": signal_idx.tolist(),
             "sign_pattern": "alternating",
@@ -361,7 +395,7 @@ def generate_s4(
 
 def generate_s5(
     seed: int,
-    b: float,
+    tau: float,
 ) -> SyntheticDataset:
     """S5: very dense weak signal across all 1,280 coordinates.
 
@@ -371,8 +405,11 @@ def generate_s5(
 
     Signs are deterministic and balanced by alternating across coordinates.
     """
-    if b <= 0:
-        raise ValueError("b must be positive")
+    if not _matches_allowed_tau(tau, MASTER_TAU):
+        raise ValueError(f"S5 tau must be one of {MASTER_TAU}")
+
+    tau = float(tau)
+    b = _tau_to_b(tau=tau, k=P)
 
     rng = _rng(seed)
 
@@ -400,7 +437,8 @@ def generate_s5(
         scenario="S5",
         seed=int(seed),
         metadata={
-            "b": float(b),
+            "tau": tau,
+            "b": b,
             "n_signal": P,
             "signal_idx": signal_idx.tolist(),
             "sign_pattern": "alternating",
