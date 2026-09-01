@@ -1,0 +1,48 @@
+{
+  "stage": "Experiment 03 confirmatory firewall",
+  "status": "PASS",
+  "model_contact": false,
+  "repository": {
+    "branch": "exp03-toxin-representation",
+    "precontact_head": "b9f032d20ae943813e7836a9d6fb3f10b81b895d"
+  },
+  "counts": {
+    "discovery_positive": 139,
+    "discovery_negative": 139,
+    "confirmatory_positive": 161,
+    "confirmatory_negative": 3541
+  },
+  "identifier_firewall": {
+    "discovery_positive_vs_confirmatory_positive_overlap": 0,
+    "discovery_negative_vs_confirmatory_negative_overlap": 0,
+    "discovery_positive_vs_discovery_negative_overlap": 0,
+    "confirmatory_positive_vs_confirmatory_negative_overlap": 0
+  },
+  "joint_discovery_length_matching": {
+    "positive": {
+      "<30": 9,
+      "30-75": 22,
+      "76-150": 29,
+      ">150": 79
+    },
+    "negative": {
+      "<30": 9,
+      "30-75": 22,
+      "76-150": 29,
+      ">150": 79
+    },
+    "identical": true
+  },
+  "membership_sha256": {
+    "discovery_positive_n139.tsv": "752f228f3941b0b95cd1dfb62c167ec053c6cb896d57d3663a1ecd1e01110a5e",
+    "discovery_negative_n139.tsv": "5cffb5554de4f8e2ccd68d01b29a08227cdad20eb56898dc55431777856032bb",
+    "confirmatory_positive_universe.tsv": "42a08582492ff8ec9cd38604b425e20ee795c1479f4f3aa47a0949ebf52479e1",
+    "confirmatory_negative_universe.tsv": "9705f964fd26ce786f080bed29758ece2283f00c406a885e92c4b8f7b9c53e64"
+  },
+  "model_contact_state": {
+    "esm_embeddings_observed": false,
+    "sae_activations_observed": false,
+    "feature_nomination_observed": false,
+    "confirmatory_representation_statistics_observed": false
+  }
+}
