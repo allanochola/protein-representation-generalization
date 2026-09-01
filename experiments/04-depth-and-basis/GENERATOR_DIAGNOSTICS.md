@@ -240,3 +240,249 @@ Those remain calibration-stage questions and must use calibration seeds
 
 Define and implement S6 and S7 under the same frozen tau convention before any
 probe calibration is executed.
+
+
+---
+
+## 9. S6-S7 generator diagnostics
+
+### Status
+
+**PASS — S6/S7 DIAGNOSTIC-ONLY GENERATOR VERIFICATION**
+
+Frozen diagnostic script:
+
+- commit: `32a800b`
+- file: `experiments/04-depth-and-basis/diagnose_s6_s7.py`
+
+Generator source under test:
+
+- S6 implementation commit: `0f7b027`
+- S7 implementation commit: `2f064c2`
+
+No probe was fit.
+
+No AUROC was computed.
+
+No threshold or regularization setting was selected.
+
+Calibration seeds `1000-1099` remained untouched.
+
+Independent-validation seeds `2000-2099` remained untouched.
+
+No biological activation was computed.
+
+### Newly consumed diagnostic seeds
+
+S6:
+
+- large-N geometry: `900061`, `900062`, `900063`
+- actual-generator rho-isolation: `900064`
+
+S7:
+
+- large-N geometry: `900071`, `900072`, `900073`
+- actual-generator structure: `900074`
+
+These seeds are now consumed permanently for diagnostic use and may never be
+reused for calibration or independent validation.
+
+---
+
+## 10. S6 diagnostic results
+
+### S6-D1 — large-N geometry
+
+**PASS**
+
+Diagnostic sample size:
+
+- `N = 200,000`
+
+Tested tau values:
+
+- `0.223606797749979`
+- `1.118033988749895`
+- `3.354101966249685`
+
+Tested rho values:
+
+- `0.30`
+- `0.60`
+- `0.90`
+
+Across seeds `900061-900063`:
+
+- empirical score SD remained within the frozen 1% tau sanity bound;
+- nuisance variance remained approximately 1.0;
+- mean signal-to-own-nuisance correlation tracked rho directly;
+- representative cross-block nuisance correlations remained near zero.
+
+Observed ranges included:
+
+- nuisance variance: approximately `0.998762` to `1.000181`;
+- mean own-block correlation:
+  - rho 0.30: approximately `0.299540` to `0.300245`;
+  - rho 0.60: approximately `0.599532` to `0.600155`;
+  - rho 0.90: approximately `0.899828` to `0.900030`;
+- maximum representative cross-block absolute correlation:
+  approximately `0.003112` to `0.004987`.
+
+These results support the frozen S6 construction:
+
+    nuisance = rho * signal + sqrt(1 - rho^2) * epsilon
+
+with unit nuisance variance and simple Pearson correlation equal to rho.
+
+### S6-D2 — actual-generator rho isolation
+
+**PASS**
+
+Diagnostic seed:
+
+- `900064`
+
+Fixed tau:
+
+- `1.118033988749895`
+
+Observed actual-generator summaries:
+
+| rho | Mean own-block corr | Nuisance variance | Background mean | Background variance | Max background corr |
+|---:|---:|---:|---:|---:|---:|
+| 0.30 | 0.3047 | 1.0088 | 0.0009 | 0.9978 | 0.1116 |
+| 0.60 | 0.6049 | 1.0158 | 0.0009 | 0.9978 | 0.1116 |
+| 0.90 | 0.9019 | 1.0253 | 0.0009 | 0.9978 | 0.1116 |
+
+At fixed seed and tau, changing rho left exactly unchanged:
+
+- the five true signal coordinates;
+- the reconstructed noiseless score;
+- the background coordinates;
+- the final 139/139 labels.
+
+Only nuisance indices `5-104` changed with rho.
+
+Thus S6 successfully isolates nuisance covariance from generative difficulty.
+
+---
+
+## 11. S7 diagnostic results
+
+### S7-D1 — large-N geometry
+
+**PASS**
+
+Diagnostic sample size:
+
+- `N = 200,000`
+
+Tested tau values:
+
+- `0.223606797749979`
+- `1.118033988749895`
+- `3.354101966249685`
+
+Tested seeds:
+
+- `900071`
+- `900072`
+- `900073`
+
+Observed shortcut geometry:
+
+- proxy variance remained approximately 1.0;
+- same-orientation correlations remained approximately `+0.95`;
+- opposite-orientation correlations remained approximately `-0.95`;
+- empirical score SD tracked tau within the frozen implementation sanity bound.
+
+Observed ranges:
+
+- proxy variance: `0.996543` to `1.003567`;
+- same-orientation correlation: `0.949702` to `0.950260`;
+- opposite-orientation correlation: `-0.950214` to `-0.949755`.
+
+These results support the frozen signed-interchangeable proxy construction.
+
+### S7-D2 — actual-generator structure
+
+**PASS**
+
+Diagnostic seed:
+
+- `900074`
+
+Fixed tau:
+
+- `1.118033988749895`
+
+Observed:
+
+- same-orientation correlation = `0.9530`;
+- opposite-orientation correlation = `-0.9551`;
+- background mean = `-0.0011`;
+- background variance = `1.0022`;
+- maximum sampled background-background absolute correlation = `0.0722`;
+- maximum sampled latent-z/background absolute correlation = `0.1194`.
+
+The independently reconstructed latent score and frozen label-noise stream
+reproduced the generated labels exactly.
+
+The returned observed-space beta remained identically zero, consistent with the
+frozen non-identifiable observed-basis interpretation.
+
+Thus S7 successfully implements one latent predictive direction represented by
+a globally active mixed-orientation interchangeable proxy block.
+
+---
+
+## 12. Combined S0-S7 generator verdict
+
+**PASS — FULL SYNTHETIC GENERATOR ENVIRONMENT IMPLEMENTED AND
+DIAGNOSTICALLY VERIFIED**
+
+The diagnostic evidence now supports the implementation of scenarios S0-S7 at
+the generator level.
+
+This verdict is strictly limited to synthetic-generator construction.
+
+It does **not** validate:
+
+- L1 regularization selection;
+- predictive-discrimination threshold P;
+- sparsity threshold S;
+- coefficient-identity stability threshold I;
+- sign-stability threshold G;
+- the conjunctive `P AND S AND I AND G` probe decision rule;
+- S1/S6 common-tau robustness;
+- S1/S7 common-tau operating-window separation.
+
+Those are calibration-stage questions.
+
+Calibration seeds `1000-1099` remain completely unobserved.
+
+Independent-validation seeds `2000-2099` remain completely unobserved.
+
+No Experiment-04 biological activation has been computed.
+
+---
+
+## 13. Next boundary
+
+The synthetic generator environment is now frozen and diagnostically verified.
+
+The next methodological phase is sparse-probe **calibration** using calibration
+seeds `1000-1099`.
+
+Before any calibration seed is executed:
+
+1. the calibration runner itself must be written;
+2. its perturbation construction must be frozen;
+3. candidate C-selection rules R1/R2/R3 must be implemented exactly as specified;
+4. predictive, sparsity, identity and sign-stability statistics must be
+   implemented without final numerical thresholds being chosen from validation;
+5. the complete calibration script must be statically inspected and committed;
+6. only then may seeds `1000-1099` be opened.
+
+Validation seeds `2000-2099` remain sealed until the complete probe instrument
+and numerical acceptance criteria have been frozen from calibration.
