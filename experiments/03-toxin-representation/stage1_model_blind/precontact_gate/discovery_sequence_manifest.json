@@ -1,0 +1,41 @@
+{
+  "stage": "Experiment 03 discovery sequence byte-level freeze",
+  "status": "PASS",
+  "model_contact": false,
+  "source": {
+    "provider": "UniProtKB REST API",
+    "retrieval": "direct accession FASTA",
+    "redirect_policy": "HTTP redirects rejected",
+    "release": "2026_02",
+    "release_dates": [
+      "10-June-2026"
+    ]
+  },
+  "counts": {
+    "positive": 139,
+    "negative": 139,
+    "total": 278
+  },
+  "checks": {
+    "exact_positive_membership": true,
+    "exact_negative_membership": true,
+    "unique_identifiers": 278,
+    "all_lengths_match_frozen_metadata": true,
+    "all_lengths_within_1_1022": true,
+    "redirects_accepted": false
+  },
+  "sha256": {
+    "discovery_positive_n139.tsv": "752f228f3941b0b95cd1dfb62c167ec053c6cb896d57d3663a1ecd1e01110a5e",
+    "discovery_negative_n139.tsv": "5cffb5554de4f8e2ccd68d01b29a08227cdad20eb56898dc55431777856032bb",
+    "confirmatory_firewall.json": "7ff1f7d4cb14f9587bafb9a104e657b3307d2e49f85f418b32988b328f1ce2e5",
+    "discovery_sequence_manifest.tsv": "7ac8d253d06ab86b67f2f3d42d7b5ad0c770360a2d4959dc8d325bed00b9ce09",
+    "discovery_sequences.fasta": "ef17a1231bafc86255bf8ba57aaa64fe7f81c39677fb8d0553fa2d94ca2fb358"
+  },
+  "historical_boundary": "These sequence bytes are frozen before Experiment 03 biological model contact against the previously frozen discovery identifier membership and exact sequence length metadata.",
+  "model_contact_state": {
+    "esm_embeddings_observed": false,
+    "sae_activations_observed": false,
+    "feature_nomination_observed": false,
+    "confirmatory_representation_statistics_observed": false
+  }
+}
