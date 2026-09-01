@@ -65,15 +65,6 @@ REGIMES = {
     },
 }
 
-PAIRWISE_GRID = [
-    0.50, 0.55, 0.60, 0.65, 0.70,
-    0.75, 0.80, 0.85, 0.90,
-]
-
-MODAL_GRID = [
-    0.60, 0.65, 0.70, 0.75,
-    0.80, 0.85, 0.90, 0.95,
-]
 
 FEATURE_SET_K = 5
 JACCARD_THRESHOLD = 0.60
@@ -663,270 +654,6 @@ def simulate() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def summarize(
-    df: pd.DataFrame,
-) -> pd.DataFrame:
-    rows = []
-
-    for (
-        regime,
-        n,
-    ), group in df.groupby(
-        ["regime", "n_per_class"]
-    ):
-        for metric in [
-            "pairwise_agreement",
-            "modal_frequency",
-            "median_pairwise_jaccard",
-        ]:
-            values = group[metric].to_numpy()
-
-            rows.append({
-                "regime": regime,
-                "n_per_class": n,
-                "metric": metric,
-                "p05": float(
-                    np.quantile(
-                        values,
-                        0.05,
-                    )
-                ),
-                "median": float(
-                    np.quantile(
-                        values,
-                        0.50,
-                    )
-                ),
-                "p95": float(
-                    np.quantile(
-                        values,
-                        0.95,
-                    )
-                ),
-            })
-
-    return pd.DataFrame(rows)
-
-
-def select_thresholds(
-    df: pd.DataFrame,
-) -> tuple[pd.DataFrame, dict | None]:
-    n139 = df[
-        df["n_per_class"] == 139
-    ].copy()
-
-    rows = []
-    chosen = None
-
-    for pair_thr in PAIRWISE_GRID:
-        for modal_thr in MODAL_GRID:
-            passed = (
-                (
-                    n139["pairwise_agreement"]
-                    >= pair_thr
-                )
-                & (
-                    n139["modal_frequency"]
-                    >= modal_thr
-                )
-            )
-
-            rates = {}
-
-            for regime in REGIMES:
-                mask = (
-                    n139["regime"]
-                    == regime
-                )
-
-                rates[regime] = float(
-                    passed[mask].mean()
-                )
-
-            acceptable = (
-                rates["A_stable_single"] >= 0.90
-                and rates["B_near_tie"] <= 0.10
-                and rates["C_distributed"] <= 0.10
-            )
-
-            rows.append({
-                "pairwise_threshold":
-                    pair_thr,
-                "modal_threshold":
-                    modal_thr,
-                "pass_rate_stable_single":
-                    rates[
-                        "A_stable_single"
-                    ],
-                "pass_rate_near_tie":
-                    rates[
-                        "B_near_tie"
-                    ],
-                "pass_rate_distributed":
-                    rates[
-                        "C_distributed"
-                    ],
-                "acceptable":
-                    int(acceptable),
-            })
-
-            if (
-                acceptable
-                and chosen is None
-            ):
-                chosen = {
-                    "pairwise_threshold":
-                        pair_thr,
-                    "modal_threshold":
-                        modal_thr,
-                    "pass_rate_stable_single":
-                        rates[
-                            "A_stable_single"
-                        ],
-                    "pass_rate_near_tie":
-                        rates[
-                            "B_near_tie"
-                        ],
-                    "pass_rate_distributed":
-                        rates[
-                            "C_distributed"
-                        ],
-                }
-
-    return pd.DataFrame(rows), chosen
-
-
-
-def feature_set_calibration_summary(
-    df: pd.DataFrame,
-) -> pd.DataFrame:
-    rows = []
-
-    for (
-        regime,
-        n,
-    ), group in df.groupby(
-        ["regime", "n_per_class"]
-    ):
-        values = (
-            group[
-                "median_pairwise_jaccard"
-            ]
-            .to_numpy()
-        )
-
-        rows.append({
-            "regime": regime,
-            "n_per_class": int(n),
-            "jaccard_threshold":
-                JACCARD_THRESHOLD,
-            "pass_rate": float(
-                (
-                    group[
-                        "median_pairwise_jaccard"
-                    ]
-                    >= JACCARD_THRESHOLD
-                ).mean()
-            ),
-            "p05": float(
-                np.quantile(
-                    values,
-                    0.05,
-                )
-            ),
-            "median": float(
-                np.quantile(
-                    values,
-                    0.50,
-                )
-            ),
-            "p95": float(
-                np.quantile(
-                    values,
-                    0.95,
-                )
-            ),
-        })
-
-    return pd.DataFrame(rows)
-
-
-
-def recurrence_calibration_summary(
-    df: pd.DataFrame,
-) -> pd.DataFrame:
-    rows = []
-
-    for (regime, n), group in df.groupby(
-        ["regime", "n_per_class"]
-    ):
-        recurrent = (
-            group["n_recurrent_features"]
-            .to_numpy()
-        )
-
-        rows.append({
-            "regime": regime,
-            "n_per_class": int(n),
-            "jaccard_threshold": JACCARD_THRESHOLD,
-            "recurrence_threshold": RECURRENCE_THRESHOLD,
-            "min_recurrent_features": MIN_RECURRENT_FEATURES,
-            "median_n_recurrent":
-                float(np.median(recurrent)),
-            "p05_n_recurrent":
-                float(np.quantile(recurrent, 0.05)),
-            "p95_n_recurrent":
-                float(np.quantile(recurrent, 0.95)),
-            "recurrence_only_pass_rate":
-                float(group["recurrence_pass"].mean()),
-            "combined_pass_rate":
-                float(
-                    group[
-                        "combined_feature_set_pass"
-                    ].mean()
-                ),
-        })
-
-    return pd.DataFrame(rows)
-
-
-
-def concentration_summary(
-    df: pd.DataFrame,
-) -> pd.DataFrame:
-    rows = []
-
-    for (regime, n), group in df.groupby(
-        ["regime", "n_per_class"]
-    ):
-        values = group[
-            "fixed_top5_concentration_median"
-        ].to_numpy()
-
-        rows.append({
-            "regime": regime,
-            "n_per_class": int(n),
-            "p05": float(
-                np.quantile(values, 0.05)
-            ),
-            "median": float(
-                np.quantile(values, 0.50)
-            ),
-            "p95": float(
-                np.quantile(values, 0.95)
-            ),
-            "jaccard_recurrence_pass_rate":
-                float(
-                    group[
-                        "combined_feature_set_pass"
-                    ].mean()
-                ),
-        })
-
-    return pd.DataFrame(rows)
-
-
-
 def independent_validation_summary(
     df: pd.DataFrame,
 ) -> pd.DataFrame:
@@ -1150,28 +877,6 @@ def plateau_descriptives(
 def run():
     raw = simulate()
 
-    summary = summarize(raw)
-
-    threshold_grid, chosen = (
-        select_thresholds(raw)
-    )
-
-    plateau = plateau_descriptives(
-        raw
-    )
-
-    feature_set_summary = (
-        feature_set_calibration_summary(
-            raw
-        )
-    )
-
-    recurrence_summary = (
-        recurrence_calibration_summary(
-            raw
-        )
-    )
-
     validation_summary = (
         independent_validation_summary(
             raw
@@ -1183,32 +888,7 @@ def run():
     )
 
     raw.to_csv(
-        HERE / "calibration_raw.csv",
-        index=False,
-    )
-
-    summary.to_csv(
-        HERE / "calibration_summary.csv",
-        index=False,
-    )
-
-    threshold_grid.to_csv(
-        HERE / "threshold_grid.csv",
-        index=False,
-    )
-
-    plateau.to_csv(
-        HERE / "feature_set_plateau_descriptives.csv",
-        index=False,
-    )
-
-    feature_set_summary.to_csv(
-        HERE / "recurrence_feature_set_calibration_summary.csv",
-        index=False,
-    )
-
-    recurrence_summary.to_csv(
-        HERE / "concentration_recurrence_summary.csv",
+        HERE / "independent_validation_raw.csv",
         index=False,
     )
 
@@ -1219,13 +899,11 @@ def run():
 
     result = {
         "status": validation_result["status"],
-        "validation_type":
-            "independent_synthetic",
+        "validation_type": "independent_synthetic",
         "n_latents": N_LATENTS,
         "n_outer": N_OUTER,
         "n_perturbations": N_PERTURB,
-        "subsample_fraction":
-            SUBSAMPLE_FRAC,
+        "subsample_fraction": SUBSAMPLE_FRAC,
         "feature_set": {
             "k": FEATURE_SET_K,
             "jaccard_threshold":
@@ -1252,46 +930,6 @@ def run():
     )
 
     print(
-        "\n── CALIBRATION SUMMARY ──"
-    )
-
-    print(
-        summary.to_string(
-            index=False
-        )
-    )
-
-    print(
-        "\n── THRESHOLD RESULT ──"
-    )
-    print(
-        json.dumps(
-            result,
-            indent=2,
-        )
-    )
-
-    print(
-        "\n── FEATURE-SET CALIBRATION ──"
-    )
-
-    print(
-        feature_set_summary.to_string(
-            index=False
-        )
-    )
-
-    print(
-        "\n── RECURRENCE CALIBRATION ──"
-    )
-
-    print(
-        recurrence_summary.to_string(
-            index=False
-        )
-    )
-
-    print(
         "\n── INDEPENDENT VALIDATION SUMMARY ──"
     )
 
@@ -1309,15 +947,6 @@ def run():
         json.dumps(
             validation_result,
             indent=2,
-        )
-    )
-
-    print(
-        "\n── PLATEAU DESCRIPTIVES ──"
-    )
-    print(
-        plateau.to_string(
-            index=False
         )
     )
 
