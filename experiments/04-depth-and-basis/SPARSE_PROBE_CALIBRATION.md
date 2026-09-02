@@ -2762,6 +2762,57 @@ rejector.
 
 No numerical `gamma_G` can repair this structural failure.
 
+#### Post-failure signed-support reconstruction of `3000-3099`
+
+After the calibration failure was declared, the archived signed supports
+from the already-consumed `3000-3099` block were descriptively re-analysed.
+No generator was executed, no probe was fit, no threshold was selected,
+and no additional seed block was opened.
+
+The frozen pairwise I/G calculation was reconstructed for all 1,351,350
+perturbation pairs and reproduced the archived cell statistics to
+floating-point precision (maximum reconstruction error `8.327e-17` for
+both I and G).
+
+Signed and unsigned recurrence were not pairwise identical:
+
+- 47 / 273 cells contained at least one pair with `G_pair < I_pair`;
+- 114 / 1,351,350 pairs had `G_pair < I_pair`;
+- the largest observed single-pair `I_pair - G_pair` was
+  `0.01483560545308743`.
+
+However, none of these distinctions reached the frozen cell aggregate:
+
+- signed and unsigned middle order statistics differed in `0 / 273` cells;
+- `G_stat < I_stat` in `0 / 273` cells;
+- maximum `|I_stat - G_stat| = 0`.
+
+A cell-scoped coordinate census further showed that every coordinate
+observed with both fitted signs had minority-sign count exactly one, and
+all such cells occurred at `N=100`. No corresponding cell occurred at
+`N=120` or `N=139`.
+
+For S7 specifically, none of the five planted shortcut coordinates ever
+reversed fitted sign across the 2,700 archived S7 fits. Whenever selected,
+their signs followed the frozen `(+,+,-,+,-)` orientation exactly.
+
+The sparse-probe instrument itself can support high recurrence: S7 contains
+cells with a coordinate selected in `100 / 100` perturbations at each of
+`N=100`, `N=120`, and `N=139`.
+
+The failure is therefore refined into two separate questions:
+
+1. the current S7 construction lacks a systematic planted-coordinate
+   sign-instability mechanism; and
+2. the signed distinctions that did occur elsewhere in the consumed suite
+   were too sparse to affect the frozen median G aggregation.
+
+The complete descriptive record is:
+
+`calibration_step1/SIGNED_SUPPORT_CENSUS_3000_3099.txt`
+
+This finding selects no alternative G definition and freezes no threshold.
+
 #### S3 identity-stability behavior
 
 The S3 identity-stability result depends materially on discovery size.

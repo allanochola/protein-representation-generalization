@@ -1,0 +1,147 @@
+Experiment 04 — Arm-B signed-support descriptive re-analysis
+Calibration block: 3000-3099
+Status: already consumed; descriptive re-analysis only
+
+SCOPE
+-----
+27,300 archived perturbation fits
+273 calibration cells
+100 perturbations per cell
+4,950 perturbation pairs per cell
+1,351,350 perturbation pairs total
+
+No generator was executed.
+No probe was fit.
+No threshold was selected.
+No new seed was consumed.
+Validation block 2000-2099 remained sealed.
+Calibration reserve 4000-4099 remained unopened.
+
+SIGNED-SUPPORT INTEGRITY
+------------------------
+signed/unsigned support coordinate-set mismatches: 0
+rows where K_t == |signed support|: 27,300 / 27,300
+
+PAIR-LEVEL RECONSTRUCTION
+-------------------------
+The frozen I/G calculation was reconstructed directly from archived
+per-perturbation signed supports using the executable convention:
+
+    I_pair = Jaccard(unsigned support_t, unsigned support_u)
+    G_pair = Jaccard(signed support_t, signed support_u)
+
+with Jaccard(empty, empty) = 0.
+
+All 4,950 perturbation pairs were reconstructed for every cell.
+
+Validation against archived cell statistics:
+
+    max |I_stat - I_reconstructed| = 8.327e-17
+    max |G_stat - G_reconstructed| = 8.327e-17
+
+The reconstruction therefore reproduces the frozen aggregate statistics
+to floating-point precision.
+
+PAIR-LEVEL SIGNED DISTINCTION
+-----------------------------
+cells with >=1 pair where G_pair < I_pair: 47 / 273
+pairs where G_pair < I_pair: 114 / 1,351,350
+global fraction: 8.436008436008436e-05
+largest observed single-pair I-G gap: 0.01483560545308743
+
+Thus signed and unsigned Jaccard are not pairwise identical throughout
+the calibration block.
+
+However:
+
+    cells where signed/unsigned middle order statistics differed: 0 / 273
+    cells where G_stat < I_stat: 0 / 273
+    max |I_stat - G_stat|: 0
+
+The rare pair-level signed-support distinctions were therefore completely
+removed by the frozen median aggregation in this calibration block.
+
+CELL-SCOPED SIGN-REVERSAL CENSUS
+--------------------------------
+A coordinate-level census within each calibration cell found:
+
+    total recurring-coordinate opposite-sign pair events: 114
+    cells with >=1 such event: 47 / 273
+    maximum minority-sign count for any both-sign coordinate: 1
+
+Every affected cell occurred at target_n = 100.
+No affected cell occurred at target_n = 120 or 139.
+
+Therefore the observed fitted-sign reversals were isolated one-perturbation
+events rather than a sustained sign-ambiguity regime.
+
+S7 PLANTED SHORTCUT
+-------------------
+Across all 2,700 S7 fits, the five planted shortcut coordinates had:
+
+    coordinate 0: selected 447;  positive 447;  negative 0
+    coordinate 1: selected 1164; positive 1164; negative 0
+    coordinate 2: selected 845;  positive 0;    negative 845
+    coordinate 3: selected 999;  positive 999;  negative 0
+    coordinate 4: selected 965;  positive 0;    negative 965
+
+No planted S7 shortcut coordinate was observed with both fitted signs.
+
+Whenever selected, the realized fitted signs therefore followed the
+frozen generator orientation:
+
+    (+,+,-,+,-)
+
+The current S7 construction consequently did not instantiate the intended
+recurring-coordinate sign-instability mechanism.
+
+RECURRENCE HEADROOM
+-------------------
+The frozen sparse-probe instrument is capable of very high coordinate
+recurrence. At least one cell reached 100/100 recurrence in S1, S3, S6,
+and S7. S7 reached 100/100 maximum coordinate recurrence at target_n
+100, 120, and 139.
+
+Thus lack of coordinate recurrence is not by itself an explanation for
+the G failure.
+
+INTERPRETATION
+--------------
+Two distinct failures are now separated.
+
+1. S7 generator/control failure
+
+   The planted S7 shortcut coordinates have fixed fitted-sign orientation
+   conditional on coordinate identity. The current mixed-orientation
+   redundant-proxy construction did not generate recurring-coordinate
+   sign instability.
+
+   Merely lowering rho_shortcut does not introduce a mechanism that
+   changes the orientation of a recurring planted coordinate.
+
+2. G calibration-mechanism failure on the consumed suite
+
+   The frozen signed Jaccard did distinguish 114 individual perturbation
+   pairs from their unsigned counterparts, but those differences never
+   altered either middle order statistic in any calibration cell.
+
+   Consequently median aggregation made G_stat operationally
+   non-discriminating from I_stat throughout block 3000-3099.
+
+This does not establish that median signed Jaccard can never discriminate
+a suitably constructed sign-instability control. Nor does it justify
+selecting a replacement G statistic from this consumed block.
+
+It establishes that the current S7 construction supplied no systematic
+planted-coordinate sign ambiguity and that the signed distinctions which
+did occur elsewhere were too sparse to affect the frozen G aggregation.
+
+Any redesign must therefore consider separately:
+
+    (a) a generator/control mechanism capable of systematic sign reversal
+        on recurring coordinates; and
+
+    (b) whether the frozen median G aggregation can detect the intended
+        regime under the actual R2/L1 probe mechanics.
+
+No gamma threshold was selected or altered by this analysis.
