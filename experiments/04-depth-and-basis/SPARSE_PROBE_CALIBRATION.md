@@ -2451,6 +2451,199 @@ and so on.
 
 ---
 
+
+### Calibration interruption and checkpointing
+
+Calibration block `1000-1099` was opened under the frozen Step-1 runner at
+commit `a5fc7e0`.
+
+The runtime restarted before terminal calibration outputs were persisted.
+
+No complete per-perturbation table or cell-statistics table survived.
+
+Therefore:
+
+    calibration seeds 1000-1099 = consumed
+
+These seeds may not be rerun.
+
+No numerical P/S/I/G threshold was selected from the interrupted execution.
+
+Validation seeds:
+
+    2000-2099
+
+remain sealed and untouched.
+
+The next calibration block is:
+
+    3000-3099
+
+This interruption does not change the statistical instrument.
+
+The following remain frozen:
+
+- synthetic scenario definitions;
+- fixed scenario/tau synthetic-dataset construction;
+- rho-isolation semantics;
+- target-N values;
+- Stage-A / Stage-B separation;
+- internal 80/20 split;
+- five-fold internal CV;
+- R2 one-standard-error rule;
+- C grid;
+- solver configuration;
+- exact-zero support semantics;
+- P_stat;
+- S_stat;
+- I_stat;
+- G_stat;
+- positive-control detection-floor requirements;
+- negative-control interpretation;
+- numerical-threshold firewall.
+
+The failure was an execution-persistence failure, not a calibration-statistic
+failure.
+
+### Frozen checkpoint architecture
+
+The Step-1 runner must persist calibration results incrementally at the level
+of a complete calibration cell.
+
+A calibration cell is uniquely identified by:
+
+    scenario
+    tau_index
+    rho_index
+    target_n
+
+A cell becomes checkpoint-eligible only after all 100 perturbations from the
+active calibration block have completed successfully.
+
+For the next calibration block, the required perturbation seeds are exactly:
+
+    3000-3099
+
+A complete cell must contain:
+
+    100 per-perturbation rows
+    1 aggregate P/S/I/G row
+
+Partial cells are not valid calibration outputs.
+
+### Atomic persistence
+
+After a cell completes successfully:
+
+1. construct its 100-row perturbation result;
+2. construct its one-row aggregate result;
+3. validate the complete seed set;
+4. validate row counts;
+5. write updated tables to temporary files;
+6. atomically replace the authoritative checkpoint files;
+7. only then mark the cell complete in the checkpoint manifest.
+
+The authoritative files may never contain a partially completed cell.
+
+Temporary-file writes must occur in the same filesystem as the final files so
+that filesystem replacement is atomic.
+
+### Checkpoint manifest
+
+The runner must maintain a checkpoint manifest containing completed cell
+identities.
+
+A completed-cell manifest entry must include at least:
+
+    scenario
+    tau_index
+    rho_index
+    target_n
+
+The manifest may mark a cell complete only after both its per-perturbation and
+aggregate rows have been atomically persisted.
+
+On restart, a cell may be skipped only if all frozen integrity checks pass.
+
+### Restart integrity checks
+
+Before skipping a completed cell, the runner must verify:
+
+- exactly 100 perturbation rows exist for the cell;
+- their calibration seeds are exactly `3000-3099`;
+- exactly one aggregate row exists;
+- `n_perturbations = 100`;
+- the aggregate row's cell identity matches the perturbation rows;
+- no duplicate calibration seed exists within the cell.
+
+If any checkpoint integrity test fails, execution must stop.
+
+The runner may not silently repair, merge, truncate, deduplicate or partially
+resume a corrupted cell.
+
+### Interrupted cell semantics
+
+If execution stops before a cell is atomically committed, that cell is
+recomputed from scratch on restart using the same frozen seeds.
+
+This does not constitute reuse of a completed calibration result because no
+authoritative cell output was committed.
+
+A successfully checkpointed cell may not be recomputed during the same
+calibration block.
+
+### Scope of checkpoint amendment
+
+Checkpointing changes persistence and restart behavior only.
+
+It may not change:
+
+- synthetic-data generation;
+- seed derivation;
+- perturbation construction;
+- scenario order;
+- target-N order;
+- C-selection mechanics;
+- model fitting;
+- P/S/I/G definitions;
+- aggregation;
+- numerical thresholds;
+- validation behavior.
+
+No threshold selection may occur inside the checkpointed Step-1 runner.
+
+### Progress reporting
+
+After each successfully checkpointed cell, the runner must print:
+
+- completed cell identity;
+- completed-cell count;
+- total-cell count;
+- elapsed runtime;
+- path of the checkpoint files.
+
+Progress reporting is descriptive only and may not affect execution.
+
+### Active-block boundary
+
+Calibration block `3000-3099` remains unopened until the checkpoint-capable
+runner has been:
+
+1. implemented;
+2. statically inspected;
+3. committed;
+4. pushed;
+5. verified against the remote HEAD.
+
+The block is considered opened as soon as the first probe fit using any seed
+from `3000-3099` begins.
+
+If the checkpoint-capable runner itself fails after that point, block
+`3000-3099` is governed by the persistence rules above.
+
+Validation seeds `2000-2099` remain sealed throughout this process.
+
+
 ## 22. Independent-validation requirements
 
 Before validation is run, numerical acceptance criteria must be frozen.
