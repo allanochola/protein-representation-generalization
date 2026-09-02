@@ -34,6 +34,7 @@ import argparse
 import json
 import math
 import sys
+import time
 import warnings
 from collections import Counter
 from dataclasses import dataclass
@@ -77,7 +78,7 @@ from synthetic_generators import (  # noqa: E402
 # Frozen calibration constants
 # ============================================================
 
-CALIBRATION_SEEDS = tuple(range(1000, 1100))
+CALIBRATION_SEEDS = tuple(range(3000, 3100))
 VALIDATION_SEEDS = frozenset(range(2000, 2100))
 
 TARGET_N_VALUES = (100, 120, 139)
@@ -1194,16 +1195,475 @@ def aggregate_cell(
     }
 
 
+
+# ============================================================
+# Checkpoint persistence
+# ============================================================
+
+CELL_KEY_COLUMNS = (
+    "scenario",
+    "tau_index",
+    "rho_index",
+    "target_n",
+)
+
+
+def cell_key_from_values(
+    scenario: str,
+    tau_index: int,
+    rho_index: int,
+    target_n: int,
+) -> tuple[str, int, int, int]:
+    return (
+        str(scenario),
+        int(tau_index),
+        int(rho_index),
+        int(target_n),
+    )
+
+
+def cell_key_from_row(row) -> tuple[str, int, int, int]:
+    return cell_key_from_values(
+        row["scenario"],
+        row["tau_index"],
+        row["rho_index"],
+        row["target_n"],
+    )
+
+
+def atomic_write_csv(
+    df: pd.DataFrame,
+    final_path: Path,
+) -> None:
+    """
+    Write CSV through a temporary file on the same filesystem,
+    then atomically replace the authoritative file.
+    """
+    final_path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    tmp_path = final_path.with_name(
+        final_path.name + ".tmp"
+    )
+
+    if tmp_path.exists():
+        tmp_path.unlink()
+
+    df.to_csv(
+        tmp_path,
+        index=False,
+    )
+
+    tmp_path.replace(final_path)
+
+
+def atomic_write_json(
+    payload: dict,
+    final_path: Path,
+) -> None:
+    final_path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    tmp_path = final_path.with_name(
+        final_path.name + ".tmp"
+    )
+
+    if tmp_path.exists():
+        tmp_path.unlink()
+
+    tmp_path.write_text(
+        json.dumps(
+            payload,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    tmp_path.replace(final_path)
+
+
+def empty_or_read_csv(
+    path: Path,
+) -> pd.DataFrame:
+    if not path.exists():
+        return pd.DataFrame()
+
+    return pd.read_csv(path)
+
+
+def load_manifest(
+    manifest_path: Path,
+) -> dict:
+    if not manifest_path.exists():
+        return {
+            "calibration_seeds": list(CALIBRATION_SEEDS),
+            "completed_cells": [],
+        }
+
+    payload = json.loads(
+        manifest_path.read_text(
+            encoding="utf-8"
+        )
+    )
+
+    if payload.get("calibration_seeds") != list(CALIBRATION_SEEDS):
+        raise CalibrationContractError(
+            "Checkpoint manifest calibration-seed block "
+            "does not match active CALIBRATION_SEEDS."
+        )
+
+    if not isinstance(
+        payload.get("completed_cells"),
+        list,
+    ):
+        raise CalibrationContractError(
+            "Checkpoint manifest completed_cells must be a list."
+        )
+
+    return payload
+
+
+def completed_keys_from_manifest(
+    manifest: dict,
+) -> set[tuple[str, int, int, int]]:
+    keys = set()
+
+    for item in manifest["completed_cells"]:
+        required = {
+            "scenario",
+            "tau_index",
+            "rho_index",
+            "target_n",
+        }
+
+        if set(item) != required:
+            raise CalibrationContractError(
+                "Malformed completed-cell manifest entry."
+            )
+
+        key = cell_key_from_values(
+            item["scenario"],
+            item["tau_index"],
+            item["rho_index"],
+            item["target_n"],
+        )
+
+        if key in keys:
+            raise CalibrationContractError(
+                f"Duplicate completed-cell manifest entry: {key}"
+            )
+
+        keys.add(key)
+
+    return keys
+
+
+def cell_mask(
+    df: pd.DataFrame,
+    key: tuple[str, int, int, int],
+) -> pd.Series:
+    scenario, tau_index, rho_index, target_n = key
+
+    return (
+        (df["scenario"].astype(str) == scenario)
+        & (df["tau_index"].astype(int) == tau_index)
+        & (df["rho_index"].astype(int) == rho_index)
+        & (df["target_n"].astype(int) == target_n)
+    )
+
+
+def validate_completed_cell(
+    key: tuple[str, int, int, int],
+    raw_df: pd.DataFrame,
+    agg_df: pd.DataFrame,
+) -> None:
+    """
+    Frozen restart integrity checks for one authoritative cell.
+    """
+    if raw_df.empty or agg_df.empty:
+        raise CalibrationContractError(
+            f"Manifest marks {key} complete but checkpoint tables are empty."
+        )
+
+    required_raw_columns = {
+        "scenario",
+        "tau_index",
+        "rho_index",
+        "target_n",
+        "calibration_seed",
+    }
+
+    required_agg_columns = {
+        "scenario",
+        "tau_index",
+        "rho_index",
+        "target_n",
+        "n_perturbations",
+    }
+
+    if not required_raw_columns.issubset(raw_df.columns):
+        raise CalibrationContractError(
+            "Raw checkpoint table is missing required identity columns."
+        )
+
+    if not required_agg_columns.issubset(agg_df.columns):
+        raise CalibrationContractError(
+            "Aggregate checkpoint table is missing required identity columns."
+        )
+
+    raw_cell = raw_df.loc[
+        cell_mask(raw_df, key)
+    ].copy()
+
+    agg_cell = agg_df.loc[
+        cell_mask(agg_df, key)
+    ].copy()
+
+    if len(raw_cell) != 100:
+        raise CalibrationContractError(
+            f"Completed cell {key} has {len(raw_cell)} "
+            "perturbation rows; expected 100."
+        )
+
+    observed_seeds = sorted(
+        raw_cell["calibration_seed"]
+        .astype(int)
+        .tolist()
+    )
+
+    if observed_seeds != list(CALIBRATION_SEEDS):
+        raise CalibrationContractError(
+            f"Completed cell {key} does not contain exactly "
+            "calibration seeds 3000-3099."
+        )
+
+    if raw_cell["calibration_seed"].duplicated().any():
+        raise CalibrationContractError(
+            f"Completed cell {key} contains duplicate calibration seeds."
+        )
+
+    if len(agg_cell) != 1:
+        raise CalibrationContractError(
+            f"Completed cell {key} has {len(agg_cell)} aggregate rows; "
+            "expected exactly one."
+        )
+
+    if int(agg_cell.iloc[0]["n_perturbations"]) != 100:
+        raise CalibrationContractError(
+            f"Completed cell {key} aggregate n_perturbations != 100."
+        )
+
+    if cell_key_from_row(agg_cell.iloc[0]) != key:
+        raise CalibrationContractError(
+            f"Aggregate identity mismatch for completed cell {key}."
+        )
+
+
+def validate_checkpoint_state(
+    manifest: dict,
+    raw_df: pd.DataFrame,
+    agg_df: pd.DataFrame,
+) -> set[tuple[str, int, int, int]]:
+    """
+    Validate every manifest-completed cell and reject authoritative
+    rows that are not represented by the manifest.
+    """
+    completed = completed_keys_from_manifest(
+        manifest
+    )
+
+    for key in sorted(completed):
+        validate_completed_cell(
+            key,
+            raw_df,
+            agg_df,
+        )
+
+    if not raw_df.empty:
+        raw_keys = {
+            cell_key_from_row(row)
+            for _, row in raw_df.iterrows()
+        }
+
+        if raw_keys != completed:
+            raise CalibrationContractError(
+                "Raw checkpoint table cell identities do not match manifest."
+            )
+
+    if not agg_df.empty:
+        agg_keys = {
+            cell_key_from_row(row)
+            for _, row in agg_df.iterrows()
+        }
+
+        if agg_keys != completed:
+            raise CalibrationContractError(
+                "Aggregate checkpoint table cell identities "
+                "do not match manifest."
+            )
+
+    return completed
+
+
+def append_completed_cell(
+    *,
+    cell_rows: pd.DataFrame,
+    aggregate_row: dict,
+    raw_df: pd.DataFrame,
+    agg_df: pd.DataFrame,
+    manifest: dict,
+    raw_path: Path,
+    cell_path: Path,
+    manifest_path: Path,
+) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
+
+    if len(cell_rows) != 100:
+        raise CalibrationContractError(
+            f"Checkpoint candidate has {len(cell_rows)} rows; "
+            "expected exactly 100."
+        )
+
+    observed_seeds = sorted(
+        cell_rows["calibration_seed"]
+        .astype(int)
+        .tolist()
+    )
+
+    if observed_seeds != list(CALIBRATION_SEEDS):
+        raise CalibrationContractError(
+            "Checkpoint candidate does not contain exactly seeds 3000-3099."
+        )
+
+    if cell_rows["calibration_seed"].duplicated().any():
+        raise CalibrationContractError(
+            "Checkpoint candidate contains duplicate calibration seeds."
+        )
+
+    key = cell_key_from_row(
+        cell_rows.iloc[0]
+    )
+
+    if any(
+        cell_key_from_row(row) != key
+        for _, row in cell_rows.iterrows()
+    ):
+        raise CalibrationContractError(
+            "Checkpoint candidate contains mixed cell identities."
+        )
+
+    if cell_key_from_values(
+        aggregate_row["scenario"],
+        aggregate_row["tau_index"],
+        aggregate_row["rho_index"],
+        aggregate_row["target_n"],
+    ) != key:
+        raise CalibrationContractError(
+            "Aggregate row identity does not match perturbation cell."
+        )
+
+    if int(aggregate_row["n_perturbations"]) != 100:
+        raise CalibrationContractError(
+            "Aggregate row n_perturbations != 100."
+        )
+
+    completed = completed_keys_from_manifest(
+        manifest
+    )
+
+    if key in completed:
+        raise CalibrationContractError(
+            f"Refusing to recompute already completed cell: {key}"
+        )
+
+    if raw_df.empty:
+        new_raw = cell_rows.copy()
+    else:
+        new_raw = pd.concat(
+            [raw_df, cell_rows],
+            ignore_index=True,
+        )
+
+    new_agg_row = pd.DataFrame(
+        [aggregate_row]
+    )
+
+    if agg_df.empty:
+        new_agg = new_agg_row
+    else:
+        new_agg = pd.concat(
+            [agg_df, new_agg_row],
+            ignore_index=True,
+        )
+
+    # Authoritative tables first.
+    atomic_write_csv(
+        new_raw,
+        raw_path,
+    )
+
+    atomic_write_csv(
+        new_agg,
+        cell_path,
+    )
+
+    # Manifest only after BOTH tables have been atomically replaced.
+    new_manifest = {
+        "calibration_seeds": list(CALIBRATION_SEEDS),
+        "completed_cells": list(
+            manifest["completed_cells"]
+        )
+        + [
+            {
+                "scenario": key[0],
+                "tau_index": key[1],
+                "rho_index": key[2],
+                "target_n": key[3],
+            }
+        ],
+    }
+
+    atomic_write_json(
+        new_manifest,
+        manifest_path,
+    )
+
+    # Re-read and verify authoritative state immediately.
+    verify_raw = pd.read_csv(raw_path)
+    verify_agg = pd.read_csv(cell_path)
+    verify_manifest = load_manifest(
+        manifest_path
+    )
+
+    validate_checkpoint_state(
+        verify_manifest,
+        verify_raw,
+        verify_agg,
+    )
+
+    return (
+        verify_raw,
+        verify_agg,
+        verify_manifest,
+    )
+
+
+
 # ============================================================
 # Execution
 # ============================================================
 
 def run_step1(output_dir: Path) -> None:
     """
-    Execute calibration Step 1 and persist raw statistics.
+    Execute calibration Step 1 with complete-cell atomic checkpointing.
 
     IMPORTANT:
-    This function opens calibration seeds 1000-1099.
+    This function opens calibration seeds 3000-3099.
     """
     output_dir = output_dir.resolve()
     output_dir.mkdir(
@@ -1211,7 +1671,7 @@ def run_step1(output_dir: Path) -> None:
         exist_ok=True,
     )
 
-    perturbation_path = (
+    raw_path = (
         output_dir
         / "arm_b_step1_per_perturbation.csv"
     )
@@ -1221,37 +1681,57 @@ def run_step1(output_dir: Path) -> None:
         / "arm_b_step1_cell_statistics.csv"
     )
 
-    if perturbation_path.exists() or cell_path.exists():
-        raise CalibrationContractError(
-            "Step-1 output already exists. "
-            "Refusing to overwrite a calibration record."
-        )
+    manifest_path = (
+        output_dir
+        / "arm_b_step1_checkpoint_manifest.json"
+    )
 
-    raw_rows: list[dict] = []
-    aggregate_rows: list[dict] = []
+    raw_df = empty_or_read_csv(
+        raw_path
+    )
+
+    agg_df = empty_or_read_csv(
+        cell_path
+    )
+
+    manifest = load_manifest(
+        manifest_path
+    )
+
+    completed = validate_checkpoint_state(
+        manifest,
+        raw_df,
+        agg_df,
+    )
 
     cells = scenario_cells()
 
-    print(
-        "OPENING CALIBRATION BLOCK 1000-1099.\n"
-        "Validation block 2000-2099 remains sealed.\n"
-        "No numerical P/S/I/G threshold is used by this script."
+    total_cells = (
+        len(cells)
+        * len(TARGET_N_VALUES)
     )
 
-    for cell_index, cell in enumerate(cells, start=1):
-
-        print(
-            f"[cell {cell_index}/{len(cells)}] "
-            f"{cell.scenario} "
-            f"tau={cell.tau} "
-            f"rho={cell.rho}"
+    if len(completed) > total_cells:
+        raise CalibrationContractError(
+            "Checkpoint manifest contains more cells than the frozen grid."
         )
 
-        cell_rows: list[dict] = []
+    start_time = time.monotonic()
+
+    print(
+        "OPENING/RESUMING CALIBRATION BLOCK 3000-3099.\n"
+        "Validation block 2000-2099 remains sealed.\n"
+        "No numerical P/S/I/G threshold is used by this script.\n"
+        f"Completed cells already checkpointed: "
+        f"{len(completed)}/{total_cells}"
+    )
+
+    for cell_index, cell in enumerate(
+        cells,
+        start=1,
+    ):
 
         # One frozen synthetic dataset per scenario/tau setting.
-        # The same generator seed is reused across rho and across all
-        # calibration perturbations.
         dataset_ss = dataset_seedsequence(
             cell.scenario_id,
             cell.tau_index,
@@ -1266,10 +1746,37 @@ def run_step1(output_dir: Path) -> None:
             dataset_seed,
         )
 
-        # One calibration seed = one post-generation perturbation identity.
-        for calibration_seed in CALIBRATION_SEEDS:
+        for target_n in TARGET_N_VALUES:
 
-            for target_n in TARGET_N_VALUES:
+            key = cell_key_from_values(
+                cell.scenario,
+                cell.tau_index,
+                cell.rho_index,
+                target_n,
+            )
+
+            if key in completed:
+                # Already integrity-validated at startup.
+                print(
+                    "[checkpoint skip] "
+                    f"scenario={cell.scenario} "
+                    f"tau_index={cell.tau_index} "
+                    f"rho_index={cell.rho_index} "
+                    f"N={target_n}"
+                )
+                continue
+
+            rows: list[dict] = []
+
+            print(
+                "[cell start] "
+                f"scenario={cell.scenario} "
+                f"tau={cell.tau} "
+                f"rho={cell.rho} "
+                f"N={target_n}"
+            )
+
+            for calibration_seed in CALIBRATION_SEEDS:
                 row = run_one_perturbation(
                     cell,
                     calibration_seed=calibration_seed,
@@ -1278,62 +1785,100 @@ def run_step1(output_dir: Path) -> None:
                 )
 
                 row["dataset_seed"] = dataset_seed
+                rows.append(row)
 
-                raw_rows.append(row)
-                cell_rows.append(row)
-
-        cell_df = pd.DataFrame(cell_rows)
-
-        for target_n in TARGET_N_VALUES:
-            subset = (
-                cell_df[
-                    cell_df["target_n"] == target_n
-                ]
-                .sort_values("calibration_seed")
+            cell_df = (
+                pd.DataFrame(rows)
+                .sort_values(
+                    "calibration_seed"
+                )
                 .reset_index(drop=True)
             )
 
-            aggregate_rows.append(
-                aggregate_cell(subset)
+            aggregate_row = aggregate_cell(
+                cell_df
             )
 
-    raw_df = pd.DataFrame(raw_rows)
-    agg_df = pd.DataFrame(aggregate_rows)
+            # No threshold/gate columns may enter authoritative output.
+            forbidden_columns = {
+                "gamma_P",
+                "gamma_S",
+                "gamma_I",
+                "gamma_G",
+            }
 
-    # No threshold/gate columns may exist.
-    forbidden_columns = {
-        "gamma_P",
-        "gamma_S",
-        "gamma_I",
-        "gamma_G",
-    }
+            if forbidden_columns & set(cell_df.columns):
+                raise CalibrationContractError(
+                    "Threshold column appeared in per-perturbation output."
+                )
 
-    if forbidden_columns & set(raw_df.columns):
-        raise CalibrationContractError(
-            "Threshold/gate column appeared in raw output."
-        )
+            if forbidden_columns & set(aggregate_row):
+                raise CalibrationContractError(
+                    "Threshold column appeared in aggregate output."
+                )
 
-    if forbidden_columns & set(agg_df.columns):
-        raise CalibrationContractError(
-            "Threshold/gate column appeared in aggregate output."
-        )
+            (
+                raw_df,
+                agg_df,
+                manifest,
+            ) = append_completed_cell(
+                cell_rows=cell_df,
+                aggregate_row=aggregate_row,
+                raw_df=raw_df,
+                agg_df=agg_df,
+                manifest=manifest,
+                raw_path=raw_path,
+                cell_path=cell_path,
+                manifest_path=manifest_path,
+            )
 
-    raw_df.to_csv(
-        perturbation_path,
-        index=False,
+            completed = completed_keys_from_manifest(
+                manifest
+            )
+
+            elapsed = time.monotonic() - start_time
+
+            print(
+                "[cell checkpointed] "
+                f"scenario={cell.scenario} "
+                f"tau_index={cell.tau_index} "
+                f"rho_index={cell.rho_index} "
+                f"N={target_n} "
+                f"| completed={len(completed)}/{total_cells} "
+                f"| elapsed_seconds={elapsed:.1f} "
+                f"| raw={raw_path} "
+                f"| aggregate={cell_path} "
+                f"| manifest={manifest_path}"
+            )
+
+    # Final authoritative integrity validation.
+    raw_df = pd.read_csv(raw_path)
+    agg_df = pd.read_csv(cell_path)
+    manifest = load_manifest(
+        manifest_path
     )
 
-    agg_df.to_csv(
-        cell_path,
-        index=False,
+    completed = validate_checkpoint_state(
+        manifest,
+        raw_df,
+        agg_df,
     )
+
+    if len(completed) != total_cells:
+        raise CalibrationContractError(
+            f"Step 1 terminated with {len(completed)}/{total_cells} "
+            "completed cells."
+        )
 
     print("\nSTEP 1 COMPLETE.")
-    print("Raw perturbations :", perturbation_path)
+    print("Raw perturbations :", raw_path)
     print("Cell statistics    :", cell_path)
+    print("Checkpoint manifest:", manifest_path)
+    print("Completed cells    :", len(completed))
     print("No threshold was selected.")
     print("No validation seed was used.")
     print("No biological activation was accessed.")
+
 
 
 def parse_args() -> argparse.Namespace:
@@ -1349,7 +1894,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help=(
             "Required explicit switch. "
-            "Opens calibration seeds 1000-1099."
+            "Opens or resumes calibration seeds 3000-3099."
         ),
     )
 
