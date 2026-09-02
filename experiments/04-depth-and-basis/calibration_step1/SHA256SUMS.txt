@@ -1,0 +1,15 @@
+# Experiment 04 Arm-B Step-1 calibration artifacts
+#
+# 1000-1099: consumed operationally after interrupted run;
+# no persisted calibration table and no threshold selection.
+#
+# 3000-3099: first and only usable calibration dataset.
+# 2000-2099: remains sealed for independent validation.
+#
+# Runner commit:
+# 10fe19af5814edd09e89ae7b8df229aabfe51508
+#
+467a30b6ae18c08a029a44b56006c58946bd28e45649d290d8f3b7bda341e32d  arm_b_step1_per_perturbation.csv
+3cdd3e89ef0b0f0d0bfe944d35df752ad2e7a614acab5f85edd61da34c788f5c  arm_b_step1_per_perturbation.csv.gz
+de06aae31bc86aadb7341e4acdb61c4318dc95e628558b01e971541a39dd424a  arm_b_step1_cell_statistics.csv
+fb7903307d7e21828d907c77ffe4d609a620ba7ebcf3d7938ab502b8bed3cb82  arm_b_step1_checkpoint_manifest.json
