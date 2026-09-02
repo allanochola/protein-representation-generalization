@@ -2644,6 +2644,271 @@ If the checkpoint-capable runner itself fails after that point, block
 Validation seeds `2000-2099` remain sealed throughout this process.
 
 
+
+
+### Calibration outcome — block 3000-3099
+
+Calibration block:
+
+    3000-3099
+
+was executed to completion under the frozen Step-1 runner and produced the
+first and only usable Arm-B calibration dataset.
+
+The completed calibration object contained:
+
+    273 calibration cells
+    100 perturbations per cell
+    27,300 perturbation-level rows
+
+All calibration cells were structurally validated before analysis.
+
+Validation seeds:
+
+    2000-2099
+
+remain sealed and were not used.
+
+No biological activation was accessed.
+
+No numerical value was selected for:
+
+    gamma_P
+    gamma_S
+    gamma_I
+    gamma_G
+
+No P/S/I/G pass/fail decision was frozen from this block.
+
+No PROBE_STABLE decision was frozen from this block.
+
+#### Calibration disposition
+
+The frozen Arm-B instrument failed calibration before numerical threshold
+selection.
+
+The failure is an instrument/control-design failure rather than a numerical
+operating-point failure.
+
+Block `3000-3099` is therefore consumed and may not be reused after amendment.
+
+#### R2 positive-control behavior
+
+The preregistered R2-collapse failure mode was not observed in the useful
+high-signal positive-control region.
+
+For:
+
+    S1
+    S6 at rho = 0.30 or 0.60
+    tau_index in {6, 7, 8}
+
+the realized R2 zero-coefficient fraction was:
+
+    0.0
+
+at all target discovery sizes:
+
+    N = 100
+    N = 120
+    N = 139
+
+Therefore the calibration failure is not attributed to R2 collapse, and the
+frozen R2-to-R1/R3 rule-level escape hatch is not triggered by this result.
+
+#### G / S7 failure
+
+Across all 273 calibration cells:
+
+    I_stat == G_stat
+
+exactly.
+
+The realized maximum absolute difference between the two statistics was:
+
+    0.0
+
+The number of cells satisfying:
+
+    G_stat < I_stat
+
+was:
+
+    0
+
+The number of S7 cells satisfying:
+
+    G_stat < I_stat
+
+was also:
+
+    0
+
+Thus the S7 control did not instantiate the intended structure:
+
+    predictive
+    sparse
+    coordinate-identity stable
+    sign unstable
+
+Instead, whenever S7 showed reduced G stability, I stability fell by exactly
+the same amount.
+
+At high-signal settings, S7 frequently became both highly predictive and
+perfectly coordinate/sign stable.
+
+The frozen sign-stability limb therefore lacked a functioning sign-specific
+rejector.
+
+No numerical `gamma_G` can repair this structural failure.
+
+#### S3 identity-stability behavior
+
+The S3 identity-stability result depends materially on discovery size.
+
+At:
+
+    N = 139
+
+high-signal S3 cells reached:
+
+    I_stat = 1.0
+
+matching the positive controls and therefore providing no identity-stability
+separation at that discovery size.
+
+At:
+
+    N = 100
+    N = 120
+
+S3 did not show the same universal saturation, but the positive controls also
+had substantially lower and less clean identity stability than at N = 139.
+
+Therefore the calibration result does not establish a global S3 failure across
+all discovery sizes.
+
+The narrower supported conclusion is that the intended:
+
+    predictive but identity-unstable
+
+S3 rejection regime was not cleanly realized at N = 139, where identity
+stability saturated and ceased to distinguish S3 from the positive controls.
+
+Any S3 redesign or diagnostic follow-up must preserve this discovery-size
+dependence rather than treating the observed failure as uniform across N.
+
+#### S4 / S5 predictive-dense coverage gap
+
+S4 and S5 were intended to provide a regime in which a dense signal is
+predictive enough to exercise the sparsity limb while remaining nonsparse.
+
+Their realized predictive distributions were dominated by chance-level
+behavior within the frozen tau ladder.
+
+S4:
+
+    median P_stat = 0.5
+    maximum P_stat approximately 0.610
+
+S5:
+
+    median P_stat = 0.5
+    maximum P_stat approximately 0.536
+
+This does not by itself imply that the dense-signal scenarios malfunctioned.
+Reduced recoverability of dense signals at fixed tau is part of the construct
+the controls were designed to represent.
+
+The calibration gap is narrower:
+
+    within the frozen tau ladder,
+    S4/S5 did not reach a clearly predictive-and-dense operating regime.
+
+Therefore the sparsity limb lacked a clean predictive dense rejector in the
+realized calibration grid.
+
+This is treated as a control-range or ladder-coverage problem rather than a
+blanket failure of the S4/S5 scenario definitions.
+
+#### Consequence for threshold selection
+
+Because the intended limb-isolation structure was not realized, Step-3
+threshold selection is not performed on block `3000-3099`.
+
+In particular:
+
+- `gamma_G` may not be frozen without a functioning sign-instability rejector;
+- no partial P/S/I threshold freeze is performed while the complete conjunctive
+  P/S/I/G instrument remains invalid;
+- the failure may not be repaired by searching for numerical thresholds that
+  accommodate the realized control behavior.
+
+#### Required redesign
+
+Before any further calibration run:
+
+1. redesign S7 and/or the G calibration mechanism so the diagnostic suite
+   realizes the structural condition:
+
+       same coordinate recurs
+       coefficient sign changes
+
+   producing a regime with:
+
+       I_stat > G_stat
+
+2. re-evaluate S3 with explicit attention to discovery-size dependence,
+   especially the N = 139 identity-stability saturation, and determine whether
+   a predictive but identity-unstable operating region can be realized without
+   treating the N = 100/120 behavior as equivalent to the N = 139 failure;
+
+3. re-evaluate the S4/S5 signal-strength coverage so that the diagnostic grid
+   includes, if the construct permits, a predictive-but-dense operating region.
+   This may require extending the dense-scenario tau range rather than changing
+   the dense-signal construct itself;
+
+4. freeze every control amendment before opening a new calibration block.
+
+The redesign must target the intended structural properties rather than
+numerical separation observed in block `3000-3099`.
+
+#### Seed-block accounting after failure
+
+The seed-block state after this calibration is:
+
+    1000-1099
+        consumed operationally by the interrupted first calibration attempt;
+        no usable calibration statistics survived;
+        no threshold was selected.
+
+    3000-3099
+        consumed analytically by the completed calibration run;
+        first and only usable calibration dataset;
+        instrument failed before threshold selection.
+
+    2000-2099
+        sealed for independent validation.
+
+The next available calibration reserve block is:
+
+    4000-4099
+
+Block `4000-4099` may not be opened until all amended control and instrument
+definitions have been:
+
+1. written;
+2. diagnostically tested using the designated pre-calibration diagnostic
+   process;
+3. frozen;
+4. committed;
+5. pushed;
+6. verified against the remote HEAD.
+
+Validation block `2000-2099` remains sealed throughout redesign and
+recalibration.
+
+
 ## 22. Independent-validation requirements
 
 Before validation is run, numerical acceptance criteria must be frozen.
