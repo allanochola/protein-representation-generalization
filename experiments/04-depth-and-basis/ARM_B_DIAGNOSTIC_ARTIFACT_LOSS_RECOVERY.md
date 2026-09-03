@@ -89,3 +89,56 @@ After reconstruction:
 
 No P/S/I/G threshold selection and no independent-validation access are
 authorized by this recovery record.
+
+
+## Post-reconstruction provenance qualification
+
+The authorized artifact reconstruction subsequently completed 273 / 273 cells
+using the byte-identical frozen diagnostic runner and the runner's deterministic
+seed derivation with the already-consumed namespace `910001-910100`.
+
+The original completed diagnostic execution's software package environment was
+not captured before the Kaggle reset. Therefore, reproducibility was not
+established against a recorded package-environment match between the original
+completed execution and the reconstruction.
+
+The package versions recorded during reconstruction describe the reconstruction
+environment only and must not be interpreted as verified environment identity
+with the original completed execution.
+
+Accordingly, the reconstruction provenance rests on:
+
+1. byte identity of the frozen diagnostic implementation;
+2. deterministic seed derivation and reuse of the already-consumed diagnostic
+   namespace;
+3. deterministic reconstruction of the archived output artifacts under that
+   frozen implementation.
+
+It does not rest on a demonstrated software-package-environment match to the
+lost original runtime.
+
+This qualification does not reclassify the reconstruction as new independent
+evidence and does not alter the consumed status of `910001-910100`.
+
+The exact reconstruction console transcript is archived at:
+
+`architecture_diagnostic/RECONSTRUCTION_CONSOLE_LOG.md`
+
+with SHA-256:
+
+`49b19194f9bc085dccc443faa0998bf965fe18bc2aa0e34b422eeb6c9676b5e3`
+
+That transcript records terminal completion at 273 / 273 cells and explicitly
+records that no threshold was selected, no validation seed was used, and no
+biological activation was accessed.
+
+The protected namespaces remain:
+
+    910001-910100 = CONSUMED / CLOSED
+    920001-920100 = ASSIGNED / UNOPENED
+    4000-4099     = UNOPENED calibration reserve
+    2000-2099     = SEALED independent validation
+
+No gamma was selected by the reconstruction.
+
+No S7 redesign diagnostic was executed by the reconstruction.
