@@ -31,16 +31,15 @@ Independent-validation block `2000-2099` remains sealed.
 
 Current status
 --------------
-This diagnostic implementation is intentionally HARD-DISABLED.
+This is the complete enabled implementation of the Arm-B post-failure
+architecture diagnostic.
 
-The scientific implementation, blinding schema, checkpoint validation and
-architecture summaries are complete in this source checkpoint, but no
-diagnostic seed may be opened from this commit.
+Diagnostic namespace:
 
-Execution may be enabled only by a separate explicit enablement commit after
-this disabled implementation has been committed, pushed and remote-verified.
-That enablement change must itself be statically reviewed, committed, pushed
-and remote-verified before `910001-910100` is opened.
+    910001-910100
+
+must not be opened until this enablement commit has been reviewed, committed,
+pushed and remote-verified.
 
 The diagnostic runner must not emit or persist final P/S/I/G statistics or
 pairwise-Jaccard summaries for `910001-910100`.
@@ -2387,25 +2386,20 @@ def validate_completed_cell(
                 )
 
 
-def validate_checkpoint_state(
+def validate_checkpoint_identity_state(
     manifest: dict,
     raw_df: pd.DataFrame,
     agg_df: pd.DataFrame,
 ) -> set[tuple[str, int, int, int]]:
     """
-    Validate every manifest-completed cell and reject authoritative
-    rows that are not represented by the manifest.
+    Cheap global checkpoint-consistency validation.
+
+    Verifies only that authoritative raw/aggregate cell identities match the
+    manifest. Scientific/deep validation is performed separately.
     """
     completed = completed_keys_from_manifest(
         manifest
     )
-
-    for key in sorted(completed):
-        validate_completed_cell(
-            key,
-            raw_df,
-            agg_df,
-        )
 
     if not raw_df.empty:
         raw_keys = {
@@ -2431,6 +2425,33 @@ def validate_checkpoint_state(
             )
 
     return completed
+
+
+def validate_checkpoint_state(
+    manifest: dict,
+    raw_df: pd.DataFrame,
+    agg_df: pd.DataFrame,
+) -> set[tuple[str, int, int, int]]:
+    """
+    Validate every manifest-completed cell and reject authoritative
+    rows that are not represented by the manifest.
+    """
+    completed = completed_keys_from_manifest(
+        manifest
+    )
+
+    for key in sorted(completed):
+        validate_completed_cell(
+            key,
+            raw_df,
+            agg_df,
+        )
+
+    return validate_checkpoint_identity_state(
+        manifest,
+        raw_df,
+        agg_df,
+    )
 
 
 def append_completed_cell(
@@ -2562,7 +2583,17 @@ def append_completed_cell(
         manifest_path
     )
 
-    validate_checkpoint_state(
+    # Deep-validate only the newly written cell here.
+    # All prior completed cells were already validated at startup or
+    # immediately after their own atomic checkpoint.
+    validate_completed_cell(
+        key,
+        verify_raw,
+        verify_agg,
+    )
+
+    # Then retain the cheap global identity invariant.
+    validate_checkpoint_identity_state(
         verify_manifest,
         verify_raw,
         verify_agg,
@@ -2582,18 +2613,12 @@ def append_completed_cell(
 
 def run_architecture_diagnostic(output_dir: Path) -> None:
     """
-    Complete architecture-diagnostic implementation, intentionally disabled.
+    Execute the complete frozen Arm-B post-failure architecture diagnostic.
 
-    Execution may be enabled only by a separate reviewed, committed, pushed
-    and remote-verified enablement change.
+    This function opens diagnostic namespace `910001-910100` and therefore
+    must be invoked only after the enablement commit containing this code has
+    been pushed and remote-verified.
     """
-    raise CalibrationContractError(
-        "Architecture diagnostic scaffold is not executable yet. "
-        "No diagnostic seed may be opened until implementation is complete, "
-        "reviewed, committed, pushed and remote-verified."
-    )
-
-    # Unreachable scaffold retained temporarily for controlled conversion.
     output_dir = output_dir.resolve()
     output_dir.mkdir(
         parents=True,
@@ -2840,8 +2865,7 @@ def run_architecture_diagnostic(output_dir: Path) -> None:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Experiment 04 Arm-B post-failure architecture diagnostic: "
-            "complete implementation; execution intentionally disabled."
+            "Experiment 04 Arm-B post-failure architecture diagnostic."
         )
     )
 
@@ -2849,9 +2873,8 @@ def parse_args() -> argparse.Namespace:
         "--execute-architecture-diagnostic",
         action="store_true",
         help=(
-            "Reserved explicit execution switch. "
-            "This source checkpoint remains hard-disabled pending a separate "
-            "reviewed and remote-verified enablement commit."
+            "Required explicit switch that opens or resumes diagnostic "
+            "namespace 910001-910100."
         ),
     )
 
@@ -2870,9 +2893,8 @@ def main() -> None:
     if not args.execute_architecture_diagnostic:
         raise SystemExit(
             "Architecture diagnostic was NOT executed. "
-            "This source checkpoint is intentionally hard-disabled pending "
-            "a separate reviewed, committed, pushed and remote-verified "
-            "enablement change."
+            "Pass --execute-architecture-diagnostic only after this "
+            "enablement commit has been pushed and remote-verified."
         )
 
     run_architecture_diagnostic(
