@@ -2969,11 +2969,23 @@ After failure of block `3000-3099`, its full-N consequence for I/G was
 descriptively reconstructed and a pre-implementation architecture amendment
 was frozen.
 
-The normative amendment is:
+The normative documents governing all future Arm-B calibration are:
 
 `ARM_B_POST_FAILURE_ARCHITECTURE_AMENDMENT.md`
+    amended perturbation architecture and meaning of N;
 
-For all future Arm-B calibration runs, that amendment supersedes the original
+`ARM_B_POST_FAILURE_DIAGNOSTIC_CONTRACT.md`
+    dedicated probe-fitting diagnostic namespace `910001-910100`, frozen
+    diagnostic grid and architecture-verification requirements;
+
+`ARM_B_POST_FAILURE_DIAGNOSTIC_BLINDING_ADDENDUM.md`
+    restricts what that diagnostic may persist or expose, and supersedes the
+    diagnostic contract where the two conflict.
+
+All three must be read together. None supersedes the others in full.
+
+For all future Arm-B calibration runs, the architecture amendment supersedes
+the original
 §13 definition of N as the coefficient-stability refit size and supersedes the
 original attribution of I/G to the full-target-N Stage-B refit.
 
