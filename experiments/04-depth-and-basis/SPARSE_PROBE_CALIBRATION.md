@@ -2960,6 +2960,26 @@ Validation block `2000-2099` remains sealed throughout redesign and
 recalibration.
 
 
+## Post-failure Arm-B architecture amendment
+
+The original perturbation architecture above remains part of the historical
+pre-calibration record.
+
+After failure of block `3000-3099`, its full-N consequence for I/G was
+descriptively reconstructed and a pre-implementation architecture amendment
+was frozen.
+
+The normative amendment is:
+
+`ARM_B_POST_FAILURE_ARCHITECTURE_AMENDMENT.md`
+
+For all future Arm-B calibration runs, that amendment supersedes the original
+§13 definition of N as the coefficient-stability refit size and supersedes the
+original attribution of I/G to the full-target-N Stage-B refit.
+
+The historical block `3000-3099` results remain interpreted under the original
+architecture.
+
 ## 22. Independent-validation requirements
 
 Before validation is run, numerical acceptance criteria must be frozen.
