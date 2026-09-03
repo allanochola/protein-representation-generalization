@@ -1,0 +1,29 @@
+# Exp 04 Arm-B post-failure architecture diagnostic — reconstructed artifacts
+#
+# Historical diagnostic:
+#   runner commit: d240442046200801b73743446aafcdda10314573
+#   diagnostic namespace 910001-910100 consumed by original execution
+#   original execution: 273/273 cells, 19431.2 s
+#   original artifacts lost in Kaggle runtime reset before archive
+#
+# Recovery:
+#   recovery-record commit: aa937fab8877463bab8ea5f949c611609d731ab9
+#   exact same consumed namespace reused solely for deterministic artifact reconstruction
+#   reconstruction: 273/273 cells, 19882.7 s
+#   runner byte-identical to d240442
+#
+# Protected namespaces:
+#   4000-4099 = UNOPENED
+#   2000-2099 = SEALED
+#
+# No threshold selected.
+# No P/S/I/G persisted.
+# No biological activation accessed.
+# environment: {"numpy": "2.0.2", "pandas": "2.3.3", "python": "3.12.13", "scipy": "1.16.3", "sklearn": "1.6.1"}
+# authoritative uncompressed arm_b_post_failure_architecture_per_perturbation.csv sha256: 916f82a77908713a6a4d89f1ee0ffded7637d279f4be7ab55cccc61796e8bcdd
+
+916f82a77908713a6a4d89f1ee0ffded7637d279f4be7ab55cccc61796e8bcdd  arm_b_post_failure_architecture_per_perturbation.csv
+c37c60a79551e9515392569360bbc275c812f2d4a4cffd3e68668760aa3cb592  arm_b_post_failure_architecture_cell_summary.csv
+8f9d30b24010ae872ac0e21e7d71d31651c9f975a944a16f5add4ed8d5b4e732  arm_b_post_failure_architecture_N120_vs_N139.csv
+cff8af252f97f78170b9a09676c842a063918529943f9063af2ce5a291e4ac62  arm_b_post_failure_architecture_checkpoint_manifest.json
+4e7eafc758d2cd803803dc757e20c5e8d81e87a56840bd1b67640c88918effde  arm_b_post_failure_architecture_per_perturbation.csv.gz
