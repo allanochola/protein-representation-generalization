@@ -224,7 +224,8 @@ information to reconstruct or verify at minimum:
 - rho;
 - N;
 - selected Stage-A C;
-- Stage-A held-out AUROC;
+- Stage-A final-fit seed provenance sufficient to verify the inherited
+  Stage-A execution pathway;
 - `K_t_full`;
 - `K_t_stab`;
 - stability-subsample positive membership;
@@ -236,22 +237,50 @@ information to reconstruct or verify at minimum:
 - deterministic stability-subsample membership hash suitable for exact
   duplicate-membership detection.
 
+### Prospective blinding reconciliation
+
+Before any seed from `910001-910100` was opened, the subsequently frozen
+diagnostic blinding addendum narrowed the information that this diagnostic may
+persist or expose.
+
+Accordingly:
+
+- Stage-A held-out AUROC continues to be computed transiently as part of the
+  unchanged frozen Stage-A pathway, but is not persisted by this diagnostic;
+- final cell-level P/S/I/G statistics are not calculated, persisted, printed or
+  summarized on `910001-910100`;
+- Stage-A preservation is audited through the unchanged implementation,
+  selected-C identity and Stage-A seed provenance rather than persisted
+  predictive-performance values;
+- architecture and support-cardinality quantities listed below remain permitted
+  because they are required to verify the amended stability machinery.
+
+This correction is prospective, is made before any diagnostic seed is opened,
+and is not motivated by a diagnostic result. It does not alter Stage-A model
+selection, Stage-A held-out prediction, or the later calibration definition of
+P/S/I/G.
+
 Cell-level diagnostic summaries must include at minimum:
 
-- P statistic;
-- S statistic;
-- I statistic;
-- G statistic;
 - median `K_t_full`;
 - median `K_t_stab`;
 - minimum `K_t_stab`;
 - maximum `K_t_stab`;
+- number of empty full-fit supports;
+- number of singleton full-fit supports;
 - number of empty stability supports;
 - number of singleton stability supports;
 - number of distinct selected-C values;
-- number of distinct stability subsamples;
+- number of distinct stream-26 seed identities;
+- number of distinct realized stability-subsample memberships;
+- duplicate realized stability-membership count;
 - number of distinct unsigned stability supports;
-- largest identical unsigned-support clique.
+- largest identical unsigned stability-support clique;
+- full-fit collapse classification;
+- stability-fit collapse classification;
+- joint full-fit / stability-fit collapse classification;
+- explicit full-fit collapse flag;
+- explicit stability-fit-specific collapse flag.
 
 
 ## 8. Stability-fit collapse classification
