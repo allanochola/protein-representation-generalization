@@ -31,33 +31,34 @@ Independent-validation block `2000-2099` remains sealed.
 
 Current status
 --------------
-This scaffold is intentionally HARD-DISABLED.
+This diagnostic implementation is intentionally HARD-DISABLED.
 
-It is not yet a valid scientific diagnostic implementation and must not open
-any diagnostic seed until the amended stability-refit logic, blinding schema,
-checkpoint validation and architecture summaries have been implemented,
-reviewed, committed, pushed and remote-verified.
+The scientific implementation, blinding schema, checkpoint validation and
+architecture summaries are complete in this source checkpoint, but no
+diagnostic seed may be opened from this commit.
 
-The completed diagnostic runner must not emit or persist final P/S/I/G
-statistics or pairwise-Jaccard summaries for `910001-910100`.
+Execution may be enabled only by a separate explicit enablement commit after
+this disabled implementation has been committed, pushed and remote-verified.
+That enablement change must itself be statically reviewed, committed, pushed
+and remote-verified before `910001-910100` is opened.
 
-This checkpoint exists only to establish a safe diagnostic-specific execution
-boundary, terminology and provenance before scientific implementation changes.
+The diagnostic runner must not emit or persist final P/S/I/G statistics or
+pairwise-Jaccard summaries for `910001-910100`.
 """
 
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import sys
 import time
 import warnings
-from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Iterable, Optional
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -93,7 +94,7 @@ from synthetic_generators import (  # noqa: E402
 
 
 # ============================================================
-# Frozen calibration constants
+# Frozen diagnostic, calibration-reserve and runner constants
 # ============================================================
 
 DIAGNOSTIC_SEEDS = tuple(range(910001, 910101))
@@ -222,7 +223,7 @@ def dataset_seedsequence(
 
         [s, t, 100]
 
-    Independent of calibration seed, N and rho.
+    Independent of diagnostic seed, N and rho.
     """
     return np.random.SeedSequence(
         [
@@ -486,7 +487,7 @@ def fit_probe_or_fail(
     context: str,
 ) -> LogisticRegression:
     """
-    Any convergence warning/failure is an instrument-level calibration failure.
+    Any convergence warning/failure is an instrument-level diagnostic fit failure.
     """
     model = make_probe(
         C=C,
@@ -828,6 +829,124 @@ def select_C_R2(
 # One frozen perturbation
 # ============================================================
 
+def select_stability_subsample(
+    y: np.ndarray,
+    *,
+    target_n: int,
+    rng: np.random.Generator,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, str]:
+    """
+    Select floor(0.80 * N) observations independently within each class
+    from the already-selected target-N pool.
+
+    Returned memberships are indices in target-N-pool index space.
+    """
+    y = np.asarray(y, dtype=int)
+
+    if y.ndim != 1:
+        raise CalibrationContractError(
+            "Stability-subsample labels must be one-dimensional."
+        )
+
+    if y.shape[0] != 2 * target_n:
+        raise CalibrationContractError(
+            "Stability subsampling received wrong target-N pool size."
+        )
+
+    pos_pool = np.flatnonzero(y == 1)
+    neg_pool = np.flatnonzero(y == 0)
+
+    if len(pos_pool) != target_n or len(neg_pool) != target_n:
+        raise CalibrationContractError(
+            "Stability subsampling requires exactly N observations per class."
+        )
+
+    stability_n = int(math.floor(STABILITY_FRACTION * target_n))
+
+    expected_n = {
+        100: 80,
+        120: 96,
+        139: 111,
+    }.get(int(target_n))
+
+    if expected_n is None or stability_n != expected_n:
+        raise CalibrationContractError(
+            f"Unexpected stability-subsample size for N={target_n}: "
+            f"{stability_n}."
+        )
+
+    selected_pos = np.asarray(
+        rng.choice(
+            pos_pool,
+            size=stability_n,
+            replace=False,
+        ),
+        dtype=int,
+    )
+
+    selected_neg = np.asarray(
+        rng.choice(
+            neg_pool,
+            size=stability_n,
+            replace=False,
+        ),
+        dtype=int,
+    )
+
+    if len(np.unique(selected_pos)) != stability_n:
+        raise CalibrationContractError(
+            "Duplicate positive stability-subsample membership."
+        )
+
+    if len(np.unique(selected_neg)) != stability_n:
+        raise CalibrationContractError(
+            "Duplicate negative stability-subsample membership."
+        )
+
+    if not np.all(y[selected_pos] == 1):
+        raise CalibrationContractError(
+            "Positive stability membership contains a non-positive row."
+        )
+
+    if not np.all(y[selected_neg] == 0):
+        raise CalibrationContractError(
+            "Negative stability membership contains a non-negative row."
+        )
+
+    selected = np.concatenate(
+        [
+            selected_pos,
+            selected_neg,
+        ]
+    )
+
+    membership_payload = {
+        "positive_target_pool_indices": [
+            int(i) for i in selected_pos.tolist()
+        ],
+        "negative_target_pool_indices": [
+            int(i) for i in selected_neg.tolist()
+        ],
+    }
+
+    membership_json = json.dumps(
+        membership_payload,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+    membership_sha256 = hashlib.sha256(
+        membership_json.encode("utf-8")
+    ).hexdigest()
+
+    return (
+        selected,
+        selected_pos,
+        selected_neg,
+        membership_sha256,
+    )
+
+
 def run_one_perturbation(
     cell: ScenarioCell,
     *,
@@ -843,7 +962,7 @@ def run_one_perturbation(
 
     if diagnostic_seed in VALIDATION_SEEDS:
         raise CalibrationContractError(
-            "Validation seed access is prohibited in Step 1."
+            "Validation seed access is prohibited in the architecture diagnostic."
         )
 
     c = int(diagnostic_seed)
@@ -871,6 +990,23 @@ def run_one_perturbation(
         target_n=N,
         rng=subsample_rng,
     )
+
+    expected_target_pool_y = np.concatenate(
+        [
+            np.ones(N, dtype=int),
+            np.zeros(N, dtype=int),
+        ]
+    )
+
+    if not np.array_equal(
+        np.asarray(yn, dtype=int),
+        expected_target_pool_y,
+    ):
+        raise CalibrationContractError(
+            "Frozen target-N pool ordering changed: expected all positive "
+            "rows followed by all negative rows. Stream-26 membership and "
+            "replay semantics must not proceed under a different ordering."
+        )
 
     # --------------------------------------------------------
     # Stream 22: Stage-A split
@@ -997,19 +1133,118 @@ def run_one_perturbation(
         beta != 0.0
     )
 
-    K_t = int(len(selected_idx))
+    K_t_full = int(len(selected_idx))
 
-    support = tuple(
+    full_support = tuple(
         int(j)
         for j in selected_idx.tolist()
     )
 
-    signed_support = tuple(
+    full_signed_support = tuple(
         (
             int(j),
             1 if beta[j] > 0.0 else -1,
         )
         for j in selected_idx.tolist()
+    )
+
+    # --------------------------------------------------------
+    # Stream 26: observation-level stability subsampling
+    # --------------------------------------------------------
+
+    stability_subsample_ss = runner_seedsequence(
+        c, s, t, r, N,
+        STREAM_STABILITY_SUBSAMPLE,
+    )
+
+    stability_rng = np.random.default_rng(
+        stability_subsample_ss
+    )
+
+    (
+        stability_selected,
+        stability_selected_pos,
+        stability_selected_neg,
+        stability_membership_sha256,
+    ) = select_stability_subsample(
+        yn,
+        target_n=N,
+        rng=stability_rng,
+    )
+
+    X_stab = np.asarray(
+        Xn[stability_selected],
+        dtype=float,
+    )
+    y_stab = np.asarray(
+        yn[stability_selected],
+        dtype=int,
+    )
+
+    stability_n_per_class = int(
+        math.floor(STABILITY_FRACTION * N)
+    )
+
+    if X_stab.shape[0] != 2 * stability_n_per_class:
+        raise CalibrationContractError(
+            "Stability subsample produced wrong total sample count."
+        )
+
+    if int(np.sum(y_stab == 1)) != stability_n_per_class:
+        raise CalibrationContractError(
+            "Stability subsample produced wrong positive count."
+        )
+
+    if int(np.sum(y_stab == 0)) != stability_n_per_class:
+        raise CalibrationContractError(
+            "Stability subsample produced wrong negative count."
+        )
+
+    # --------------------------------------------------------
+    # Stream 27: stability refit's sklearn random_state
+    # --------------------------------------------------------
+
+    stability_fit_ss = runner_seedsequence(
+        c, s, t, r, N,
+        STREAM_STABILITY_FIT,
+    )
+
+    stability_fit_seed = seedsequence_to_uint32(
+        stability_fit_ss
+    )
+
+    stability_model = fit_probe_or_fail(
+        X_stab,
+        y_stab,
+        C=r2.selected_C,
+        random_state=stability_fit_seed,
+        context=f"{context}; 80%-within-pool stability refit",
+    )
+
+    beta_stab = np.asarray(
+        stability_model.coef_[0],
+        dtype=float,
+    )
+
+    stability_selected_idx = np.flatnonzero(
+        beta_stab != 0.0
+    )
+
+    K_t_stab = int(
+        len(stability_selected_idx)
+    )
+
+    stability_support = tuple(
+        int(j)
+        for j in stability_selected_idx.tolist()
+    )
+
+    stability_signed_support = tuple(
+        (
+            int(j),
+            1 if beta_stab[j] > 0.0 else -1,
+        )
+        for j in stability_selected_idx.tolist()
     )
 
     # --------------------------------------------------------
@@ -1027,70 +1262,196 @@ def run_one_perturbation(
         "rho": cell.rho,
         "rho_index": cell.rho_index,
         "selected_C_R2": r2.selected_C,
-        "R1_best_C": r2.best_C,
-        "R1_best_mean_CV_AUROC": r2.best_mean,
-        "R1_best_SE": r2.best_se,
-        "R2_one_se_floor": r2.one_se_floor,
-        "stage_A_heldout_AUROC": heldout_auc,
-        "K_t": K_t,
-        "support_indices_json": json.dumps(
-            support,
+        "K_t_full": K_t_full,
+        "K_t_stab": K_t_stab,
+        "full_support_indices_json": json.dumps(
+            full_support,
             separators=(",", ":"),
         ),
-        "signed_support_json": json.dumps(
-            signed_support,
+        "full_signed_support_json": json.dumps(
+            full_signed_support,
             separators=(",", ":"),
         ),
-        "cv_mean_by_C_json": json.dumps(
-            dict(zip(C_GRID, r2.cv_means)),
+        "stability_support_indices_json": json.dumps(
+            stability_support,
             separators=(",", ":"),
         ),
-        "cv_se_by_C_json": json.dumps(
-            dict(zip(C_GRID, r2.cv_ses)),
+        "stability_signed_support_json": json.dumps(
+            stability_signed_support,
             separators=(",", ":"),
         ),
-        "cv_fold_AUROC_json": json.dumps(
-            {
-                str(C): list(scores)
-                for C, scores
-                in zip(C_GRID, r2.fold_aurocs)
-            },
+        "stability_positive_membership_json": json.dumps(
+            tuple(
+                int(i)
+                for i in stability_selected_pos.tolist()
+            ),
             separators=(",", ":"),
         ),
+        "stability_negative_membership_json": json.dumps(
+            tuple(
+                int(i)
+                for i in stability_selected_neg.tolist()
+            ),
+            separators=(",", ":"),
+        ),
+        "stability_membership_sha256": stability_membership_sha256,
+        "stability_n_per_class": stability_n_per_class,
         "stage_A_final_fit_seed": stage_a_final_seed,
         "stage_B_fit_seed": stage_b_seed,
-        "cv_seed": cv_seed,
+        "stability_subsample_seed_identity_json": json.dumps(
+            [
+                c,
+                s,
+                t,
+                r,
+                N,
+                RUNNER_NAMESPACE,
+                STREAM_STABILITY_SUBSAMPLE,
+            ],
+            separators=(",", ":"),
+        ),
+        "stability_fit_seed": stability_fit_seed,
     }
 
 
 # ============================================================
-# Frozen I/G statistics
+# Diagnostic blinding and architecture aggregation
 # ============================================================
 
-def jaccard_zero_empty(
-    a: frozenset,
-    b: frozenset,
-) -> float:
-    union = a | b
+def assert_blinded_output_schema(
+    columns,
+    *,
+    context: str,
+) -> None:
+    """
+    Enforce the diagnostic blinding firewall on persisted/output schemas.
 
-    if not union:
-        return 0.0
+    This checks field names only. The procedural firewall governing
+    reconstructible quantities from retained supports remains separately
+    frozen by the blinding addendum.
+    """
+    names = {
+        str(column)
+        for column in columns
+    }
 
-    return float(
-        len(a & b) / len(union)
+    forbidden_exact = {
+        "P_stat",
+        "S_stat",
+        "I_stat",
+        "G_stat",
+        "PROBE_STABLE",
+        "probe_stable",
+        "stage_A_heldout_AUROC",
+        "R1_best_mean_CV_AUROC",
+        "R1_best_SE",
+        "R2_one_se_floor",
+        "cv_mean_by_C_json",
+        "cv_se_by_C_json",
+        "cv_fold_AUROC_json",
+    }
+
+    exact_hits = sorted(
+        names & forbidden_exact
     )
 
+    gamma_hits = sorted(
+        name
+        for name in names
+        if name.lower().startswith("gamma_")
+    )
 
-def aggregate_cell(
+    jaccard_hits = sorted(
+        name
+        for name in names
+        if "jaccard" in name.lower()
+    )
+
+    auroc_hits = sorted(
+        name
+        for name in names
+        if "auroc" in name.lower()
+    )
+
+    stable_gate_hits = sorted(
+        name
+        for name in names
+        if "probe_stable" in name.lower()
+    )
+
+    hits = sorted(
+        set(
+            exact_hits
+            + gamma_hits
+            + jaccard_hits
+            + auroc_hits
+            + stable_gate_hits
+        )
+    )
+
+    if hits:
+        raise CalibrationContractError(
+            f"Blinding violation in {context}: "
+            f"forbidden output fields {hits}."
+        )
+
+
+
+def aggregate_architecture_cell(
     perturbation_rows: pd.DataFrame,
 ) -> dict:
     """
-    Aggregate exactly 100 perturbations into raw P/S/I/G statistics.
+    Aggregate exactly 100 diagnostic perturbations into architecture-only
+    quantities and enforce the frozen §9 architecture invariants.
+
+    This function deliberately computes no P/S/I/G statistic and no
+    pairwise-Jaccard quantity.
     """
     if len(perturbation_rows) != 100:
         raise CalibrationContractError(
             f"Expected exactly 100 perturbation rows, "
             f"got {len(perturbation_rows)}."
+        )
+
+    assert_blinded_output_schema(
+        perturbation_rows.columns,
+        context="per-perturbation diagnostic table",
+    )
+
+    required = {
+        "scenario",
+        "scenario_id",
+        "diagnostic_seed",
+        "target_n",
+        "tau",
+        "tau_index",
+        "rho",
+        "rho_index",
+        "selected_C_R2",
+        "K_t_full",
+        "K_t_stab",
+        "full_support_indices_json",
+        "full_signed_support_json",
+        "stability_support_indices_json",
+        "stability_signed_support_json",
+        "stability_positive_membership_json",
+        "stability_negative_membership_json",
+        "stability_membership_sha256",
+        "stability_n_per_class",
+        "stage_A_final_fit_seed",
+        "stage_B_fit_seed",
+        "stability_subsample_seed_identity_json",
+        "stability_fit_seed",
+    }
+
+    missing = sorted(
+        required - set(perturbation_rows.columns)
+    )
+
+    if missing:
+        raise CalibrationContractError(
+            f"Architecture aggregation missing required columns: "
+            f"{missing}."
         )
 
     seeds = tuple(
@@ -1104,144 +1465,439 @@ def aggregate_cell(
 
     if seeds != DIAGNOSTIC_SEEDS:
         raise CalibrationContractError(
-            "Cell does not contain exactly diagnostic seeds 910001-910100."
+            "Architecture cell does not contain exactly "
+            "diagnostic seeds 910001-910100."
         )
 
-    auc = perturbation_rows[
-        "stage_A_heldout_AUROC"
-    ].to_numpy(dtype=float)
-
-    K = perturbation_rows[
-        "K_t"
-    ].to_numpy(dtype=float)
-
-    P_stat = float(np.median(auc))
-    S_stat = float(np.median(K))
-
-    supports = [
-        frozenset(
-            int(x)
-            for x in json.loads(value)
+    if perturbation_rows[
+        "diagnostic_seed"
+    ].duplicated().any():
+        raise CalibrationContractError(
+            "Architecture cell contains duplicate diagnostic seeds."
         )
-        for value in perturbation_rows[
-            "support_indices_json"
-        ].tolist()
+
+    identity_columns = [
+        "scenario",
+        "scenario_id",
+        "target_n",
+        "tau_index",
+        "rho_index",
     ]
 
-    signed_supports = [
-        frozenset(
-            (int(pair[0]), int(pair[1]))
-            for pair in json.loads(value)
-        )
-        for value in perturbation_rows[
-            "signed_support_json"
-        ].tolist()
-    ]
-
-    I_values: list[float] = []
-    G_values: list[float] = []
-
-    for i in range(100):
-        for j in range(i + 1, 100):
-            I_pair = jaccard_zero_empty(
-                supports[i],
-                supports[j],
+    for column in identity_columns:
+        if perturbation_rows[column].nunique(dropna=False) != 1:
+            raise CalibrationContractError(
+                f"Architecture cell mixes values in {column}."
             )
-
-            G_pair = jaccard_zero_empty(
-                signed_supports[i],
-                signed_supports[j],
-            )
-
-            # Frozen structural invariant.
-            if G_pair > I_pair + 1e-15:
-                raise CalibrationContractError(
-                    f"G_pair > I_pair for pair ({i}, {j})."
-                )
-
-            I_values.append(I_pair)
-            G_values.append(G_pair)
-
-    if len(I_values) != 4950:
-        raise CalibrationContractError(
-            f"Expected 4950 I pairs; got {len(I_values)}."
-        )
-
-    if len(G_values) != 4950:
-        raise CalibrationContractError(
-            f"Expected 4950 G pairs; got {len(G_values)}."
-        )
-
-    I_stat = float(
-        np.median(
-            np.asarray(I_values, dtype=float)
-        )
-    )
-
-    G_stat = float(
-        np.median(
-            np.asarray(G_values, dtype=float)
-        )
-    )
-
-    if G_stat > I_stat + 1e-15:
-        raise CalibrationContractError(
-            "Frozen invariant G_stat <= I_stat violated."
-        )
 
     first = perturbation_rows.iloc[0]
 
-    selected_counts = Counter(
-        float(x)
-        for x in perturbation_rows[
-            "selected_C_R2"
-        ].tolist()
-    )
+    scenario_id = int(first["scenario_id"])
+    tau_index = int(first["tau_index"])
+    rho_index = int(first["rho_index"])
+    N = int(first["target_n"])
 
-    zero_fit_fraction = float(
-        np.mean(
-            perturbation_rows["K_t"].to_numpy(
-                dtype=float
-            ) == 0
+    expected_stability_n = {
+        100: 80,
+        120: 96,
+        139: 111,
+    }.get(N)
+
+    if expected_stability_n is None:
+        raise CalibrationContractError(
+            f"Unexpected target N in architecture aggregation: {N}."
         )
+
+    observed_stability_n = {
+        int(x)
+        for x in perturbation_rows[
+            "stability_n_per_class"
+        ].tolist()
+    }
+
+    if observed_stability_n != {expected_stability_n}:
+        raise CalibrationContractError(
+            "Stability per-class size does not match the frozen "
+            f"0.80 rule for N={N}: {sorted(observed_stability_n)}."
+        )
+
+    # --------------------------------------------------------
+    # §9 deterministic stream-26 identity and membership audit
+    # --------------------------------------------------------
+
+    observed_stream26_identities = []
+
+    direct_memberships = []
+
+    for _, row in perturbation_rows.iterrows():
+        diagnostic_seed = int(
+            row["diagnostic_seed"]
+        )
+
+        observed_identity = tuple(
+            int(x)
+            for x in json.loads(
+                row[
+                    "stability_subsample_seed_identity_json"
+                ]
+            )
+        )
+
+        expected_identity = (
+            diagnostic_seed,
+            scenario_id,
+            tau_index,
+            rho_index,
+            N,
+            RUNNER_NAMESPACE,
+            STREAM_STABILITY_SUBSAMPLE,
+        )
+
+        if observed_identity != expected_identity:
+            raise CalibrationContractError(
+                "Stored stream-26 seed identity does not match "
+                f"the frozen derivation for diagnostic seed "
+                f"{diagnostic_seed}."
+            )
+
+        observed_stream26_identities.append(
+            observed_identity
+        )
+
+        pos_membership = tuple(
+            int(x)
+            for x in json.loads(
+                row[
+                    "stability_positive_membership_json"
+                ]
+            )
+        )
+
+        neg_membership = tuple(
+            int(x)
+            for x in json.loads(
+                row[
+                    "stability_negative_membership_json"
+                ]
+            )
+        )
+
+        if len(pos_membership) != expected_stability_n:
+            raise CalibrationContractError(
+                "Stored positive stability membership has wrong size."
+            )
+
+        if len(neg_membership) != expected_stability_n:
+            raise CalibrationContractError(
+                "Stored negative stability membership has wrong size."
+            )
+
+        if len(set(pos_membership)) != expected_stability_n:
+            raise CalibrationContractError(
+                "Stored positive stability membership contains duplicates."
+            )
+
+        if len(set(neg_membership)) != expected_stability_n:
+            raise CalibrationContractError(
+                "Stored negative stability membership contains duplicates."
+            )
+
+        # Membership indices are in target-N-pool index space.
+        # select_target_n currently returns all positives then all negatives,
+        # so direct range checks are exact for the frozen implementation.
+        if any(
+            not (0 <= idx < N)
+            for idx in pos_membership
+        ):
+            raise CalibrationContractError(
+                "Stored positive stability membership lies outside "
+                "the positive target-pool range."
+            )
+
+        if any(
+            not (N <= idx < 2 * N)
+            for idx in neg_membership
+        ):
+            raise CalibrationContractError(
+                "Stored negative stability membership lies outside "
+                "the negative target-pool range."
+            )
+
+        membership_payload = {
+            "positive_target_pool_indices": list(
+                pos_membership
+            ),
+            "negative_target_pool_indices": list(
+                neg_membership
+            ),
+        }
+
+        membership_json = json.dumps(
+            membership_payload,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+
+        recomputed_sha256 = hashlib.sha256(
+            membership_json.encode("utf-8")
+        ).hexdigest()
+
+        if (
+            recomputed_sha256
+            != str(
+                row["stability_membership_sha256"]
+            )
+        ):
+            raise CalibrationContractError(
+                "Stored stability-membership SHA-256 does not "
+                "match the persisted membership."
+            )
+
+        # Reconstruct stream 26 directly from the frozen SeedSequence
+        # and verify exact ordered membership equality.
+        stream26_ss = runner_seedsequence(
+            diagnostic_seed,
+            scenario_id,
+            tau_index,
+            rho_index,
+            N,
+            STREAM_STABILITY_SUBSAMPLE,
+        )
+
+        replay_rng = np.random.default_rng(
+            stream26_ss
+        )
+
+        # Reconstruct the frozen target-pool labels. In the current
+        # select_target_n implementation Xn/yn are positive rows first,
+        # negative rows second.
+        replay_y = np.concatenate(
+            [
+                np.ones(N, dtype=int),
+                np.zeros(N, dtype=int),
+            ]
+        )
+
+        (
+            _,
+            replay_pos,
+            replay_neg,
+            replay_sha256,
+        ) = select_stability_subsample(
+            replay_y,
+            target_n=N,
+            rng=replay_rng,
+        )
+
+        if tuple(
+            int(x)
+            for x in replay_pos.tolist()
+        ) != pos_membership:
+            raise CalibrationContractError(
+                "Positive stability membership is not reproducible "
+                "from the frozen stream-26 construction."
+            )
+
+        if tuple(
+            int(x)
+            for x in replay_neg.tolist()
+        ) != neg_membership:
+            raise CalibrationContractError(
+                "Negative stability membership is not reproducible "
+                "from the frozen stream-26 construction."
+            )
+
+        if replay_sha256 != recomputed_sha256:
+            raise CalibrationContractError(
+                "Replayed stability-membership SHA-256 mismatch."
+            )
+
+        direct_memberships.append(
+            (
+                pos_membership,
+                neg_membership,
+            )
+        )
+
+    n_distinct_stream26_identities = int(
+        len(set(observed_stream26_identities))
     )
 
-    return {
-        "scenario": first["scenario"],
-        "scenario_id": int(first["scenario_id"]),
-        "target_n": int(first["target_n"]),
-        "tau": (
-            None
-            if pd.isna(first["tau"])
-            else float(first["tau"])
-        ),
-        "tau_index": int(first["tau_index"]),
-        "rho": (
-            None
-            if pd.isna(first["rho"])
-            else float(first["rho"])
-        ),
-        "rho_index": int(first["rho_index"]),
+    if n_distinct_stream26_identities != 100:
+        raise CalibrationContractError(
+            "Architecture diagnostic requires exactly 100 distinct "
+            "stream-26 identities per cell."
+        )
+
+    n_distinct_stability_memberships = int(
+        len(set(direct_memberships))
+    )
+
+    # Duplicate realized membership is probabilistically possible even
+    # under correct sampling. It is not declared logically impossible,
+    # but the frozen contract requires diagnostic execution to halt for
+    # explicit investigation rather than silently accepting it.
+    duplicate_membership_count = int(
+        100 - n_distinct_stability_memberships
+    )
+
+    if duplicate_membership_count != 0:
+        raise CalibrationContractError(
+            "Architecture diagnostic observed duplicate realized "
+            "stability-subsample membership within a cell. "
+            "Execution must stop for explicit investigation."
+        )
+
+    # --------------------------------------------------------
+    # Architecture support/C/cardinality summaries
+    # --------------------------------------------------------
+
+    support_counts = perturbation_rows[
+        "stability_support_indices_json"
+    ].value_counts(dropna=False)
+
+    n_distinct_stability_supports = int(
+        len(support_counts)
+    )
+
+    largest_identical_support_clique = int(
+        support_counts.iloc[0]
+    )
+
+    selected_C_values = perturbation_rows[
+        "selected_C_R2"
+    ]
+
+    n_distinct_selected_C = int(
+        selected_C_values.nunique(dropna=False)
+    )
+
+    K_full = perturbation_rows[
+        "K_t_full"
+    ].to_numpy(dtype=float)
+
+    K_stab = perturbation_rows[
+        "K_t_stab"
+    ].to_numpy(dtype=float)
+
+    median_K_t_full = float(
+        np.median(K_full)
+    )
+
+    median_K_t_stab = float(
+        np.median(K_stab)
+    )
+
+    min_K_t_stab = int(
+        np.min(K_stab)
+    )
+
+    max_K_t_stab = int(
+        np.max(K_stab)
+    )
+
+    empty_full_support_count = int(
+        np.sum(K_full == 0)
+    )
+
+    singleton_full_support_count = int(
+        np.sum(K_full == 1)
+    )
+
+    empty_stability_support_count = int(
+        np.sum(K_stab == 0)
+    )
+
+    singleton_stability_support_count = int(
+        np.sum(K_stab == 1)
+    )
+
+    if median_K_t_stab == 0:
+        stability_collapse_class = "EMPTY"
+    elif 0 < median_K_t_stab < 2:
+        stability_collapse_class = "SINGLETON_DOMINATED"
+    else:
+        stability_collapse_class = (
+            "NONDEGENERATE_FOR_ARCHITECTURE_DIAGNOSTIC"
+        )
+
+    if median_K_t_full == 0:
+        full_collapse_class = "EMPTY"
+    elif 0 < median_K_t_full < 2:
+        full_collapse_class = "SINGLETON_DOMINATED"
+    else:
+        full_collapse_class = (
+            "NONDEGENERATE_FOR_ARCHITECTURE_DIAGNOSTIC"
+        )
+
+    joint_collapse_class = (
+        f"FULL_{full_collapse_class}"
+        f"__STABILITY_{stability_collapse_class}"
+    )
+
+    full_fit_collapse = bool(
+        median_K_t_full < 2
+    )
+
+    stability_fit_specific_collapse = bool(
+        median_K_t_full >= 2
+        and median_K_t_stab < 2
+    )
+
+    result = {
+        "scenario": str(first["scenario"]),
+        "scenario_id": scenario_id,
+        "target_n": N,
+        "tau": first["tau"],
+        "tau_index": tau_index,
+        "rho": first["rho"],
+        "rho_index": rho_index,
         "n_perturbations": 100,
-        "P_stat": P_stat,
-        "S_stat": S_stat,
-        "I_stat": I_stat,
-        "G_stat": G_stat,
-        "selected_C_counts_json": json.dumps(
-            {
-                str(k): int(v)
-                for k, v in sorted(
-                    selected_counts.items()
-                )
-            },
-            separators=(",", ":"),
-        ),
-        "R2_zero_coefficient_fraction": zero_fit_fraction,
-        "stage_A_AUROC_min": float(np.min(auc)),
-        "stage_A_AUROC_max": float(np.max(auc)),
-        "K_t_min": int(np.min(K)),
-        "K_t_max": int(np.max(K)),
+        "stability_n_per_class": expected_stability_n,
+        "n_distinct_stream26_identities":
+            n_distinct_stream26_identities,
+        "n_distinct_stability_memberships":
+            n_distinct_stability_memberships,
+        "duplicate_stability_membership_count":
+            duplicate_membership_count,
+        "n_distinct_selected_C":
+            n_distinct_selected_C,
+        "n_distinct_stability_supports":
+            n_distinct_stability_supports,
+        "largest_identical_stability_support_clique":
+            largest_identical_support_clique,
+        "median_K_t_full": median_K_t_full,
+        "median_K_t_stab": median_K_t_stab,
+        "min_K_t_stab": min_K_t_stab,
+        "max_K_t_stab": max_K_t_stab,
+        "empty_full_support_count":
+            empty_full_support_count,
+        "singleton_full_support_count":
+            singleton_full_support_count,
+        "empty_stability_support_count":
+            empty_stability_support_count,
+        "singleton_stability_support_count":
+            singleton_stability_support_count,
+        "full_collapse_class":
+            full_collapse_class,
+        "stability_collapse_class":
+            stability_collapse_class,
+        "joint_collapse_class":
+            joint_collapse_class,
+        "full_fit_collapse":
+            full_fit_collapse,
+        "stability_fit_specific_collapse":
+            stability_fit_specific_collapse,
     }
+
+    assert_blinded_output_schema(
+        result.keys(),
+        context="architecture cell summary",
+    )
+
+    return result
+
+
 
 
 
@@ -1256,6 +1912,172 @@ CELL_KEY_COLUMNS = (
     "target_n",
 )
 
+
+def build_n120_n139_architecture_comparison(
+    cell_summary: pd.DataFrame,
+) -> pd.DataFrame:
+    """
+    Construct the frozen secondary N=120 versus N=139 architecture
+    comparison.
+
+    This is a terminal derivative of the completed authoritative cell-summary
+    table. It exposes architecture quantities only and computes no P/S/I/G
+    or pairwise-Jaccard statistic.
+    """
+    if cell_summary.empty:
+        raise CalibrationContractError(
+            "Cannot build N=120/N=139 comparison from an empty cell summary."
+        )
+
+    assert_blinded_output_schema(
+        cell_summary.columns,
+        context="N=120/N=139 comparison input",
+    )
+
+    required = {
+        "scenario",
+        "scenario_id",
+        "tau",
+        "tau_index",
+        "rho",
+        "rho_index",
+        "target_n",
+        "n_perturbations",
+        "stability_n_per_class",
+        "n_distinct_stream26_identities",
+        "n_distinct_stability_memberships",
+        "duplicate_stability_membership_count",
+        "n_distinct_selected_C",
+        "n_distinct_stability_supports",
+        "largest_identical_stability_support_clique",
+        "median_K_t_full",
+        "median_K_t_stab",
+        "min_K_t_stab",
+        "max_K_t_stab",
+        "empty_full_support_count",
+        "singleton_full_support_count",
+        "empty_stability_support_count",
+        "singleton_stability_support_count",
+        "full_collapse_class",
+        "stability_collapse_class",
+        "joint_collapse_class",
+        "full_fit_collapse",
+        "stability_fit_specific_collapse",
+    }
+
+    missing = sorted(
+        required - set(cell_summary.columns)
+    )
+
+    if missing:
+        raise CalibrationContractError(
+            "N=120/N=139 architecture comparison missing "
+            f"required columns: {missing}."
+        )
+
+    subset = cell_summary[
+        cell_summary["target_n"].isin([120, 139])
+    ].copy()
+
+    key_columns = [
+        "scenario",
+        "scenario_id",
+        "tau",
+        "tau_index",
+        "rho",
+        "rho_index",
+    ]
+
+    if subset.duplicated(
+        key_columns + ["target_n"]
+    ).any():
+        raise CalibrationContractError(
+            "Duplicate architecture cell identity in "
+            "N=120/N=139 comparison."
+        )
+
+    n120 = (
+        subset[
+            subset["target_n"] == 120
+        ]
+        .drop(columns=["target_n"])
+        .set_index(key_columns)
+        .sort_index()
+    )
+
+    n139 = (
+        subset[
+            subset["target_n"] == 139
+        ]
+        .drop(columns=["target_n"])
+        .set_index(key_columns)
+        .sort_index()
+    )
+
+    if n120.empty or n139.empty:
+        raise CalibrationContractError(
+            "N=120/N=139 comparison requires non-empty "
+            "matched tables at both discovery sizes."
+        )
+
+    if not n120.index.equals(n139.index):
+        only_120 = n120.index.difference(
+            n139.index
+        )
+        only_139 = n139.index.difference(
+            n120.index
+        )
+
+        raise CalibrationContractError(
+            "N=120 and N=139 architecture cells are not exactly matched. "
+            f"Only N=120: {len(only_120)}; "
+            f"only N=139: {len(only_139)}."
+        )
+
+    comparison = (
+        n120.join(
+            n139,
+            how="inner",
+            lsuffix="_N120",
+            rsuffix="_N139",
+        )
+        .reset_index()
+    )
+
+    if len(comparison) != len(n120):
+        raise CalibrationContractError(
+            f"N=120/N=139 join lost rows: {len(n120)} matched cells in, "
+            f"{len(comparison)} out. Check NaN-keyed rho matching."
+        )
+
+    comparison.insert(
+        len(key_columns),
+        "comparison",
+        "N120_vs_N139",
+    )
+
+    for suffix in ("N120", "N139"):
+        identity_col = (
+            f"n_distinct_stream26_identities_{suffix}"
+        )
+
+        if not (
+            comparison[identity_col]
+            .astype(int)
+            .eq(100)
+            .all()
+        ):
+            raise CalibrationContractError(
+                "Terminal N=120/N=139 comparison contains a cell "
+                f"without 100 stream-26 identities at {suffix}."
+            )
+
+    assert_blinded_output_schema(
+        comparison.columns,
+        context="N=120/N=139 architecture comparison",
+    )
+
+    return comparison
 
 def cell_key_from_values(
     scenario: str,
@@ -1494,7 +2316,7 @@ def validate_completed_cell(
 
     if raw_cell["diagnostic_seed"].duplicated().any():
         raise CalibrationContractError(
-            f"Completed cell {key} contains duplicate calibration seeds."
+            f"Completed cell {key} contains duplicate diagnostic seeds."
         )
 
     if len(agg_cell) != 1:
@@ -1512,6 +2334,57 @@ def validate_completed_cell(
         raise CalibrationContractError(
             f"Aggregate identity mismatch for completed cell {key}."
         )
+
+    assert_blinded_output_schema(
+        raw_cell.columns,
+        context=f"restarted raw checkpoint cell {key}",
+    )
+
+    assert_blinded_output_schema(
+        agg_cell.columns,
+        context=f"restarted architecture-summary cell {key}",
+    )
+
+    recomputed_summary = aggregate_architecture_cell(
+        raw_cell
+        .sort_values("diagnostic_seed")
+        .reset_index(drop=True)
+    )
+
+    persisted_summary = agg_cell.iloc[0]
+
+    for field, expected in recomputed_summary.items():
+        if field not in persisted_summary.index:
+            raise CalibrationContractError(
+                f"Completed cell {key} aggregate is missing "
+                f"recomputed field {field!r}."
+            )
+
+        observed = persisted_summary[field]
+
+        if pd.isna(expected) and pd.isna(observed):
+            continue
+
+        if isinstance(expected, (float, np.floating)):
+            if not np.isclose(
+                float(observed),
+                float(expected),
+                rtol=0.0,
+                atol=1e-12,
+                equal_nan=True,
+            ):
+                raise CalibrationContractError(
+                    f"Completed cell {key} aggregate mismatch for "
+                    f"{field}: persisted={observed!r}, "
+                    f"recomputed={expected!r}."
+                )
+        else:
+            if observed != expected:
+                raise CalibrationContractError(
+                    f"Completed cell {key} aggregate mismatch for "
+                    f"{field}: persisted={observed!r}, "
+                    f"recomputed={expected!r}."
+                )
 
 
 def validate_checkpoint_state(
@@ -1591,7 +2464,7 @@ def append_completed_cell(
 
     if cell_rows["diagnostic_seed"].duplicated().any():
         raise CalibrationContractError(
-            "Checkpoint candidate contains duplicate calibration seeds."
+            "Checkpoint candidate contains duplicate diagnostic seeds."
         )
 
     key = cell_key_from_row(
@@ -1709,11 +2582,10 @@ def append_completed_cell(
 
 def run_architecture_diagnostic(output_dir: Path) -> None:
     """
-    Diagnostic implementation scaffold.
+    Complete architecture-diagnostic implementation, intentionally disabled.
 
-    Execution is intentionally disabled until the architecture-specific
-    perturbation, blinding, checkpoint and output semantics are complete,
-    reviewed, committed, pushed and remote-verified.
+    Execution may be enabled only by a separate reviewed, committed, pushed
+    and remote-verified enablement change.
     """
     raise CalibrationContractError(
         "Architecture diagnostic scaffold is not executable yet. "
@@ -1741,6 +2613,11 @@ def run_architecture_diagnostic(output_dir: Path) -> None:
     manifest_path = (
         output_dir
         / "arm_b_post_failure_architecture_checkpoint_manifest.json"
+    )
+
+    comparison_path = (
+        output_dir
+        / "arm_b_post_failure_architecture_N120_vs_N139.csv"
     )
 
     raw_df = empty_or_read_csv(
@@ -1852,27 +2729,20 @@ def run_architecture_diagnostic(output_dir: Path) -> None:
                 .reset_index(drop=True)
             )
 
-            aggregate_row = aggregate_cell(
+            aggregate_row = aggregate_architecture_cell(
                 cell_df
             )
 
-            # No threshold/gate columns may enter authoritative output.
-            forbidden_columns = {
-                "gamma_P",
-                "gamma_S",
-                "gamma_I",
-                "gamma_G",
-            }
+            # Blinding firewall at the authoritative-output boundary.
+            assert_blinded_output_schema(
+                cell_df.columns,
+                context="per-perturbation authoritative output",
+            )
 
-            if forbidden_columns & set(cell_df.columns):
-                raise CalibrationContractError(
-                    "Threshold column appeared in per-perturbation output."
-                )
-
-            if forbidden_columns & set(aggregate_row):
-                raise CalibrationContractError(
-                    "Threshold column appeared in aggregate output."
-                )
+            assert_blinded_output_schema(
+                aggregate_row.keys(),
+                context="architecture-summary authoritative output",
+            )
 
             (
                 raw_df,
@@ -1923,13 +2793,42 @@ def run_architecture_diagnostic(output_dir: Path) -> None:
 
     if len(completed) != total_cells:
         raise CalibrationContractError(
-            f"Step 1 terminated with {len(completed)}/{total_cells} "
-            "completed cells."
+            f"Architecture diagnostic terminated with "
+            f"{len(completed)}/{total_cells} completed cells."
         )
 
-    print("\nSTEP 1 COMPLETE.")
+    # --------------------------------------------------------
+    # Terminal architecture derivative.
+    #
+    # This is intentionally outside the per-cell checkpoint transaction.
+    # If absent after a restart with all cells complete, it is reconstructed
+    # from the authoritative cell-summary table without rerunning any seed.
+    # --------------------------------------------------------
+
+    final_cell_summary = pd.read_csv(
+        cell_path
+    )
+
+    assert_blinded_output_schema(
+        final_cell_summary.columns,
+        context="completed architecture cell-summary table",
+    )
+
+    comparison_df = (
+        build_n120_n139_architecture_comparison(
+            final_cell_summary
+        )
+    )
+
+    atomic_write_csv(
+        comparison_df,
+        comparison_path,
+    )
+
+    print("\nARCHITECTURE DIAGNOSTIC COMPLETE.")
     print("Raw perturbations :", raw_path)
     print("Cell statistics    :", cell_path)
+    print("N=120/N=139 compare:", comparison_path)
     print("Checkpoint manifest:", manifest_path)
     print("Completed cells    :", len(completed))
     print("No threshold was selected.")
@@ -1942,7 +2841,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Experiment 04 Arm-B post-failure architecture diagnostic: "
-            "implementation scaffold; execution disabled."
+            "complete implementation; execution intentionally disabled."
         )
     )
 
@@ -1950,9 +2849,9 @@ def parse_args() -> argparse.Namespace:
         "--execute-architecture-diagnostic",
         action="store_true",
         help=(
-            "Required explicit switch. "
-            "Execution remains disabled until the diagnostic runner is fully "
-            "implemented, reviewed, committed, pushed and remote-verified."
+            "Reserved explicit execution switch. "
+            "This source checkpoint remains hard-disabled pending a separate "
+            "reviewed and remote-verified enablement commit."
         ),
     )
 
@@ -1971,9 +2870,9 @@ def main() -> None:
     if not args.execute_architecture_diagnostic:
         raise SystemExit(
             "Architecture diagnostic was NOT executed. "
-            "Pass --execute-architecture-diagnostic only after the diagnostic "
-            "runner is fully implemented, reviewed, committed, pushed and "
-            "remote-verified."
+            "This source checkpoint is intentionally hard-disabled pending "
+            "a separate reviewed, committed, pushed and remote-verified "
+            "enablement change."
         )
 
     run_architecture_diagnostic(
