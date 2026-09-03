@@ -264,10 +264,15 @@ For diagnostic interpretation only, each cell is classified as:
         median(K_t_stab) == 0
 
     SINGLETON_DOMINATED
-        median(K_t_stab) == 1
+        0 < median(K_t_stab) < 2
 
     NONDEGENERATE_FOR_ARCHITECTURE_DIAGNOSTIC
         median(K_t_stab) >= 2
+
+Because each cell contains 100 perturbations, the median of integer-valued
+`K_t_stab` can be a half-integer. The intervals above are therefore exhaustive
+over every possible non-negative median and intentionally classify values such
+as `0.5` and `1.5` rather than leaving them undefined.
 
 This classification is not a final support-resolution acceptance rule.
 
