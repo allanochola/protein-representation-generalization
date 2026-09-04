@@ -1,0 +1,59 @@
+{
+  "captured_utc": "2026-09-04T04:48:05.172286+00:00",
+  "command": [
+    "/usr/bin/python3",
+    "/kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/diagnose_s7_step4b.py",
+    "--execute-s7-step4b-diagnostic"
+  ],
+  "firewall_before_execution": {
+    "2000-2099": "SEALED",
+    "4000-4099": "UNOPENED",
+    "910001-910100": "CONSUMED / CLOSED",
+    "920001-920100": "ASSIGNED / UNOPENED",
+    "candidate_status": "NOT EVALUATED",
+    "gamma": null,
+    "probe_fits": "NONE"
+  },
+  "git": {
+    "branch": "exp04-depth-and-basis",
+    "pre_execution_head": "30d55305302b8797c9275380ce38dd16b39b7ba2",
+    "remote_pre_execution_head": "30d55305302b8797c9275380ce38dd16b39b7ba2"
+  },
+  "implementation_repair": {
+    "change": "@dataclass(frozen=True) restored above ScenarioCell",
+    "commit": "30d55305302b8797c9275380ce38dd16b39b7ba2",
+    "scope": "exact one-line inherited implementation repair"
+  },
+  "instrument": {
+    "generator": "experiments/04-depth-and-basis/synthetic_generators.py",
+    "generator_sha256": "b91eec8be2ae7931e38efa45e142208a88dee254fe22606419442e4a02f12dbb",
+    "runner": "experiments/04-depth-and-basis/diagnose_s7_step4b.py",
+    "runner_sha256": "0e897e8cd9e782e8de63d86c39e9942713aef7b4f7112d8b5d3472c214d0752b"
+  },
+  "libraries_visible_to_notebook": {
+    "joblib": "1.5.3",
+    "numpy": "2.0.2",
+    "pandas": "2.3.3",
+    "scikit-learn": "1.6.1",
+    "scipy": "1.16.3",
+    "threadpoolctl": "3.6.0"
+  },
+  "platform": {
+    "machine": "x86_64",
+    "platform": "Linux-6.12.90+-x86_64-with-glibc2.35",
+    "release": "6.12.90+",
+    "system": "Linux"
+  },
+  "preopening_runtime_smoke": {
+    "audit_seed": 123456,
+    "protected_probe_fit_occurred": false,
+    "protected_seedsequence_materialized": false,
+    "status": "PASS"
+  },
+  "python": {
+    "execution_executable": "/usr/bin/python3",
+    "implementation": "CPython",
+    "notebook_executable": "/usr/bin/python3",
+    "notebook_version": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]"
+  }
+}

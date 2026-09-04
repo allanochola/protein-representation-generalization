@@ -1,0 +1,46 @@
+{
+  "candidate_status": "NOT YET CLASSIFIED",
+  "command": [
+    "/usr/bin/python3",
+    "/kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/diagnose_s7_step4b.py",
+    "--execute-s7-step4b-diagnostic"
+  ],
+  "execution_finished_utc": "2026-09-04T04:48:07.531293+00:00",
+  "execution_started_utc": "2026-09-04T04:48:05.441873+00:00",
+  "generator_path": "experiments/04-depth-and-basis/synthetic_generators.py",
+  "generator_sha256": "b91eec8be2ae7931e38efa45e142208a88dee254fe22606419442e4a02f12dbb",
+  "other_firewalls": {
+    "2000-2099": "SEALED",
+    "4000-4099": "UNOPENED",
+    "910001-910100": "CONSUMED / CLOSED"
+  },
+  "pre_execution_commit": "30d55305302b8797c9275380ce38dd16b39b7ba2",
+  "pre_execution_remote_commit": "30d55305302b8797c9275380ce38dd16b39b7ba2",
+  "preopening_smoke_test": {
+    "audit_seed": 123456,
+    "probe_fit_occurred": false,
+    "protected_namespace_touched": false,
+    "status": "PASS"
+  },
+  "previous_attempt": {
+    "archive": "experiments/04-depth-and-basis/s7_step4b_execution_provenance/protected_execution",
+    "classification": "failed before protected seed materialization / probe fit",
+    "namespace_consumed": false
+  },
+  "protected_namespace": {
+    "automatic_retry_authorized": false,
+    "classification_basis": "Correctly authorized protected invocation returned nonzero. Process launch alone does not establish namespace consumption. Use archived traceback, checkpoints, artifacts, and frozen source ordering to determine whether the first protected probe fit occurred.",
+    "namespace": "920001-920100",
+    "status_after_execution": "REQUIRES FAILURE-POINT AUDIT \u2014 DO NOT RERUN",
+    "status_before": "ASSIGNED / UNOPENED"
+  },
+  "record_type": "s7_step4b_protected_execution_attempt_02",
+  "required_execution_flag": "--execute-s7-step4b-diagnostic",
+  "required_execution_flag_present": true,
+  "runner_created_or_modified_files": [],
+  "runner_path": "experiments/04-depth-and-basis/diagnose_s7_step4b.py",
+  "runner_return_code": 1,
+  "runner_sha256": "0e897e8cd9e782e8de63d86c39e9942713aef7b4f7112d8b5d3472c214d0752b",
+  "scientific_interpretation_performed_before_archive": false,
+  "wrapper_exception": null
+}

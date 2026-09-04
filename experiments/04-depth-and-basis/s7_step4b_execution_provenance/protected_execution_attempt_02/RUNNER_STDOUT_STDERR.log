@@ -1,0 +1,32 @@
+EXP 04 — S7 STEP-4b PROTECTED EXECUTION ATTEMPT 02
+pre_execution_head=30d55305302b8797c9275380ce38dd16b39b7ba2
+runner_sha256=0e897e8cd9e782e8de63d86c39e9942713aef7b4f7112d8b5d3472c214d0752b
+generator_sha256=b91eec8be2ae7931e38efa45e142208a88dee254fe22606419442e4a02f12dbb
+command=/usr/bin/python3 /kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/diagnose_s7_step4b.py --execute-s7-step4b-diagnostic
+started_utc=2026-09-04T04:48:05.441873+00:00
+
+── RUNNER OUTPUT ──
+OPENING/RESUMING S7 STEP-4b DIAGNOSTIC 920001-920100.
+910001-910100 remains consumed/closed.
+4000-4099 remains unopened.
+2000-2099 remains sealed.
+No gamma is selected by this diagnostic.
+[cell start] tau_index=0 tau=0.223606797749979 N=100
+Traceback (most recent call last):
+  File "/kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/diagnose_s7_step4b.py", line 3217, in <module>
+    main()
+  File "/kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/diagnose_s7_step4b.py", line 3211, in main
+    run_s7_step4b_diagnostic(
+  File "/kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/diagnose_s7_step4b.py", line 2798, in run_s7_step4b_diagnostic
+    row = run_one_perturbation(
+          ^^^^^^^^^^^^^^^^^^^^^
+  File "/kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/diagnose_s7_step4b.py", line 877, in run_one_perturbation
+    r2 = select_C_R2(
+         ^^^^^^^^^^^^
+  File "/kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/diagnose_s7_step4b.py", line 550, in select_C_R2
+    return R2Result(
+           ^^^^^^^^^
+TypeError: R2Result() takes no arguments
+
+── PROCESS RETURN ──
+return_code=1
