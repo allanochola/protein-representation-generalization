@@ -1,0 +1,33 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/diagnose_s7_step4b.py",
+    "--execute-s7-step4b-diagnostic"
+  ],
+  "execution_finished_utc": "2026-09-04T04:25:15.048439+00:00",
+  "execution_started_utc": "2026-09-04T04:25:13.328799+00:00",
+  "generator_path": "experiments/04-depth-and-basis/synthetic_generators.py",
+  "generator_sha256": "b91eec8be2ae7931e38efa45e142208a88dee254fe22606419442e4a02f12dbb",
+  "other_firewalls": {
+    "2000-2099": "SEALED",
+    "4000-4099": "UNOPENED",
+    "910001-910100": "CONSUMED / CLOSED"
+  },
+  "pre_execution_commit": "604710f6c395b937b6eeefba828aa885dc8fdb81",
+  "pre_execution_remote_commit": "604710f6c395b937b6eeefba828aa885dc8fdb81",
+  "protected_namespace": {
+    "automatic_retry_authorized": false,
+    "classification_basis": "Correctly flagged protected invocation exited nonzero. Process launch alone is not the frozen contract's consumption event.",
+    "namespace": "920001-920100",
+    "status_after_transaction": "STATUS REQUIRES FAILURE-POINT AUDIT; DO NOT RERUN",
+    "status_before": "ASSIGNED / UNOPENED"
+  },
+  "record_type": "s7_step4b_protected_execution",
+  "required_execution_flag_present": true,
+  "runner_created_or_modified_files": [],
+  "runner_path": "experiments/04-depth-and-basis/diagnose_s7_step4b.py",
+  "runner_return_code": 1,
+  "runner_sha256": "9f3f15b1be9b49b19b8f43bce51019bccbd60aabdeb6a58471ae207c0408e6c0",
+  "scientific_interpretation_performed_by_wrapper": false,
+  "wrapper_exception": null
+}

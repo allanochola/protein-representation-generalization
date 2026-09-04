@@ -1,0 +1,25 @@
+EXP 04 — ACTUAL S7 STEP-4b PROTECTED EXECUTION
+pre_execution_head=604710f6c395b937b6eeefba828aa885dc8fdb81
+runner_sha256=9f3f15b1be9b49b19b8f43bce51019bccbd60aabdeb6a58471ae207c0408e6c0
+generator_sha256=b91eec8be2ae7931e38efa45e142208a88dee254fe22606419442e4a02f12dbb
+command=/usr/bin/python3 /kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/diagnose_s7_step4b.py --execute-s7-step4b-diagnostic
+started_utc=2026-09-04T04:25:13.328799+00:00
+
+── RUNNER OUTPUT ──
+Traceback (most recent call last):
+  File "/kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/diagnose_s7_step4b.py", line 3216, in <module>
+    main()
+  File "/kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/diagnose_s7_step4b.py", line 3210, in main
+    run_s7_step4b_diagnostic(
+  File "/kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/diagnose_s7_step4b.py", line 2720, in run_s7_step4b_diagnostic
+    cells = s7_cells()
+            ^^^^^^^^^^
+  File "/kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/diagnose_s7_step4b.py", line 1152, in s7_cells
+    cells = tuple(
+            ^^^^^^
+  File "/kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/diagnose_s7_step4b.py", line 1153, in <genexpr>
+    ScenarioCell(
+TypeError: ScenarioCell() takes no arguments
+
+── PROCESS RETURN ──
+return_code=1
