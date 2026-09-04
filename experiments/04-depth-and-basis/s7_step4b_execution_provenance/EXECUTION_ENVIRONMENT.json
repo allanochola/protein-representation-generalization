@@ -1,0 +1,41 @@
+{
+  "captured_utc": "2026-09-04T04:11:01.803043+00:00",
+  "git": {
+    "branch": "exp04-depth-and-basis",
+    "pre_execution_head": "c9ecd87bfa671a220ea669acfdeff6ee664ddf3c",
+    "remote_pre_execution_head": "c9ecd87bfa671a220ea669acfdeff6ee664ddf3c"
+  },
+  "instrument": {
+    "generator_path": "experiments/04-depth-and-basis/synthetic_generators.py",
+    "generator_sha256": "b91eec8be2ae7931e38efa45e142208a88dee254fe22606419442e4a02f12dbb",
+    "runner_path": "experiments/04-depth-and-basis/diagnose_s7_step4b.py",
+    "runner_sha256": "9f3f15b1be9b49b19b8f43bce51019bccbd60aabdeb6a58471ae207c0408e6c0"
+  },
+  "libraries": {
+    "joblib": "1.5.3",
+    "numpy": "2.0.2",
+    "pandas": "2.3.3",
+    "scikit-learn": "1.6.1",
+    "scipy": "1.16.3",
+    "threadpoolctl": "3.6.0"
+  },
+  "platform": {
+    "machine": "x86_64",
+    "platform": "Linux-6.12.90+-x86_64-with-glibc2.35",
+    "processor": "x86_64",
+    "release": "6.12.90+",
+    "system": "Linux"
+  },
+  "python": {
+    "executable": "/usr/bin/python3",
+    "implementation": "CPython",
+    "version": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]"
+  },
+  "scientific_firewall_before_launch": {
+    "2000-2099": "SEALED",
+    "4000-4099": "UNOPENED",
+    "910001-910100": "CONSUMED / CLOSED",
+    "920001-920100": "ASSIGNED / UNOPENED",
+    "gamma": null
+  }
+}

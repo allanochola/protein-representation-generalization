@@ -1,0 +1,11 @@
+EXP 04 — S7 STEP-4b PROTECTED EXECUTION
+pre_execution_head=c9ecd87bfa671a220ea669acfdeff6ee664ddf3c
+runner_sha256=9f3f15b1be9b49b19b8f43bce51019bccbd60aabdeb6a58471ae207c0408e6c0
+started_utc=2026-09-04T04:11:02.091982+00:00
+namespace_920001_920100=CONSUMED_CONSERVATIVELY_ON_PROCESS_LAUNCH
+
+── RUNNER OUTPUT ──
+S7 step-4b diagnostic was NOT executed. Pass --execute-s7-step4b-diagnostic only after the enabled checkpoint has been pushed and remote-verified.
+
+── RUNNER PROCESS RETURN ──
+return_code=1

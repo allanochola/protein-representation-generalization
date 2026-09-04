@@ -1,0 +1,29 @@
+{
+  "diagnostic": "Arm-B S7 step-4b redesign diagnostic",
+  "execution_finished_utc": "2026-09-04T04:11:04.045816+00:00",
+  "execution_started_utc": "2026-09-04T04:11:02.091982+00:00",
+  "experiment": "04-depth-and-basis",
+  "generator_sha256": "b91eec8be2ae7931e38efa45e142208a88dee254fe22606419442e4a02f12dbb",
+  "other_firewalls": {
+    "2000-2099": "SEALED",
+    "4000-4099": "UNOPENED",
+    "910001-910100": "CONSUMED / CLOSED"
+  },
+  "pre_execution_commit": "c9ecd87bfa671a220ea669acfdeff6ee664ddf3c",
+  "pre_execution_remote_commit": "c9ecd87bfa671a220ea669acfdeff6ee664ddf3c",
+  "protected_namespace": {
+    "automatic_retry_authorized": false,
+    "namespace": "920001-920100",
+    "status_after_process_launch": "CONSUMED",
+    "status_before_launch": "ASSIGNED / UNOPENED"
+  },
+  "runner_changed_files_before_provenance": [],
+  "runner_command": [
+    "/usr/bin/python3",
+    "/kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/diagnose_s7_step4b.py"
+  ],
+  "runner_return_code": 1,
+  "runner_sha256": "9f3f15b1be9b49b19b8f43bce51019bccbd60aabdeb6a58471ae207c0408e6c0",
+  "scientific_interpretation_performed_by_wrapper": false,
+  "wrapper_exception": null
+}
