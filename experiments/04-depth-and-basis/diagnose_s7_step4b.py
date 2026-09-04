@@ -1,7 +1,7 @@
 """
 Experiment 04 — Arm-B S7 step-4b redesign diagnostic.
 
-IMPLEMENTATION STATE: HARD-DISABLED SUCCESSOR; NOT YET ENABLED.
+IMPLEMENTATION STATE: ENABLED SUCCESSOR; NOT YET EXECUTED.
 
 This file implements the prospectively frozen S7 step-4b diagnostic contract.
 
@@ -48,7 +48,7 @@ from synthetic_generators import MASTER_TAU, generate_s7
 
 HERE = Path(__file__).resolve().parent
 
-EXECUTION_ENABLED = False
+EXECUTION_ENABLED = True
 
 # Dedicated S7 step-4 diagnostic namespace.
 DIAGNOSTIC_SEEDS = tuple(range(930001, 930101))
