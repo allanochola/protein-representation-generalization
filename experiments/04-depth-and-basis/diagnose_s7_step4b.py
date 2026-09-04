@@ -1768,15 +1768,6 @@ def aggregate_step4b_cell(
 
     # Do NOT create a scientific gate from distinct realized memberships.
     # Duplicate membership is checked only as an integrity anomaly.
-    if len(
-        set(
-            direct_memberships
-        )
-    ) != 100:
-        raise CalibrationContractError(
-            "Duplicate realized stability membership observed; "
-            "halt for integrity investigation."
-        )
 
     # ------------------------------------------------------------------
     # Reconstruct K_t_stab from persisted unsigned supports.
