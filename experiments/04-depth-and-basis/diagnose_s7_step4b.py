@@ -1,13 +1,14 @@
 """
 Experiment 04 — Arm-B S7 step-4b redesign diagnostic.
 
-IMPLEMENTATION STATE: ENABLED / REMOTE-VERIFIED; NOT YET EXECUTED.
+IMPLEMENTATION STATE: HARD-DISABLED SUCCESSOR; NOT YET ENABLED.
 
 This file implements the prospectively frozen S7 step-4b diagnostic contract.
 
 Scientific firewall:
     910001-910100 = CONSUMED / CLOSED
-    920001-920100 = ASSIGNED / UNOPENED
+    920001-920100 = CONSUMED / CLOSED
+    930001-930100 = ASSIGNED / UNOPENED
     4000-4099     = UNOPENED
     2000-2099     = SEALED
 
@@ -47,10 +48,10 @@ from synthetic_generators import MASTER_TAU, generate_s7
 
 HERE = Path(__file__).resolve().parent
 
-EXECUTION_ENABLED = True
+EXECUTION_ENABLED = False
 
 # Dedicated S7 step-4 diagnostic namespace.
-DIAGNOSTIC_SEEDS = tuple(range(920001, 920101))
+DIAGNOSTIC_SEEDS = tuple(range(930001, 930101))
 
 # Explicitly prohibited namespaces.
 VALIDATION_SEEDS = frozenset(range(2000, 2100))
@@ -769,7 +770,7 @@ def run_one_perturbation(
 
     if diagnostic_seed not in DIAGNOSTIC_SEEDS:
         raise CalibrationContractError(
-            "S7 step-4b accepts diagnostic seeds 920001-920100 only; "
+            "S7 step-4b accepts diagnostic seeds 930001-930100 only; "
             f"got {diagnostic_seed}."
         )
 
@@ -1374,7 +1375,7 @@ def frozen_pairwise_jaccards(
     if observed_seeds != expected_seeds:
         raise CalibrationContractError(
             "Cell does not contain exactly diagnostic seeds "
-            "920001-920100 in canonical order."
+            "930001-930100 in canonical order."
         )
 
     supports = [
@@ -1489,7 +1490,7 @@ def aggregate_step4b_cell(
 
     if observed_seeds != DIAGNOSTIC_SEEDS:
         raise CalibrationContractError(
-            "Step-4b cell does not contain exactly seeds 920001-920100."
+            "Step-4b cell does not contain exactly seeds 930001-930100."
         )
 
     if rows[
@@ -2586,7 +2587,7 @@ def build_candidate_verdict(
                 else "REJECTED"
             ),
         "namespace_after_first_probe_fit":
-            "920001-920100 = CONSUMED",
+            "930001-930100 = CONSUMED",
         "lower_tau_cells":
             "DESCRIPTIVE_ONLY",
         "gamma_selected":
@@ -2601,7 +2602,7 @@ def run_s7_step4b_diagnostic(
     Execute/resume the frozen S7 step-4b diagnostic.
 
     IMPORTANT:
-    The very first protected probe fit consumes namespace 920001-920100.
+    The very first protected probe fit consumes namespace 930001-930100.
     """
     # Must be the first substantive execution check.
     if EXECUTION_ENABLED is not True:
@@ -2612,8 +2613,8 @@ def run_s7_step4b_diagnostic(
 
     if DIAGNOSTIC_SEEDS != tuple(
         range(
-            920001,
-            920101,
+            930001,
+            930101,
         )
     ):
         raise CalibrationContractError(
@@ -2733,8 +2734,9 @@ def run_s7_step4b_diagnostic(
     start_time = time.monotonic()
 
     print(
-        "OPENING/RESUMING S7 STEP-4b DIAGNOSTIC 920001-920100.\n"
+        "OPENING/RESUMING S7 STEP-4b DIAGNOSTIC 930001-930100.\n"
         "910001-910100 remains consumed/closed.\n"
+        "920001-920100 remains consumed/closed.\n"
         "4000-4099 remains unopened.\n"
         "2000-2099 remains sealed.\n"
         "No gamma is selected by this diagnostic."
@@ -3051,7 +3053,7 @@ def run_s7_step4b_diagnostic(
             S7_SCENARIO,
 
         "diagnostic_namespace":
-            "920001-920100 CONSUMED",
+            "930001-930100 CONSUMED",
 
         "validation_namespace":
             "2000-2099 SEALED",
