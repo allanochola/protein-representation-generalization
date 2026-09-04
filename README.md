@@ -343,3 +343,316 @@ Together, these experiments separate representation generalization,
 experimental feasibility, and interpretable-feature stability rather than
 treating successful downstream prediction as sufficient evidence for all
 three.
+
+<!-- CURRENT_PROJECT_STATE_START -->
+
+## Current project state — September 2026
+
+This repository studies whether biologically meaningful information in protein
+language-model representations survives family-level distribution shift and,
+more recently, whether information that is accessible in the raw representation
+is necessarily localized into a compact mechanistically interpretable basis.
+
+The project has progressed from representation-level generalization tests to
+mechanistic-interpretability and basis-alignment questions.
+
+### Experiment 01 — Secondary-structure representation generalization
+
+**Status: complete.**
+
+Experiment 01 tested Q3 secondary-structure prediction from ESM-2 650M
+layer-17 representations under a deterministic 30%-sequence-identity cluster
+split, with a ±3 local-sequence baseline.
+
+Frozen dataset geometry:
+
+- 11,373 proteins;
+- 11,043 sequence-identity clusters;
+- 2,875,432 residues;
+- 7,712 training proteins;
+- 1,361 random-test proteins;
+- 2,300 divergent-test proteins.
+
+Primary result:
+
+- Δ_ESM = **+0.155039**
+- 95% CI = **[+0.151, +0.159]**
+- G = **+0.002903**
+- 95% CI = **[-0.003, +0.009]**
+
+Verdict:
+
+**H_repr**
+
+Under this design, ESM-2 contained substantial linearly accessible
+secondary-structure information beyond the frozen local-sequence baseline,
+and the representation advantage largely survived the divergent-family split.
+
+Archived at Zenodo:
+
+**10.5281/zenodo.22134890**
+
+---
+
+### Experiment 02 — Catalytic-residue generalization
+
+**Status: closed.**
+
+Experiment 02 asked whether linearly accessible catalytic-site information
+survives a 30%-identity family holdout beyond what can be recovered from local
+amino-acid context.
+
+The experiment was closed without a strong biological verdict because the
+ratio arm was underpowered and the preregistered precision gate targeted the
+wrong quantity for the realized design.
+
+The closure, deviation record, and sensitivity analysis are retained rather
+than retrospectively modifying the criterion.
+
+The main lesson from Experiment 02 was methodological: family-disjoint
+biological probing requires explicit power and precision checks before
+interpreting a null or weak effect.
+
+---
+
+### Experiment 03 — Toxin representation and SAE stability
+
+**Status: complete; preregistered stability criterion failed.**
+
+Experiment 03 moved from conventional probing toward mechanistic
+interpretability.
+
+It tested whether toxin-associated information in ESM-2 650M could be
+localized into a compact, stable set of InterPLM sparse-autoencoder features
+at layer 18.
+
+The preregistered three-way SAE stability gate failed.
+
+That result did **not** establish absence of toxin-associated information in
+ESM-2. It left several live explanations:
+
+1. layer 18 may be the wrong representational depth;
+2. toxin-associated information may be distributed rather than compact;
+3. information may be linearly accessible in the raw ESM representation but
+   misaligned with the InterPLM SAE basis;
+4. no stable accessible toxin-associated signal may exist under the frozen
+   discovery geometry.
+
+Those alternatives motivate Experiment 04.
+
+---
+
+### Experiment 04 — Depth and Basis
+
+**Status: active.**
+
+Experiment 04 is designed to distinguish:
+
+- representational-depth effects;
+- SAE-basis misalignment;
+- sparse linear accessibility;
+- distributed or unstable accessibility.
+
+It evaluates ESM-2 650M at six protocol-defined layers:
+
+- 1
+- 9
+- 18
+- 24
+- 30
+- 33
+
+Layer 18 is inherited as the already-observed Experiment-03 anchor.
+
+The fresh layers are:
+
+- 1
+- 9
+- 24
+- 30
+- 33
+
+No best-performing layer may be selected post hoc.
+
+#### Arm A — ESM depth × InterPLM SAE stability
+
+Arm A retains the Experiment-03 SAE discovery and stability instrument
+unchanged and applies it across depth.
+
+The raw workflow is:
+
+1. obtain residue-level ESM-2 representations;
+2. encode through the corresponding normalized InterPLM SAE;
+3. residue-max pool each SAE latent;
+4. apply the inherited signed-feature stability instrument.
+
+Arm A remains the preregistered depth-profile component of Experiment 04.
+
+#### Arm B — Supervised sparse probe
+
+Arm B asks whether toxin-associated information is accessible in the raw
+1,280-dimensional ESM-2 representation even when it is not localized into a
+stable compact SAE feature set.
+
+The frozen representation and model class are:
+
+1. raw 1,280-dimensional ESM-2 residue representations;
+2. coordinate-wise residue-max pooling over residues;
+3. L1-regularized logistic regression;
+4. discovery-only regularization selection.
+
+Candidate inverse-regularization grid:
+
+`1e-4, 3e-4, 1e-3, 3e-3, 1e-2, 3e-2, 1e-1, 3e-1, 1.0`
+
+The discovery geometry is inherited from Experiment 03:
+
+- 139 toxin-positive sequences;
+- 139 family-aware negative sequences;
+- realized per-class discovery sizes N = 100, 120, and 139.
+
+The confirmatory universe remains outside the current exploratory Arm-B
+analysis.
+
+---
+
+### Arm-B synthetic calibration history
+
+Arm B underwent an extended synthetic calibration program before biological
+use.
+
+An important architecture defect was identified in the original stability
+design: at N=139, repeated Stage-B refits could operate on effectively
+identical datasets, creating artificial support stability.
+
+That architecture was corrected by introducing an independent
+80%-within-target-N stability refit.
+
+After the repair, the stability machinery produced non-degenerate sparse
+supports.
+
+#### S7-v2
+
+The replacement synthetic sign-instability scenario, S7-v2, planted one
+heterogeneous signed shortcut coordinate while retaining stable predictive
+anchors.
+
+S7-v2 was evaluated exactly once under protected diagnostic namespace:
+
+`930001-930100`
+
+The prospectively frozen strong-calibration rule required all nine acceptance
+cells to pass:
+
+1. support resolution;
+2. recurring-coordinate two-sign instability;
+3. strict signed-versus-unsigned support separation.
+
+Result:
+
+**0/9 acceptance cells passed.**
+
+Therefore:
+
+**S7-v2 = REJECTED under the frozen strong-calibration rule.**
+
+The rejection is permanent and is not rescued by retrospective threshold
+changes.
+
+Failure anatomy in the nine acceptance cells:
+
+- support resolution: **9/9 PASS**
+- planted-coordinate recurrence R: **24–59 / 100**
+- median recurrence: **30 / 100**
+- frozen recurrence requirement: **R ≥ 71**
+- minority-sign count M: **0–7**
+- median minority-sign count: **3**
+- frozen minority-sign requirement: **M ≥ 8**
+- strict G < I: **3/9 cells**
+
+The dominant failure was therefore insufficient recurrence of the planted
+sign-instability coordinate, not another collapse of the corrected
+resampling architecture.
+
+---
+
+### Calibration-limited continuation
+
+The project does **not** relabel S7-v2 as a successful calibration.
+
+Instead, the corrected Arm-B implementation is considered operationally
+adequate for a narrower biological continuation.
+
+The current Arm-B evidential status is:
+
+**EXPLORATORY / DESCRIPTIVE / CALIBRATION-LIMITED**
+
+This means that biological Arm-B analyses may characterize:
+
+- predictive accessibility;
+- sparse-support sizes;
+- recurrence frequencies;
+- support similarity;
+- coefficient-sign variation;
+- differences across representational depth;
+- patterns consistent with basis misalignment or distributed accessibility.
+
+However, the rejected synthetic thresholds are **not** treated as validated
+biological gates.
+
+In particular, the following are not transferred as validated biological
+cutoffs:
+
+- R ≥ 71
+- M ≥ 8
+- strict G < I
+- the S7-v2 9-of-9 candidate rule
+
+No biological result may retroactively change the frozen S7-v2 verdict.
+
+The continuation decision is frozen in:
+
+`experiments/04-depth-and-basis/ARM_B_CALIBRATION_LIMITED_CONTINUATION_AMENDMENT.md`
+
+---
+
+### Current scientific firewall
+
+At the current repository state:
+
+- S7-v2 — **REJECTED / CLOSED**
+- Arm-B implementation — **OPERATIONALLY ADEQUATE**
+- Arm-B biological use — **EXPLORATORY / CALIBRATION-LIMITED**
+- `910001-910100` — **CONSUMED / CLOSED**
+- `920001-920100` — **CONSUMED / CLOSED**
+- `930001-930100` — **CONSUMED / CLOSED**
+- `4000-4099` — **UNOPENED**
+- `2000-2099` — **SEALED**
+- gamma — **NONE**
+- fresh Experiment-04 biological execution — **NOT YET OPENED**
+
+The next implementation boundary is to freeze and audit the biological Arm-B
+runner before computing fresh Experiment-04 biological activations.
+
+---
+
+## Research direction
+
+The project is now centered on a narrower mechanistic question:
+
+> **Can biologically meaningful information be accessible in a protein
+> model's representation even when a sparse-autoencoder basis fails to expose
+> it as a compact, stable feature set?**
+
+A positive raw-probe result alongside weak SAE localization would be
+consistent with basis misalignment or distributed accessibility.
+
+Failure of both instruments would provide no evidence for a stable compact or
+sparsely accessible signal under the frozen design, but would not by itself
+establish information absence from ESM-2.
+
+The project therefore treats calibration failures, negative results, and
+instrument limitations as scientific outputs rather than opportunities for
+post-hoc rescue.
+
+<!-- CURRENT_PROJECT_STATE_END -->
