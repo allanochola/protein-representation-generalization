@@ -1,7 +1,7 @@
 """
 Experiment 04 — Arm-B S7 step-4b redesign diagnostic.
 
-IMPLEMENTATION STATE: HARD-DISABLED.
+IMPLEMENTATION STATE: ENABLED / REMOTE-VERIFIED; NOT YET EXECUTED.
 
 This file implements the prospectively frozen S7 step-4b diagnostic contract.
 
@@ -17,9 +17,9 @@ architecture diagnostic.
 The Jaccard helper is inherited unchanged from the frozen Step-1 calibration
 implementation.
 
-Execution must remain impossible while EXECUTION_ENABLED is False.
-Changing that literal requires a separate later enablement commit after the
-disabled runner has been audited, committed, pushed, and remote-verified.
+Execution was enabled only after the disabled runner was audited, committed,
+pushed, and remote-verified in a separate enablement commit. The protected
+diagnostic namespace remains unopened until the first protected probe fit.
 """
 
 from __future__ import annotations
