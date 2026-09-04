@@ -31,7 +31,7 @@ import sys
 # HARD DISABLE BOUNDARY
 # ============================================================================
 
-ENABLE_BIOLOGICAL_REPRESENTATION_EXTRACTION = False
+ENABLE_BIOLOGICAL_REPRESENTATION_EXTRACTION = True
 
 
 # ============================================================================
