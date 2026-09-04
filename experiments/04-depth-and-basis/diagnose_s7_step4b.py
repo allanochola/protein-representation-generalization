@@ -83,6 +83,7 @@ class CalibrationContractError(RuntimeError):
 class CalibrationFitFailure(RuntimeError):
     """Frozen solver configuration produced a fit/convergence failure."""
 
+@dataclass(frozen=True)
 class ScenarioCell:
     scenario: str
     scenario_id: int
