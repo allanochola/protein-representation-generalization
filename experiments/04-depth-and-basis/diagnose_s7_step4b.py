@@ -92,6 +92,7 @@ class ScenarioCell:
     rho: Optional[float]
     rho_index: int
 
+@dataclass(frozen=True)
 class R2Result:
     selected_C: float
     best_C: float
