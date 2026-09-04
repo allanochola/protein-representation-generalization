@@ -1,0 +1,99 @@
+{
+  "archive_dtype": "float32",
+  "auroc_computed": false,
+  "biological_token_slice": "[1:L+1]",
+  "confirmatory_data_processed": false,
+  "cross_validation_performed": false,
+  "discovery_negative": 139,
+  "discovery_positive": 139,
+  "expected_rows": 278,
+  "experiment": "04-depth-and-basis",
+  "fasta_path": "experiments/03-toxin-representation/stage1_model_blind/precontact_gate/discovery_sequences.fasta",
+  "fasta_sha256": "ef17a1231bafc86255bf8ba57aaa64fe7f81c39677fb8d0553fa2d94ca2fb358",
+  "hidden_width": 1280,
+  "layer_semantics": "output.hidden_states[k]",
+  "layers": [
+    1,
+    9,
+    18,
+    24,
+    30,
+    33
+  ],
+  "manifest_path": "experiments/03-toxin-representation/stage1_model_contact/discovery_extraction/discovery_matrix_rows.tsv",
+  "manifest_sha256": "ef78d4c62a9142a03b72fd440e19d9093cab73e8d23106178d381838fa14112e",
+  "matrices": [
+    {
+      "dtype": "float32",
+      "layer": 1,
+      "path": "raw_esm_layer_1.npy",
+      "sha256": "204b2d0901b805ce9221b8318883e29dfe2c9a2c1aa18f37b6fc831ef3b08c15",
+      "shape": [
+        278,
+        1280
+      ]
+    },
+    {
+      "dtype": "float32",
+      "layer": 9,
+      "path": "raw_esm_layer_9.npy",
+      "sha256": "7eb08b17232cbf34c23ac8e246dbeb07bec2197904d4bb24e6717a93c1d03683",
+      "shape": [
+        278,
+        1280
+      ]
+    },
+    {
+      "dtype": "float32",
+      "layer": 18,
+      "path": "raw_esm_layer_18.npy",
+      "sha256": "c4e408db0963a0cbb90996ebb59b5e83cd86a9120de1a968cd4b7d80f5fa440e",
+      "shape": [
+        278,
+        1280
+      ]
+    },
+    {
+      "dtype": "float32",
+      "layer": 24,
+      "path": "raw_esm_layer_24.npy",
+      "sha256": "78c34e2c4419fb1ba850e383ab56b06b864412e65ba5046379983ff9e1190336",
+      "shape": [
+        278,
+        1280
+      ]
+    },
+    {
+      "dtype": "float32",
+      "layer": 30,
+      "path": "raw_esm_layer_30.npy",
+      "sha256": "ebc98537034ea7946b4c634d4a0a3fff18f503428b3f182c79360a604159c98b",
+      "shape": [
+        278,
+        1280
+      ]
+    },
+    {
+      "dtype": "float32",
+      "layer": 33,
+      "path": "raw_esm_layer_33.npy",
+      "sha256": "64e626858aa8e2a0a323af5121520f969f942679f8cbec4d27c7116bc8501f0d",
+      "shape": [
+        278,
+        1280
+      ]
+    }
+  ],
+  "model_id": "facebook/esm2_t33_650M_UR50D",
+  "model_revision": "08e4846e537177426273712802403f7ba8261b6c",
+  "phase": "E",
+  "pooling": "coordinate_wise_residue_max",
+  "probe_fit_performed": false,
+  "probe_seed_namespace_accessed": false,
+  "rows_manifest": {
+    "path": "phase_e_matrix_rows.tsv",
+    "sha256": "ef78d4c62a9142a03b72fd440e19d9093cab73e8d23106178d381838fa14112e"
+  },
+  "status": "discovery-representation-extraction",
+  "support_statistics_computed": false
+}
