@@ -1,0 +1,39 @@
+{
+  "archived_refusal_commit": "0eb9b520d4ed492d376a2a3b168452ded2fb4131",
+  "contract_consumption_rule": "920001-920100 is consumed at the first protected probe fit.",
+  "corrected_namespace_classification": {
+    "2000-2099": "SEALED",
+    "4000-4099": "UNOPENED",
+    "910001-910100": "CONSUMED / CLOSED",
+    "920001-920100": "ASSIGNED / UNOPENED",
+    "gamma": null,
+    "probe_fits": "NONE"
+  },
+  "failed_invocation": [
+    "/usr/bin/python3",
+    "/kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/diagnose_s7_step4b.py"
+  ],
+  "frozen_runner_commit_before_refusal": "c9ecd87bfa671a220ea669acfdeff6ee664ddf3c",
+  "generator_path": "experiments/04-depth-and-basis/synthetic_generators.py",
+  "generator_sha256": "b91eec8be2ae7931e38efa45e142208a88dee254fe22606419442e4a02f12dbb",
+  "next_authorized_action": "Invoke the same frozen runner once with --execute-s7-step4b-diagnostic.",
+  "observed_runner_message": "S7 step-4b diagnostic was NOT executed. Pass --execute-s7-step4b-diagnostic only after the enabled checkpoint has been pushed and remote-verified.",
+  "protected_probe_fit_occurred": false,
+  "protected_seedsequence_materialized": false,
+  "record_type": "preexecution_refusal_namespace_clarification",
+  "recorded_utc": "2026-09-04T04:15:02.825046+00:00",
+  "required_execution_flag_omitted": "--execute-s7-step4b-diagnostic",
+  "runner_created_scientific_artifacts": 0,
+  "runner_path": "experiments/04-depth-and-basis/diagnose_s7_step4b.py",
+  "runner_sha256": "9f3f15b1be9b49b19b8f43bce51019bccbd60aabdeb6a58471ae207c0408e6c0",
+  "scientific_candidate_status": "NOT EVALUATED",
+  "static_control_flow": {
+    "cli_refusal_guard_lineno": 3203,
+    "cli_refusal_guard_precedes_diagnostic_call": true,
+    "diagnostic_call_lineno": 3210,
+    "main_lineno": 3192,
+    "refusal_branch_raises_SystemExit": true,
+    "run_s7_step4b_diagnostic_reached": false
+  },
+  "supersedes_wrapper_classification_only": "The prior wrapper labeled 920001-920100 consumed at process launch. That label was more conservative than the frozen contract and did not correspond to a protected probe fit."
+}
