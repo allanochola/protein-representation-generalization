@@ -1,0 +1,13 @@
+{
+  "acceptance_cells_passed": 0,
+  "acceptance_cells_total": 9,
+  "archive_manifest_sha256": "910ee95a678304f349d45f41d409c6f75c6672dfde6ea78465489976d1aa4198",
+  "authoritative_summary_sha256": "f4b425b1f04ea8cdbf07d2036fc4b65925630bc6f770e87757f0a3eb270b5cff",
+  "candidate": "S7-v2",
+  "candidate_pass": false,
+  "candidate_verdict": "REJECTED",
+  "decision_rule": "all_9_of_9",
+  "gamma_selected": false,
+  "lower_tau_cells": "DESCRIPTIVE_ONLY",
+  "namespace_after_first_probe_fit": "930001-930100 = CONSUMED"
+}

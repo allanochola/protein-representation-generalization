@@ -1,0 +1,25 @@
+{
+  "attempt": "protected_execution_attempt_03",
+  "authenticated_push_dry_run": true,
+  "authenticated_remote_check": true,
+  "branch": "exp04-depth-and-basis",
+  "command": [
+    "/usr/bin/python3",
+    "-u",
+    "/kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/diagnose_s7_step4b.py",
+    "--execute-s7-step4b-diagnostic",
+    "--output-dir",
+    "/kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/s7_step4b_execution_provenance/protected_execution_attempt_03/diagnostic_output"
+  ],
+  "enabled_head": "35531576c7090f83bbc93c4b2bfa56d036c9f6c9",
+  "execution_enabled": true,
+  "generator_sha256": "b91eec8be2ae7931e38efa45e142208a88dee254fe22606419442e4a02f12dbb",
+  "git_identity_configured": true,
+  "namespace_state_before_invocation": "CLEARED / ASSIGNED / UNOPENED",
+  "policy": "Single invocation only. No retry after subprocess start. Archive/commit/push automatically regardless of return code.",
+  "preflight_utc": "2026-09-04T05:41:13.521205+00:00",
+  "protected_namespace": "930001-930100",
+  "remote_head_before_execution": "35531576c7090f83bbc93c4b2bfa56d036c9f6c9",
+  "runner_sha256": "59c54c26d0c8a28d7c3842e611fa1f594934a3f9beb46d30b81d8c112e15017b",
+  "status": "READY_FOR_SINGLE_INVOCATION"
+}

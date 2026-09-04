@@ -1,0 +1,15 @@
+{
+  "dataset_seed": 1674067987,
+  "n_pair_rows": 4950,
+  "n_raw_rows": 100,
+  "pairs_sha256": "922502f1806279c9e10efc73fb6c5462c6544c303c493879f6291ef20f043fac",
+  "planted_sign_instability_idx": [
+    5
+  ],
+  "raw_sha256": "922ef395ae297f0f43563929163d94733bdbbe4fb51683f422f6ae5170cd3987",
+  "scenario": "S7",
+  "status": "COMPLETE",
+  "summary_sha256": "59ada73c8d121a57b2c9d336f0040de84b218dffa42021dedd8b7213953e34f0",
+  "target_n": 120,
+  "tau_index": 1
+}

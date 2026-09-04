@@ -1,0 +1,1 @@
+/usr/bin/python3 -u /kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/diagnose_s7_step4b.py --execute-s7-step4b-diagnostic --output-dir /kaggle/working/protein-representation-generalization/experiments/04-depth-and-basis/s7_step4b_execution_provenance/protected_execution_attempt_03/diagnostic_output
