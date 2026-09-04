@@ -186,6 +186,7 @@ STREAM_STAGE_A_FIT: Final[int] = 24
 STREAM_STAGE_B_FIT: Final[int] = 25
 STREAM_STABILITY_SUBSAMPLE: Final[int] = 26
 STREAM_STABILITY_FIT: Final[int] = 27
+STREAM_LABEL_PERMUTATION: Final[int] = 28
 
 
 # ============================================================================
@@ -391,6 +392,12 @@ def run_enabled_phase_p() -> None:
     # Frozen biological main-sweep addressing.
     MAIN_BIOLOGICAL_SEED_START = 1000001
     MAIN_BIOLOGICAL_SEED_END = 1000100
+
+    # Frozen descriptive permutation-null addressing.
+    PERMUTATION_NULL_SEED_START = 1100001
+    PERMUTATION_NULL_SEED_END = 1100100
+    PERMUTATION_NULL_TARGET_N = 139
+
     RUNNER_NAMESPACE = 200
 
     STREAM_TARGET_N = 21
@@ -488,6 +495,55 @@ def run_enabled_phase_p() -> None:
                 0,
                 0,
                 int(target_n),
+                RUNNER_NAMESPACE,
+                int(stream_id),
+            ]
+        )
+
+    def permutation_null_seedsequence(
+        c: int,
+        stream_id: int,
+    ) -> np.random.SeedSequence:
+        """
+        Frozen permutation-null runner-level address:
+
+            [c, 0, 0, 0, 139, 200, stream_id]
+
+        The null namespace is strictly disjoint from the main biological
+        namespace. Streams 21-27 retain their inherited stochastic roles;
+        stream 28 is reserved exclusively for label-position permutation.
+        """
+        if not (
+            PERMUTATION_NULL_SEED_START
+            <= int(c)
+            <= PERMUTATION_NULL_SEED_END
+        ):
+            raise CalibrationContractError(
+                f"permutation-null perturbation identifier outside "
+                f"authorized namespace: {c}"
+            )
+
+        if int(stream_id) not in (
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            STREAM_LABEL_PERMUTATION,
+        ):
+            raise CalibrationContractError(
+                f"unauthorized permutation-null stream ID: {stream_id}"
+            )
+
+        return np.random.SeedSequence(
+            [
+                int(c),
+                0,
+                0,
+                0,
+                PERMUTATION_NULL_TARGET_N,
                 RUNNER_NAMESPACE,
                 int(stream_id),
             ]
@@ -945,6 +1001,111 @@ def run_enabled_phase_p() -> None:
             np.asarray(y[eval_idx], dtype=int),
         )
 
+    def prepare_permutation_null_stage_a(
+        X: np.ndarray,
+        y: np.ndarray,
+        *,
+        c: int,
+    ) -> tuple[
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+    ]:
+        """
+        Frozen permutation-null ordering at N=139:
+
+            stream 21 target-N selection
+                -> stream 28 positional label permutation
+                -> stream 22 Stage-A split
+
+        Xn is never permuted. Only the association between the fixed target-pool
+        rows and their labels is randomized. Positional permutation preserves
+        the selected pool's exact class counts.
+        """
+        target_ss = permutation_null_seedsequence(
+            c,
+            STREAM_TARGET_N,
+        )
+        target_rng = np.random.default_rng(target_ss)
+
+        Xn, yn = select_target_n(
+            X,
+            y,
+            target_n=PERMUTATION_NULL_TARGET_N,
+            rng=target_rng,
+        )
+
+        if Xn.shape[0] != 2 * PERMUTATION_NULL_TARGET_N:
+            raise CalibrationContractError(
+                "permutation-null target pool has wrong row count"
+            )
+
+        if yn.shape != (2 * PERMUTATION_NULL_TARGET_N,):
+            raise CalibrationContractError(
+                "permutation-null target labels have wrong shape"
+            )
+
+        pre_pos = int(np.sum(yn == 1))
+        pre_neg = int(np.sum(yn == 0))
+
+        if (
+            pre_pos != PERMUTATION_NULL_TARGET_N
+            or pre_neg != PERMUTATION_NULL_TARGET_N
+        ):
+            raise CalibrationContractError(
+                "permutation-null target pool must contain exactly "
+                "139 labels per class before permutation"
+            )
+
+        permutation_ss = permutation_null_seedsequence(
+            c,
+            STREAM_LABEL_PERMUTATION,
+        )
+        permutation_rng = np.random.default_rng(permutation_ss)
+
+        perm = permutation_rng.permutation(len(yn))
+        yn_perm = np.asarray(yn[perm], dtype=int)
+
+        if yn_perm.shape != yn.shape:
+            raise CalibrationContractError(
+                "label permutation changed target-label shape"
+            )
+
+        if int(np.sum(yn_perm == 1)) != pre_pos:
+            raise CalibrationContractError(
+                "label permutation changed positive class count"
+            )
+
+        if int(np.sum(yn_perm == 0)) != pre_neg:
+            raise CalibrationContractError(
+                "label permutation changed negative class count"
+            )
+
+        stage_a_ss = permutation_null_seedsequence(
+            c,
+            STREAM_STAGE_A_SPLIT,
+        )
+        stage_a_rng = np.random.default_rng(stage_a_ss)
+
+        X_train, y_train, X_eval, y_eval = stage_a_split(
+            Xn,
+            yn_perm,
+            target_n=PERMUTATION_NULL_TARGET_N,
+            rng=stage_a_rng,
+        )
+
+        return (
+            Xn,
+            yn_perm,
+            X_train,
+            y_train,
+            X_eval,
+            y_eval,
+        )
+
     # Implementation freeze checks. These are definitions only while the
     # outer execution gate remains False.
     assert TARGET_N_VALUES == (100, 120, 139)
@@ -967,6 +1128,10 @@ def run_enabled_phase_p() -> None:
         1.0,
     )
     assert RUNNER_NAMESPACE == 200
+    assert PERMUTATION_NULL_SEED_START == 1100001
+    assert PERMUTATION_NULL_SEED_END == 1100100
+    assert PERMUTATION_NULL_TARGET_N == 139
+    assert STREAM_LABEL_PERMUTATION == 28
     assert STAGE_A_FIT_CHILD_COUNT == 46
     assert STAGE_A_CV_FIT_CHILDREN == tuple(range(45))
     assert STAGE_A_FINAL_REFIT_CHILD == 45
