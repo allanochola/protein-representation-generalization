@@ -86,17 +86,41 @@ def find_repo_root() -> Path:
     fail("could not resolve repository root")
 
 
-def parse_fasta(path: Path) -> dict[str, str]:
+def parse_fasta(
+    path: Path,
+    expected_ids: set[str],
+) -> dict[str, str]:
     """
-    Parse the frozen discovery FASTA.
+    Parse the frozen discovery FASTA by exact frozen identifier only.
 
-    UniProt-style header aliases are supported, but the final mapping must
-    resolve every identifier in discovery_matrix_rows.tsv exactly once.
+    Header metadata tokens are not treated as aliases. Each FASTA record
+    must resolve to exactly one identifier from the prospectively frozen
+    discovery identifier set.
     """
+    expected_ids = set(expected_ids)
+
+    if not expected_ids:
+        fail("expected FASTA identifier set is empty")
+
     mapping: dict[str, str] = {}
 
     header = None
     chunks: list[str] = []
+
+    def candidate_tokens(text: str) -> set[str]:
+        tokens = {text}
+
+        for field in text.split():
+            tokens.add(field)
+
+            if "|" in field:
+                tokens.update(
+                    part
+                    for part in field.split("|")
+                    if part
+                )
+
+        return tokens
 
     def flush() -> None:
         nonlocal header, chunks
@@ -109,25 +133,29 @@ def parse_fasta(path: Path) -> dict[str, str]:
         if not sequence:
             fail("empty FASTA sequence encountered")
 
-        first = header.split()[0]
+        hits = sorted(
+            candidate_tokens(header)
+            & expected_ids
+        )
 
-        aliases = {first}
-
-        if "|" in first:
-            aliases.update(
-                part
-                for part in first.split("|")
-                if part
+        if len(hits) != 1:
+            fail(
+                "FASTA header does not resolve to exactly one "
+                "frozen identifier: "
+                + header
+                + " ; hits="
+                + repr(hits)
             )
 
-        for alias in aliases:
-            if alias in mapping and mapping[alias] != sequence:
-                fail(
-                    "ambiguous FASTA alias maps to different sequences: "
-                    + alias
-                )
+        identifier = hits[0]
 
-            mapping[alias] = sequence
+        if identifier in mapping:
+            fail(
+                "duplicate FASTA record for frozen identifier: "
+                + identifier
+            )
+
+        mapping[identifier] = sequence
 
     with path.open(
         "r",
@@ -149,6 +177,28 @@ def parse_fasta(path: Path) -> dict[str, str]:
                 chunks.append(line)
 
         flush()
+
+    missing = sorted(
+        expected_ids
+        - set(mapping)
+    )
+
+    extra = sorted(
+        set(mapping)
+        - expected_ids
+    )
+
+    if missing:
+        fail(
+            "frozen identifiers missing from FASTA: "
+            + repr(missing)
+        )
+
+    if extra:
+        fail(
+            "unexpected FASTA identifiers resolved: "
+            + repr(extra)
+        )
 
     return mapping
 
@@ -217,7 +267,10 @@ def validate_frozen_inputs(
         )
 
     rows = load_manifest(manifest_path)
-    fasta = parse_fasta(fasta_path)
+    fasta = parse_fasta(
+        fasta_path,
+        {row["identifier"].strip() for row in rows},
+    )
 
     if len(rows) != EXPECTED_N_ROWS:
         fail(
