@@ -623,13 +623,50 @@ def assert_exact_scientific_identity(
         ]
     )
 
-    if (
-        p.returncode != 0
-        or p.stdout != ""
-    ):
+    if p.returncode != 0:
         raise OrchestratorContractError(
-            "scientific worktree not clean at live boundary"
+            "scientific worktree status command failed at live boundary"
         )
+
+    if p.stdout != "":
+        resume_lines = [
+            line
+            for line in p.stdout.splitlines()
+            if line
+        ]
+
+        resume_output = (
+            scientific_repo
+            / "experiments/04-depth-and-basis/phase_p_biological_probe/output"
+        )
+
+        resume_manifest = (
+            resume_output
+            / "execution_manifest.json"
+        )
+
+        exact_manifest_only_resume = (
+            resume_lines
+            == [
+                "?? experiments/04-depth-and-basis/phase_p_biological_probe/output/"
+            ]
+            and resume_output.is_dir()
+            and sorted(
+                item.name
+                for item in resume_output.iterdir()
+            )
+            == ["execution_manifest.json"]
+            and resume_manifest.is_file()
+            and sha256_file(
+                resume_manifest
+            )
+            == "f5049a77f210b53e58ded918d8cbce9444444fd141df86f61a94dc8aa460e7ba"
+        )
+
+        if not exact_manifest_only_resume:
+            raise OrchestratorContractError(
+                "scientific worktree not clean at live boundary"
+            )
 
     if sha256_file(
         runner_path
