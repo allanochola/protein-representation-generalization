@@ -9,6 +9,7 @@ import csv
 import hashlib
 import json
 import shutil
+import subprocess
 import tempfile
 import time
 from typing import Dict
@@ -349,6 +350,191 @@ def write_dataset_metadata(
         )
         + "\n",
         encoding="utf-8",
+    )
+
+
+
+def run_cli(cmd):
+    return subprocess.run(
+        cmd,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+
+
+def build_version_command(
+    stage_dir: Path,
+    message: str,
+):
+    """
+    Build one append-history Dataset version command.
+
+    Destructive old-version deletion flags are forbidden.
+    """
+
+    cmd = [
+        "kaggle",
+        "datasets",
+        "version",
+        "-p",
+        str(stage_dir),
+        "-m",
+        message,
+    ]
+
+    forbidden = {
+        "-d",
+        "--delete-old-versions",
+    }
+
+    if any(
+        token in forbidden
+        for token in cmd
+    ):
+        raise PublisherContractError(
+            "destructive old-version deletion "
+            "flag present."
+        )
+
+    return cmd
+
+
+def wait_until_dataset_ready(
+    *,
+    max_attempts: int = 120,
+    sleep_seconds: float = 2.0,
+) -> None:
+
+    last = ""
+
+    for _ in range(max_attempts):
+        p = run_cli(
+            [
+                "kaggle",
+                "datasets",
+                "status",
+                DATASET_REF,
+            ]
+        )
+
+        text = (
+            p.stdout
+            + "\n"
+            + p.stderr
+        ).strip()
+
+        last = text
+
+        if (
+            p.returncode == 0
+            and "ready" in text.lower()
+        ):
+            return
+
+        time.sleep(
+            sleep_seconds
+        )
+
+    raise PublisherContractError(
+        "dataset never reached ready state. "
+        f"Last status: {last!r}"
+    )
+
+
+def list_remote_files_text() -> str:
+    p = run_cli(
+        [
+            "kaggle",
+            "datasets",
+            "files",
+            DATASET_REF,
+            "--page-size",
+            "200",
+        ]
+    )
+
+    if p.returncode != 0:
+        raise PublisherContractError(
+            "remote file listing failed: "
+            + (
+                p.stderr.strip()
+                or p.stdout.strip()
+            )
+        )
+
+    return (
+        p.stdout
+        + "\n"
+        + p.stderr
+    )
+
+
+def download_remote_file(
+    *,
+    filename: str,
+    destination: Path,
+) -> Path:
+
+    p = run_cli(
+        [
+            "kaggle",
+            "datasets",
+            "download",
+            DATASET_REF,
+            "-f",
+            filename,
+            "-p",
+            str(destination),
+            "-o",
+        ]
+    )
+
+    if p.returncode != 0:
+        raise PublisherContractError(
+            f"remote download failed for {filename}: "
+            + (
+                p.stderr.strip()
+                or p.stdout.strip()
+            )
+        )
+
+    matches = [
+        x
+        for x in destination.rglob(filename)
+        if x.is_file()
+    ]
+
+    if len(matches) != 1:
+        raise PublisherContractError(
+            f"expected one downloaded {filename}; "
+            f"observed={len(matches)}"
+        )
+
+    return matches[0]
+
+
+def publish_stage_as_new_version(
+    *,
+    stage_dir: Path,
+    message: str,
+):
+    """
+    Create exactly one new Dataset version.
+
+    A successful CLI return only means the version request was
+    accepted. Remote durability requires later readiness + fresh
+    download/hash verification.
+    """
+
+    cmd = build_version_command(
+        stage_dir,
+        message,
+    )
+
+    return run_cli(
+        cmd
     )
 
 
@@ -718,15 +904,26 @@ def main() -> None:
         action="store_true",
     )
 
+    parser.add_argument(
+        "--dummy-live-transport-test",
+        action="store_true",
+    )
+
     args = parser.parse_args()
 
     if args.self_test:
         synthetic_self_test()
         return
 
+    if args.dummy_live_transport_test:
+        print(
+            "DUMMY LIVE TRANSPORT MODE AVAILABLE — "
+            "caller must provide the controlled staging/test harness."
+        )
+        return
+
     raise PublisherContractError(
-        "Live publication mode is intentionally unavailable "
-        "until the live non-biological transport boundary is frozen."
+        "Biological live publication mode remains disabled."
     )
 
 
