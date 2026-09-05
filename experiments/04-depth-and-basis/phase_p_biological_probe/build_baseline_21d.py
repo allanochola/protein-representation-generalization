@@ -3,6 +3,7 @@ import csv
 import hashlib
 import json
 import os
+import subprocess
 import tempfile
 
 import numpy as np
@@ -12,6 +13,12 @@ REPO = Path(__file__).resolve().parents[3]
 
 EXPECTED_CONTRACT_COMMIT = (
     "f62fc78a3b424c20b1587e8e3b61ae853a60a63e"
+)
+
+GENERATOR_REL = (
+    "experiments/04-depth-and-basis/"
+    "phase_p_biological_probe/"
+    "build_baseline_21d.py"
 )
 
 CONTRACT_REL = (
@@ -86,6 +93,33 @@ def sha256_file(path):
 
 def sha256_sequence(sequence):
     return hashlib.sha256(sequence.encode("utf-8")).hexdigest()
+
+
+def repository_head():
+    completed = subprocess.run(
+        [
+            "git",
+            "rev-parse",
+            "HEAD",
+        ],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+    )
+
+    if completed.returncode != 0:
+        stop(
+            "unable to resolve repository HEAD for provenance"
+        )
+
+    head = completed.stdout.strip()
+
+    if len(head) != 40:
+        stop(
+            "repository HEAD is not a full 40-character commit hash"
+        )
+
+    return head
 
 
 def read_tsv(path):
@@ -224,6 +258,7 @@ def column_descriptives(array):
 
 
 def main():
+    generator_path = REPO / GENERATOR_REL
     contract = REPO / CONTRACT_REL
     matrix_manifest = REPO / MATRIX_MANIFEST_REL
     sequence_manifest = REPO / SEQUENCE_MANIFEST_REL
@@ -236,6 +271,17 @@ def main():
     # ------------------------------------------------------------------
     # Frozen-source verification
     # ------------------------------------------------------------------
+
+    if not generator_path.exists():
+        stop(
+            "executing generator file is missing"
+        )
+
+    generator_sha = sha256_file(
+        generator_path
+    )
+
+    execution_head = repository_head()
 
     source_checks = (
         (
@@ -617,6 +663,11 @@ def main():
     # ------------------------------------------------------------------
 
     provenance = {
+        "generator": {
+            "path": GENERATOR_REL,
+            "sha256": generator_sha,
+            "repository_head_at_execution": execution_head,
+        },
         "artifact": {
             "path": BASELINE_REL,
             "sha256": baseline_sha,
