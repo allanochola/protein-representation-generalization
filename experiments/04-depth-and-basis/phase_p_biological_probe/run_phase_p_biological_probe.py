@@ -57,7 +57,7 @@ import sys
 # HARD EXECUTION GATE
 # ============================================================================
 
-ENABLE_PHASE_P_BIOLOGICAL_PROBING: Final[bool] = False
+ENABLE_PHASE_P_BIOLOGICAL_PROBING: Final[bool] = True
 
 
 # ============================================================================
@@ -3920,10 +3920,7 @@ def run_enabled_phase_p() -> None:
         )
 
 
-    raise PhasePContractError(
-        "Phase-P corrected mechanics are encoded, but biological execution "
-        "is not yet authorized at this freeze."
-    )
+    run_wired_phase_p_from_frozen_attachments()
 
 
 def main() -> int:
