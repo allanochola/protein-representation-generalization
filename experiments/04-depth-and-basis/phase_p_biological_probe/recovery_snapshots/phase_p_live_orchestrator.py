@@ -553,16 +553,21 @@ def process_is_stopped(pid: int) -> bool:
 def wait_until_stopped(
     child,
     *,
-    timeout_seconds: float = 120.0,
+    timeout_seconds=None,
 ) -> None:
 
     deadline = (
-        __import__("time").monotonic()
-        + float(timeout_seconds)
+        None
+        if timeout_seconds is None
+        else (
+            __import__("time").monotonic()
+            + float(timeout_seconds)
+        )
     )
 
     while (
-        __import__("time").monotonic()
+        deadline is None
+        or __import__("time").monotonic()
         < deadline
     ):
         if child.poll() is not None:
@@ -691,7 +696,7 @@ def start_scientific_child_at_gate(
     try:
         wait_until_stopped(
             child,
-            timeout_seconds=120.0,
+            timeout_seconds=None,
         )
 
         if not output_dir.is_dir():
