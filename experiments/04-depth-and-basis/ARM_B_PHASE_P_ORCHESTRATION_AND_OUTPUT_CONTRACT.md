@@ -318,6 +318,13 @@ No new coefficient-derived statistic may be introduced during execution.
 
 ## 11. Output files
 
+### Authoritative execution-output directory
+
+The frozen repository-relative Phase-P biological execution-output directory is:
+
+`experiments/04-depth-and-basis/phase_p_biological_probe/output`
+
+
 The biological execution must use a new output directory that is absent
 before first execution.
 
