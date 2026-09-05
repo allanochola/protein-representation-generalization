@@ -1,0 +1,283 @@
+{
+  "artifact": {
+    "dtype": "float32",
+    "finite": true,
+    "path": "experiments/04-depth-and-basis/phase_p_biological_probe/input/baseline_21d.npy",
+    "sha256": "95fa09075b24dbd11133bdf157f9e4a9b27a01f54d644860a074d5bae4c32d98",
+    "shape": [
+      278,
+      21
+    ]
+  },
+  "biological_phase_p_execution_authorized": false,
+  "column_descriptive_statistics": [
+    {
+      "column_index": 0,
+      "feature": "length",
+      "max": 1013.0,
+      "mean": 260.42446043165467,
+      "min": 7.0,
+      "std_population": 225.65013915565805
+    },
+    {
+      "column_index": 1,
+      "feature": "fraction_A",
+      "max": 0.20000000298023224,
+      "mean": 0.0691835968855688,
+      "min": 0.0,
+      "std_population": 0.03292189135921343
+    },
+    {
+      "column_index": 2,
+      "feature": "fraction_C",
+      "max": 0.3636363744735718,
+      "mean": 0.04869239215978602,
+      "min": 0.0,
+      "std_population": 0.05899789442334763
+    },
+    {
+      "column_index": 3,
+      "feature": "fraction_D",
+      "max": 0.1770833283662796,
+      "mean": 0.056481253134636145,
+      "min": 0.0,
+      "std_population": 0.026927129721391708
+    },
+    {
+      "column_index": 4,
+      "feature": "fraction_E",
+      "max": 0.14077669382095337,
+      "mean": 0.05227814009078115,
+      "min": 0.0,
+      "std_population": 0.02778699903217322
+    },
+    {
+      "column_index": 5,
+      "feature": "fraction_F",
+      "max": 0.3333333432674408,
+      "mean": 0.043671619704850825,
+      "min": 0.0,
+      "std_population": 0.034241683753124925
+    },
+    {
+      "column_index": 6,
+      "feature": "fraction_G",
+      "max": 0.2222222238779068,
+      "mean": 0.07294181083402723,
+      "min": 0.0,
+      "std_population": 0.035440003925554
+    },
+    {
+      "column_index": 7,
+      "feature": "fraction_H",
+      "max": 0.1428571492433548,
+      "mean": 0.021080752322115273,
+      "min": 0.0,
+      "std_population": 0.016241795049774882
+    },
+    {
+      "column_index": 8,
+      "feature": "fraction_I",
+      "max": 0.23076923191547394,
+      "mean": 0.04932736486812933,
+      "min": 0.0,
+      "std_population": 0.027956065996783238
+    },
+    {
+      "column_index": 9,
+      "feature": "fraction_K",
+      "max": 0.25,
+      "mean": 0.05921512998124625,
+      "min": 0.0,
+      "std_population": 0.03240629091652299
+    },
+    {
+      "column_index": 10,
+      "feature": "fraction_L",
+      "max": 0.2222222238779068,
+      "mean": 0.08321395114050817,
+      "min": 0.0,
+      "std_population": 0.03325691447400906
+    },
+    {
+      "column_index": 11,
+      "feature": "fraction_M",
+      "max": 0.1411764770746231,
+      "mean": 0.023938377140753187,
+      "min": 0.0,
+      "std_population": 0.016541252070607998
+    },
+    {
+      "column_index": 12,
+      "feature": "fraction_N",
+      "max": 0.1304347813129425,
+      "mean": 0.04690397197461064,
+      "min": 0.0,
+      "std_population": 0.024409339324254972
+    },
+    {
+      "column_index": 13,
+      "feature": "fraction_P",
+      "max": 0.18518517911434174,
+      "mean": 0.04827783378712136,
+      "min": 0.0,
+      "std_population": 0.03048024417545506
+    },
+    {
+      "column_index": 14,
+      "feature": "fraction_Q",
+      "max": 0.20000000298023224,
+      "mean": 0.03855341885878751,
+      "min": 0.0,
+      "std_population": 0.02327546377977408
+    },
+    {
+      "column_index": 15,
+      "feature": "fraction_R",
+      "max": 0.16470588743686676,
+      "mean": 0.04900696250214744,
+      "min": 0.0,
+      "std_population": 0.028633979147748078
+    },
+    {
+      "column_index": 16,
+      "feature": "fraction_S",
+      "max": 0.18918919563293457,
+      "mean": 0.06880852177390735,
+      "min": 0.0,
+      "std_population": 0.029115962886467554
+    },
+    {
+      "column_index": 17,
+      "feature": "fraction_T",
+      "max": 0.1428571492433548,
+      "mean": 0.056404857695263495,
+      "min": 0.0,
+      "std_population": 0.02914804225621612
+    },
+    {
+      "column_index": 18,
+      "feature": "fraction_V",
+      "max": 0.1785714328289032,
+      "mean": 0.06224749384702538,
+      "min": 0.0,
+      "std_population": 0.027285805103702737
+    },
+    {
+      "column_index": 19,
+      "feature": "fraction_W",
+      "max": 0.1428571492433548,
+      "mean": 0.013336111877696495,
+      "min": 0.0,
+      "std_population": 0.013718767358226452
+    },
+    {
+      "column_index": 20,
+      "feature": "fraction_Y",
+      "max": 0.1818181872367859,
+      "mean": 0.03643217223709811,
+      "min": 0.0,
+      "std_population": 0.02484723635533835
+    }
+  ],
+  "construction": {
+    "canonical_fraction_renormalization": false,
+    "centering": false,
+    "compute_dtype": "float64",
+    "feature_order": [
+      "length",
+      "fraction_A",
+      "fraction_C",
+      "fraction_D",
+      "fraction_E",
+      "fraction_F",
+      "fraction_G",
+      "fraction_H",
+      "fraction_I",
+      "fraction_K",
+      "fraction_L",
+      "fraction_M",
+      "fraction_N",
+      "fraction_P",
+      "fraction_Q",
+      "fraction_R",
+      "fraction_S",
+      "fraction_T",
+      "fraction_V",
+      "fraction_W",
+      "fraction_Y"
+    ],
+    "final_numeric_operation": "astype(np.float32)",
+    "final_persisted_dtype": "float32",
+    "fraction_denominator": "full_sequence_length",
+    "fraction_formula": "count(canonical_amino_acid) / full_sequence_length",
+    "generator_seeded": false,
+    "imputation": false,
+    "model_used": false,
+    "pca": false,
+    "scaling": false,
+    "standardization": false
+  },
+  "correspondence_proof": {
+    "class_name_matches_all_rows": true,
+    "expected_rows": 278,
+    "fasta_header_exact_class_pipe_identifier": true,
+    "identifier_matches_all_rows": true,
+    "matrix_row_exact_0_to_277": true,
+    "passed": true,
+    "retrieved_length_matches_all_rows": true,
+    "rows_checked": 278,
+    "sequence_sha256_matches_all_rows": true
+  },
+  "frozen_sources": {
+    "authoritative_matrix_manifest": {
+      "path": "experiments/03-toxin-representation/stage1_model_contact/discovery_extraction/discovery_matrix_rows.tsv",
+      "sha256": "ef78d4c62a9142a03b72fd440e19d9093cab73e8d23106178d381838fa14112e"
+    },
+    "derivation_contract": {
+      "commit": "f62fc78a3b424c20b1587e8e3b61ae853a60a63e",
+      "path": "experiments/04-depth-and-basis/ARM_B_PHASE_P_BASELINE_21D_DERIVATION_AND_ROW_CORRESPONDENCE_CONTRACT.md",
+      "sha256": "952313de005fbcbd5c7a922a7d0b7d798124102fb2b52f551dcefd6ea7b8a5fc"
+    },
+    "fasta": {
+      "path": "experiments/03-toxin-representation/stage1_model_blind/precontact_gate/discovery_sequences.fasta",
+      "sha256": "ef17a1231bafc86255bf8ba57aaa64fe7f81c39677fb8d0553fa2d94ca2fb358"
+    },
+    "precontact_sequence_manifest": {
+      "path": "experiments/03-toxin-representation/stage1_model_blind/precontact_gate/discovery_sequence_manifest.tsv",
+      "sha256": "7ac8d253d06ab86b67f2f3d42d7b5ad0c770360a2d4959dc8d325bed00b9ce09"
+    }
+  },
+  "generator": {
+    "path": "experiments/04-depth-and-basis/phase_p_biological_probe/build_baseline_21d.py",
+    "repository_head_at_execution": "8479c8faa81088cfad54725160a9105ce15179f5",
+    "sha256": "92c19aa79d190f4278f49ddb02ec0cc0e663695319b2189739b52a674556482d"
+  },
+  "label_authority": {
+    "census": {
+      "negative": 139,
+      "positive": 139
+    },
+    "mapping": {
+      "negative": 0,
+      "positive": 1
+    },
+    "source": "authoritative matrix manifest class_name",
+    "used_for_model_execution": false
+  },
+  "preexecution_interpretation_note": {
+    "status": "prospective",
+    "text": "The baseline is intentionally unstandardized. Its length feature is numerically much larger and more variable than individual composition fractions, so an L1-penalized probe may preferentially use length. Accordingly, later baseline predictive performance must not automatically be attributed to amino-acid composition. If raw ESM only matches this baseline, the result may be consistent with information recoverable from sequence length and simple composition. Raw ESM performance clearly above the paired baseline is the relevant excess beyond this control."
+  },
+  "q6rx08_sentinel": {
+    "canonical_fraction_sum_float32_persisted": 0.9988123588263988,
+    "canonical_fraction_sum_float64": 0.998812351543943,
+    "float32_sum_rounded_4dp": "0.9988",
+    "identifier": "Q6RX08",
+    "length": 842,
+    "matrix_row": 212,
+    "noncanonical_counts": {
+      "X": 1
+    }
+  }
+}
