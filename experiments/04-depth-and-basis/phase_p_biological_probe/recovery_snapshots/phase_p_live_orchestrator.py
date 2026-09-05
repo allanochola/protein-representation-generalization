@@ -817,9 +817,30 @@ def live_main() -> None:
     )
 
     if output_dir.exists():
-        raise OrchestratorContractError(
-            "fresh live execution requires production output absent"
+        resume_manifest = (
+            output_dir
+            / "execution_manifest.json"
         )
+
+        exact_manifest_only_resume = (
+            output_dir.is_dir()
+            and sorted(
+                item.name
+                for item in output_dir.iterdir()
+            )
+            == ["execution_manifest.json"]
+            and resume_manifest.is_file()
+            and sha256_file(
+                resume_manifest
+            )
+            == "f5049a77f210b53e58ded918d8cbce9444444fd141df86f61a94dc8aa460e7ba"
+        )
+
+        if not exact_manifest_only_resume:
+            raise OrchestratorContractError(
+                "production output is neither absent nor exact "
+                "manifest-only resume state"
+            )
 
     assert_private_dataset()
 
