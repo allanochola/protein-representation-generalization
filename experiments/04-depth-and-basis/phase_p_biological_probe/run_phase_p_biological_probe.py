@@ -1724,6 +1724,1558 @@ def run_enabled_phase_p() -> None:
         }
 
 
+    # ──────────────────────────────────────────────────────────────────────
+    # Hard-disabled Phase-P experiment-level orchestration core.
+    #
+    # These are definitions only.  No function in this block is called at
+    # this source freeze.  The existing terminal PhasePContractError below
+    # remains effective even if the outer gate is changed prematurely.
+    #
+    # Input loading is intentionally NOT implemented here.  A later,
+    # separately audited attachment must provide already-loaded immutable
+    # representation matrices and the frozen biological label vector.
+    # ──────────────────────────────────────────────────────────────────────
+
+    ORCHESTRATION_OUTPUT_CONTRACT_SHA256 = (
+        "5c62729c16c906faf0c158c17499524ee3a6eb79d938d26b1f88846e8fc7f348"
+    )
+
+    REPRESENTATION_ORDER = (
+        "esm_layer_1",
+        "esm_layer_9",
+        "esm_layer_18",
+        "esm_layer_24",
+        "esm_layer_30",
+        "esm_layer_33",
+        "baseline_21d",
+    )
+
+    REPRESENTATION_TO_LAYER = {
+        "esm_layer_1": 1,
+        "esm_layer_9": 9,
+        "esm_layer_18": 18,
+        "esm_layer_24": 24,
+        "esm_layer_30": 30,
+        "esm_layer_33": 33,
+        "baseline_21d": None,
+    }
+
+    MAIN_OUTPUT_FILENAME = "main_per_perturbation.csv"
+    NULL_OUTPUT_FILENAME = "permutation_null_per_perturbation.csv"
+    EXECUTION_MANIFEST_FILENAME = "execution_manifest.json"
+    RESULT_FILENAME = "RESULT.md"
+
+    MAIN_ATOMIC_KEY_FIELDS = (
+        "biological_perturbation_id",
+        "target_n",
+        "representation",
+    )
+
+    NULL_ATOMIC_KEY_FIELDS = (
+        "null_perturbation_id",
+    )
+
+    MAIN_OUTPUT_FIELDS = (
+        "biological_perturbation_id",
+        "target_n",
+        "representation",
+        "stage_a_eval_auroc",
+        "selected_C",
+        "K_t_full",
+        "K_t_stab",
+        "stability_unsigned_support_json",
+        "stability_signed_support_json",
+        "membership_sha256",
+    )
+
+    NULL_OUTPUT_FIELDS = (
+        "null_perturbation_id",
+        "target_n",
+        "representation",
+        "stage_a_eval_auroc",
+        "selected_C",
+        "K_t_full",
+        "K_t_stab",
+        "stability_unsigned_support_json",
+        "stability_signed_support_json",
+        "membership_sha256",
+        "replay_membership_sha256",
+        "replay_success",
+    )
+
+    def exact_support_from_coef(
+        beta: np.ndarray,
+    ) -> tuple[
+        tuple[int, ...],
+        tuple[tuple[int, int], ...],
+    ]:
+        """
+        Frozen exact-zero support convention.
+
+        A coefficient is selected iff beta_j != 0.0 exactly.
+        Signed support stores (coordinate, sign), where sign is -1 or +1.
+        """
+        beta_arr = np.asarray(beta)
+
+        if beta_arr.ndim == 2:
+            if beta_arr.shape[0] != 1:
+                raise PhasePContractError(
+                    "Expected a binary-probe coefficient row with shape "
+                    "(1, p)."
+                )
+            beta_arr = beta_arr[0]
+
+        if beta_arr.ndim != 1:
+            raise PhasePContractError(
+                "Coefficient array must be one-dimensional after binary-row "
+                "normalization."
+            )
+
+        selected = np.flatnonzero(beta_arr != 0.0)
+
+        unsigned = tuple(
+            int(j)
+            for j in selected.tolist()
+        )
+
+        signed = tuple(
+            (
+                int(j),
+                1 if float(beta_arr[j]) > 0.0 else -1,
+            )
+            for j in selected.tolist()
+        )
+
+        return unsigned, signed
+
+
+    def jaccard_zero_empty(
+        a: frozenset[object],
+        b: frozenset[object],
+    ) -> float:
+        """
+        Frozen Jaccard convention: Jaccard(empty, empty) = 0.
+        """
+        union = a | b
+
+        if not union:
+            return 0.0
+
+        return float(
+            len(a & b) / len(union)
+        )
+
+
+    def aggregate_cell_support_statistics(
+        rows: list[dict[str, object]],
+    ) -> dict[str, float]:
+        """
+        Frozen 100-perturbation cell-level support aggregation.
+
+        I_stat:
+            median pairwise unsigned-support Jaccard.
+
+        G_stat:
+            median pairwise signed-support Jaccard.
+
+        Exactly choose(100, 2) = 4,950 unordered pairs are required.
+        """
+        if len(rows) != 100:
+            raise PhasePContractError(
+                "Support-cell aggregation requires exactly 100 perturbations."
+            )
+
+        unsigned_sets = []
+        signed_sets = []
+
+        for row in rows:
+            unsigned_raw = row.get("stability_unsigned_support")
+            signed_raw = row.get("stability_signed_support")
+
+            if unsigned_raw is None or signed_raw is None:
+                raise PhasePContractError(
+                    "Support-cell row is missing exact stability support."
+                )
+
+            unsigned_sets.append(
+                frozenset(
+                    int(j)
+                    for j in unsigned_raw
+                )
+            )
+
+            signed_sets.append(
+                frozenset(
+                    (int(j), int(sign))
+                    for j, sign in signed_raw
+                )
+            )
+
+        I_pairs = []
+        G_pairs = []
+
+        for t in range(100):
+            for u in range(t + 1, 100):
+                I_pairs.append(
+                    jaccard_zero_empty(
+                        unsigned_sets[t],
+                        unsigned_sets[u],
+                    )
+                )
+                G_pairs.append(
+                    jaccard_zero_empty(
+                        signed_sets[t],
+                        signed_sets[u],
+                    )
+                )
+
+        if len(I_pairs) != 4950 or len(G_pairs) != 4950:
+            raise PhasePContractError(
+                "Expected exactly 4,950 unordered perturbation pairs."
+            )
+
+        I_stat = float(np.median(np.asarray(I_pairs, dtype=float)))
+        G_stat = float(np.median(np.asarray(G_pairs, dtype=float)))
+
+        if G_stat > I_stat + 1e-15:
+            raise PhasePContractError(
+                "Frozen invariant violated: G_stat > I_stat."
+            )
+
+        return {
+            "I_stat": I_stat,
+            "G_stat": G_stat,
+        }
+
+
+    def canonical_json_dumps(
+        value: object,
+    ) -> str:
+        """
+        Stable compact JSON serialization used only for persisted provenance
+        and exact support identities.
+        """
+        import json as _json
+
+        return _json.dumps(
+            value,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+        )
+
+
+    def parse_persisted_support_json(
+        row: dict[str, object],
+    ) -> dict[str, object]:
+        """
+        Reconstruct exact stability support from persisted canonical JSON.
+        """
+        unsigned_text = row.get(
+            "stability_unsigned_support_json"
+        )
+        signed_text = row.get(
+            "stability_signed_support_json"
+        )
+
+        if (
+            not isinstance(unsigned_text, str)
+            or not isinstance(signed_text, str)
+        ):
+            raise PhasePContractError(
+                "Persisted support JSON fields must be strings."
+            )
+
+        try:
+            unsigned_raw = json.loads(
+                unsigned_text
+            )
+            signed_raw = json.loads(
+                signed_text
+            )
+        except Exception as exc:
+            raise PhasePContractError(
+                "Persisted support JSON is malformed."
+            ) from exc
+
+        if not isinstance(unsigned_raw, list):
+            raise PhasePContractError(
+                "Unsigned support JSON must decode to a list."
+            )
+
+        unsigned = []
+
+        for value in unsigned_raw:
+            if type(value) is not int:
+                raise PhasePContractError(
+                    "Unsigned support coordinates must be integers."
+                )
+
+            if value < 0:
+                raise PhasePContractError(
+                    "Unsigned support coordinate cannot be negative."
+                )
+
+            unsigned.append(
+                int(value)
+            )
+
+        if unsigned != sorted(set(unsigned)):
+            raise PhasePContractError(
+                "Unsigned support coordinates must be unique and strictly "
+                "increasing."
+            )
+
+        if not isinstance(signed_raw, list):
+            raise PhasePContractError(
+                "Signed support JSON must decode to a list."
+            )
+
+        signed = []
+
+        for item in signed_raw:
+            if (
+                not isinstance(item, list)
+                or len(item) != 2
+            ):
+                raise PhasePContractError(
+                    "Each signed-support entry must be [coordinate, sign]."
+                )
+
+            coordinate, sign = item
+
+            if type(coordinate) is not int:
+                raise PhasePContractError(
+                    "Signed-support coordinate must be an integer."
+                )
+
+            if type(sign) is not int or sign not in (-1, 1):
+                raise PhasePContractError(
+                    "Signed-support sign must be exactly -1 or +1."
+                )
+
+            signed.append(
+                (
+                    int(coordinate),
+                    int(sign),
+                )
+            )
+
+        signed_coordinates = [
+            coordinate
+            for coordinate, _sign in signed
+        ]
+
+        if signed_coordinates != unsigned:
+            raise PhasePContractError(
+                "Signed-support coordinates must exactly equal unsigned "
+                "coordinates in the same order."
+            )
+
+        if unsigned_text != canonical_json_dumps(
+            unsigned
+        ):
+            raise PhasePContractError(
+                "Unsigned support JSON is not canonical."
+            )
+
+        if signed_text != canonical_json_dumps(
+            [
+                [coordinate, sign]
+                for coordinate, sign in signed
+            ]
+        ):
+            raise PhasePContractError(
+                "Signed support JSON is not canonical."
+            )
+
+        return {
+            "stability_unsigned_support": tuple(
+                unsigned
+            ),
+            "stability_signed_support": tuple(
+                signed
+            ),
+        }
+
+
+    def aggregate_persisted_cell_support_statistics(
+        rows: list[dict[str, object]],
+    ) -> dict[str, float]:
+        """
+        Frozen persisted-row -> I_stat/G_stat aggregation path.
+        """
+        reconstructed = [
+            parse_persisted_support_json(
+                row
+            )
+            for row in rows
+        ]
+
+        return aggregate_cell_support_statistics(
+            reconstructed
+        )
+
+
+    def validate_sha256_hex(
+        value: object,
+        *,
+        field: str,
+    ) -> str:
+        if not isinstance(value, str):
+            raise PhasePContractError(
+                f"{field} must be a SHA-256 string."
+            )
+
+        if (
+            len(value) != 64
+            or value != value.lower()
+            or any(
+                ch not in "0123456789abcdef"
+                for ch in value
+            )
+        ):
+            raise PhasePContractError(
+                f"{field} is not canonical lowercase SHA-256 hex."
+            )
+
+        return value
+
+
+    def parse_checkpoint_int(
+        value: object,
+        *,
+        field: str,
+    ) -> int:
+        if not isinstance(value, str):
+            raise PhasePContractError(
+                f"Checkpoint field {field} must be text."
+            )
+
+        try:
+            parsed = int(value)
+        except Exception as exc:
+            raise PhasePContractError(
+                f"Checkpoint field {field} is not an integer."
+            ) from exc
+
+        if str(parsed) != value:
+            raise PhasePContractError(
+                f"Checkpoint integer field {field} is not canonical."
+            )
+
+        return parsed
+
+
+    def parse_checkpoint_float(
+        value: object,
+        *,
+        field: str,
+    ) -> float:
+        if not isinstance(value, str):
+            raise PhasePContractError(
+                f"Checkpoint field {field} must be text."
+            )
+
+        try:
+            parsed = float(value)
+        except Exception as exc:
+            raise PhasePContractError(
+                f"Checkpoint field {field} is not numeric."
+            ) from exc
+
+        if not math.isfinite(parsed):
+            raise PhasePContractError(
+                f"Checkpoint field {field} is non-finite."
+            )
+
+        return parsed
+
+
+    def validate_persisted_scientific_row(
+        row: dict[str, object],
+        *,
+        null_path: bool,
+    ) -> None:
+        """
+        Validate a persisted row before its atomic key counts as completed.
+        """
+        if null_path:
+            perturbation_id = parse_checkpoint_int(
+                row["null_perturbation_id"],
+                field="null_perturbation_id",
+            )
+
+            if not (
+                PERMUTATION_NULL_SEED_START
+                <= perturbation_id
+                <= PERMUTATION_NULL_SEED_END
+            ):
+                raise PhasePContractError(
+                    "Null perturbation id outside frozen namespace."
+                )
+
+            target_n = parse_checkpoint_int(
+                row["target_n"],
+                field="target_n",
+            )
+
+            if target_n != PERMUTATION_NULL_TARGET_N:
+                raise PhasePContractError(
+                    "Persisted null target_n must equal 139."
+                )
+
+            representation = row[
+                "representation"
+            ]
+
+            if representation != "esm_layer_18":
+                raise PhasePContractError(
+                    "Persisted null representation must be esm_layer_18."
+                )
+
+        else:
+            perturbation_id = parse_checkpoint_int(
+                row["biological_perturbation_id"],
+                field="biological_perturbation_id",
+            )
+
+            if not (
+                MAIN_BIOLOGICAL_SEED_START
+                <= perturbation_id
+                <= MAIN_BIOLOGICAL_SEED_END
+            ):
+                raise PhasePContractError(
+                    "Biological perturbation id outside frozen namespace."
+                )
+
+            target_n = parse_checkpoint_int(
+                row["target_n"],
+                field="target_n",
+            )
+
+            if target_n not in TARGET_N_VALUES:
+                raise PhasePContractError(
+                    "Persisted main target_n outside frozen census."
+                )
+
+            representation = row[
+                "representation"
+            ]
+
+            if representation not in REPRESENTATION_ORDER:
+                raise PhasePContractError(
+                    "Persisted representation outside frozen census."
+                )
+
+        auroc = parse_checkpoint_float(
+            row["stage_a_eval_auroc"],
+            field="stage_a_eval_auroc",
+        )
+
+        if not 0.0 <= auroc <= 1.0:
+            raise PhasePContractError(
+                "Persisted AUROC outside [0, 1]."
+            )
+
+        selected_C = parse_checkpoint_float(
+            row["selected_C"],
+            field="selected_C",
+        )
+
+        if selected_C not in C_GRID:
+            raise PhasePContractError(
+                "Persisted selected_C outside exact frozen C grid."
+            )
+
+        K_t_full = parse_checkpoint_int(
+            row["K_t_full"],
+            field="K_t_full",
+        )
+
+        K_t_stab = parse_checkpoint_int(
+            row["K_t_stab"],
+            field="K_t_stab",
+        )
+
+        width = (
+            BASELINE_DIM
+            if representation == "baseline_21d"
+            else ESM_WIDTH
+        )
+
+        if not 0 <= K_t_full <= width:
+            raise PhasePContractError(
+                "Persisted K_t_full outside representation width."
+            )
+
+        if not 0 <= K_t_stab <= width:
+            raise PhasePContractError(
+                "Persisted K_t_stab outside representation width."
+            )
+
+        support = parse_persisted_support_json(
+            row
+        )
+
+        unsigned = support[
+            "stability_unsigned_support"
+        ]
+
+        if len(unsigned) != K_t_stab:
+            raise PhasePContractError(
+                "K_t_stab does not equal persisted support size."
+            )
+
+        if any(
+            coordinate >= width
+            for coordinate in unsigned
+        ):
+            raise PhasePContractError(
+                "Persisted support coordinate exceeds representation width."
+            )
+
+        membership_sha = validate_sha256_hex(
+            row["membership_sha256"],
+            field="membership_sha256",
+        )
+
+        if null_path:
+            replay_sha = validate_sha256_hex(
+                row["replay_membership_sha256"],
+                field="replay_membership_sha256",
+            )
+
+            if replay_sha != membership_sha:
+                raise PhasePContractError(
+                    "Null replay membership SHA does not match original."
+                )
+
+            if row["replay_success"] != "True":
+                raise PhasePContractError(
+                    "Null replay_success must be exactly True."
+                )
+
+
+    def validate_persisted_main_row(
+        row: dict[str, object],
+    ) -> None:
+        validate_persisted_scientific_row(
+            row,
+            null_path=False,
+        )
+
+
+    def validate_persisted_null_row(
+        row: dict[str, object],
+    ) -> None:
+        validate_persisted_scientific_row(
+            row,
+            null_path=True,
+        )
+
+    def csv_safe_row(
+        row: dict[str, object],
+        fieldnames: tuple[str, ...],
+    ) -> dict[str, object]:
+        """
+        Require exact output schema and convert values to CSV-safe scalars.
+        """
+        if set(row) != set(fieldnames):
+            missing = sorted(set(fieldnames) - set(row))
+            extra = sorted(set(row) - set(fieldnames))
+
+            raise PhasePContractError(
+                "Output row schema mismatch. "
+                f"missing={missing!r}; extra={extra!r}"
+            )
+
+        out = {}
+
+        for field in fieldnames:
+            value = row[field]
+
+            if isinstance(value, np.generic):
+                value = value.item()
+
+            if isinstance(value, float) and not math.isfinite(value):
+                raise PhasePContractError(
+                    f"Non-finite persisted float in field {field!r}."
+                )
+
+            out[field] = value
+
+        return out
+
+
+    def atomic_key_from_row(
+        row: dict[str, object],
+        key_fields: tuple[str, ...],
+    ) -> tuple[object, ...]:
+        return tuple(
+            row[field]
+            for field in key_fields
+        )
+
+
+    def read_existing_csv_rows_exact(
+        path: Path,
+        *,
+        fieldnames: tuple[str, ...],
+        key_fields: tuple[str, ...],
+        semantic_validator=None,
+    ) -> tuple[
+        list[dict[str, str]],
+        set[tuple[object, ...]],
+    ]:
+        """
+        Strict checkpoint reader.
+
+        A row's atomic key counts as completed only AFTER structural and
+        scientific semantic validation succeed.
+        """
+        import csv as _csv
+
+        if not path.exists():
+            return [], set()
+
+        if not path.is_file():
+            raise PhasePContractError(
+                f"Checkpoint path is not a regular file: {path}"
+            )
+
+        rows = []
+        keys = set()
+
+        with path.open(
+            "r",
+            encoding="utf-8",
+            newline="",
+        ) as handle:
+            reader = _csv.DictReader(
+                handle
+            )
+
+            if tuple(reader.fieldnames or ()) != fieldnames:
+                raise PhasePContractError(
+                    f"Checkpoint header mismatch for {path.name}."
+                )
+
+            for physical_row_number, row in enumerate(
+                reader,
+                start=2,
+            ):
+                if None in row:
+                    raise PhasePContractError(
+                        f"Malformed checkpoint row {physical_row_number} "
+                        f"in {path.name}."
+                    )
+
+                if set(row) != set(fieldnames):
+                    raise PhasePContractError(
+                        f"Checkpoint row schema mismatch at physical row "
+                        f"{physical_row_number} in {path.name}."
+                    )
+
+                if semantic_validator is not None:
+                    semantic_validator(
+                        row
+                    )
+
+                key = atomic_key_from_row(
+                    row,
+                    key_fields,
+                )
+
+                if key in keys:
+                    raise PhasePContractError(
+                        f"Duplicate checkpoint key {key!r} in {path.name}."
+                    )
+
+                keys.add(
+                    key
+                )
+                rows.append(
+                    row
+                )
+
+        return rows, keys
+
+
+    def append_csv_row_fsync(
+        path: Path,
+        *,
+        fieldnames: tuple[str, ...],
+        row: dict[str, object],
+    ) -> None:
+        """
+        Append exactly one completed row, then flush and fsync.
+
+        This function is never called at the current hard-disabled freeze.
+        """
+        import csv as _csv
+        import os as _os
+
+        path.parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        new_file = not path.exists()
+
+        clean = csv_safe_row(
+            row,
+            fieldnames,
+        )
+
+        with path.open(
+            "a",
+            encoding="utf-8",
+            newline="",
+        ) as handle:
+            writer = _csv.DictWriter(
+                handle,
+                fieldnames=fieldnames,
+                extrasaction="raise",
+            )
+
+            if new_file:
+                writer.writeheader()
+
+            writer.writerow(clean)
+            handle.flush()
+            _os.fsync(handle.fileno())
+
+
+    def write_manifest_once_or_validate(
+        path: Path,
+        manifest: dict[str, object],
+    ) -> None:
+        """
+        Create execution_manifest.json once, or require exact byte-equivalent
+        canonical JSON on resume.
+
+        No provenance adaptation is permitted.
+        """
+        import os as _os
+
+        canonical = (
+            canonical_json_dumps(manifest)
+            + "\n"
+        )
+
+        if path.exists():
+            existing = path.read_text(
+                encoding="utf-8",
+            )
+
+            if existing != canonical:
+                raise PhasePContractError(
+                    "Execution-manifest provenance mismatch on resume."
+                )
+
+            return
+
+        path.parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        with path.open(
+            "x",
+            encoding="utf-8",
+            newline="\n",
+        ) as handle:
+            handle.write(canonical)
+            handle.flush()
+            _os.fsync(handle.fileno())
+
+
+    def expected_main_keys() -> tuple[
+        tuple[int, int, str],
+        ...,
+    ]:
+        keys = []
+
+        for c in range(
+            MAIN_BIOLOGICAL_SEED_START,
+            MAIN_BIOLOGICAL_SEED_END + 1,
+        ):
+            for target_n in TARGET_N_VALUES:
+                for representation in REPRESENTATION_ORDER:
+                    keys.append(
+                        (
+                            c,
+                            target_n,
+                            representation,
+                        )
+                    )
+
+        if len(keys) != 2100:
+            raise PhasePContractError(
+                "Frozen main census did not produce exactly 2,100 keys."
+            )
+
+        return tuple(keys)
+
+
+    def expected_null_keys() -> tuple[
+        tuple[int],
+        ...,
+    ]:
+        keys = tuple(
+            (c,)
+            for c in range(
+                PERMUTATION_NULL_SEED_START,
+                PERMUTATION_NULL_SEED_END + 1,
+            )
+        )
+
+        if len(keys) != 100:
+            raise PhasePContractError(
+                "Frozen null census did not produce exactly 100 keys."
+            )
+
+        return keys
+
+
+    def validate_loaded_phase_p_inputs(
+        representations: dict[str, np.ndarray],
+        y: np.ndarray,
+    ) -> None:
+        """
+        Validate already-loaded immutable Phase-P inputs.
+
+        Loading/construction itself is intentionally outside this source patch.
+        """
+        if tuple(representations.keys()) != REPRESENTATION_ORDER:
+            raise PhasePContractError(
+                "Loaded representation order does not equal the frozen "
+                "canonical order."
+            )
+
+        y_arr = np.asarray(y)
+
+        if y_arr.shape != (N_DISCOVERY_TOTAL,):
+            raise PhasePContractError(
+                "Frozen biological label vector must have shape (278,)."
+            )
+
+        if not np.all(np.isfinite(y_arr)):
+            raise PhasePContractError(
+                "Biological label vector contains non-finite values."
+            )
+
+        unique, counts = np.unique(
+            y_arr,
+            return_counts=True,
+        )
+
+        if (
+            unique.tolist() != [0, 1]
+            or counts.tolist() != [139, 139]
+        ):
+            raise PhasePContractError(
+                "Frozen biological labels must contain exactly "
+                "139 negatives and 139 positives."
+            )
+
+        for representation in REPRESENTATION_ORDER:
+            X = np.asarray(
+                representations[representation]
+            )
+
+            expected_width = (
+                BASELINE_DIM
+                if representation == "baseline_21d"
+                else ESM_WIDTH
+            )
+
+            if X.shape != (
+                N_DISCOVERY_TOTAL,
+                expected_width,
+            ):
+                raise PhasePContractError(
+                    f"{representation} has unexpected shape {X.shape!r}."
+                )
+
+            if not np.all(np.isfinite(X)):
+                raise PhasePContractError(
+                    f"{representation} contains non-finite values."
+                )
+
+
+    def perturbation_result_to_persisted_row(
+        result: dict[str, object],
+        *,
+        perturbation_id: int,
+        target_n: int,
+        representation: str,
+        null_path: bool,
+    ) -> dict[str, object]:
+        """
+        Convert one frozen wrapper result into the exact persisted CSV row.
+
+        Persisted support JSON is the authoritative post-row support record.
+        """
+        full_unsigned, _full_signed = exact_support_from_coef(
+            np.asarray(result["stage_b_coef"])
+        )
+
+        stab_unsigned, stab_signed = exact_support_from_coef(
+            np.asarray(result["stability_coef"])
+        )
+
+        base = {
+            "target_n": int(target_n),
+            "representation": representation,
+            "stage_a_eval_auroc": float(
+                result["stage_a_eval_auroc"]
+            ),
+            "selected_C": float(
+                result["selected_C"]
+            ),
+            "K_t_full": int(
+                len(full_unsigned)
+            ),
+            "K_t_stab": int(
+                len(stab_unsigned)
+            ),
+            "stability_unsigned_support_json": canonical_json_dumps(
+                list(stab_unsigned)
+            ),
+            "stability_signed_support_json": canonical_json_dumps(
+                [
+                    [j, sign]
+                    for j, sign in stab_signed
+                ]
+            ),
+            "membership_sha256": str(
+                result["membership_sha256"]
+            ),
+        }
+
+        if null_path:
+            replay_sha = str(
+                result["replay_membership_sha256"]
+            )
+            original_sha = str(
+                result["membership_sha256"]
+            )
+
+            if replay_sha != original_sha:
+                raise PhasePContractError(
+                    "Permutation-null stability-membership replay SHA "
+                    "does not match original SHA."
+                )
+
+            return {
+                "null_perturbation_id": int(
+                    perturbation_id
+                ),
+                **base,
+                "replay_membership_sha256": replay_sha,
+                "replay_success": True,
+            }
+
+        return {
+            "biological_perturbation_id": int(
+                perturbation_id
+            ),
+            **base,
+        }
+
+
+    def run_main_sweep_from_loaded_inputs(
+        representations: dict[str, np.ndarray],
+        y: np.ndarray,
+        *,
+        output_csv: Path,
+    ) -> None:
+        """
+        Frozen 100 × 3 × 7 main sweep from already-loaded inputs.
+
+        Existing rows are never rerun or repaired. A resumed key is accepted
+        only after strict full-row semantic validation.
+        """
+        validate_loaded_phase_p_inputs(
+            representations,
+            y,
+        )
+
+        _existing_rows, existing_raw_keys = read_existing_csv_rows_exact(
+            output_csv,
+            fieldnames=MAIN_OUTPUT_FIELDS,
+            key_fields=MAIN_ATOMIC_KEY_FIELDS,
+            semantic_validator=validate_persisted_main_row,
+        )
+
+        existing_keys = set()
+
+        for raw_key in existing_raw_keys:
+            try:
+                normalized = (
+                    int(raw_key[0]),
+                    int(raw_key[1]),
+                    str(raw_key[2]),
+                )
+            except Exception as exc:
+                raise PhasePContractError(
+                    "Malformed main checkpoint key."
+                ) from exc
+
+            existing_keys.add(
+                normalized
+            )
+
+        expected = set(
+            expected_main_keys()
+        )
+
+        unexpected = (
+            existing_keys - expected
+        )
+
+        if unexpected:
+            raise PhasePContractError(
+                "Unexpected atomic key(s) in main checkpoint: "
+                f"{sorted(unexpected)!r}"
+            )
+
+        for c in range(
+            MAIN_BIOLOGICAL_SEED_START,
+            MAIN_BIOLOGICAL_SEED_END + 1,
+        ):
+            for target_n in TARGET_N_VALUES:
+                for representation in REPRESENTATION_ORDER:
+                    key = (
+                        c,
+                        target_n,
+                        representation,
+                    )
+
+                    if key in existing_keys:
+                        continue
+
+                    X = representations[
+                        representation
+                    ]
+
+                    context = (
+                        "phase_p_main:"
+                        f"c={c}:"
+                        f"N={target_n}:"
+                        f"representation={representation}"
+                    )
+
+                    result = run_biological_per_perturbation(
+                        X,
+                        y,
+                        c=c,
+                        target_n=target_n,
+                        context=context,
+                    )
+
+                    persisted = perturbation_result_to_persisted_row(
+                        result,
+                        perturbation_id=c,
+                        target_n=target_n,
+                        representation=representation,
+                        null_path=False,
+                    )
+
+                    append_csv_row_fsync(
+                        output_csv,
+                        fieldnames=MAIN_OUTPUT_FIELDS,
+                        row=persisted,
+                    )
+
+                    existing_keys.add(
+                        key
+                    )
+
+        if existing_keys != expected:
+            missing = sorted(
+                expected - existing_keys
+            )
+
+            raise PhasePContractError(
+                "Main sweep did not close at the exact 2,100-row census. "
+                f"missing={missing[:10]!r}"
+            )
+
+
+    def run_null_sweep_from_loaded_inputs(
+        representations: dict[str, np.ndarray],
+        y: np.ndarray,
+        *,
+        output_csv: Path,
+    ) -> None:
+        """
+        Frozen 100-row layer-18, N=139 descriptive permutation-null sweep.
+
+        Existing rows count as completed only after strict semantic validation.
+        """
+        validate_loaded_phase_p_inputs(
+            representations,
+            y,
+        )
+
+        _existing_rows, existing_raw_keys = read_existing_csv_rows_exact(
+            output_csv,
+            fieldnames=NULL_OUTPUT_FIELDS,
+            key_fields=NULL_ATOMIC_KEY_FIELDS,
+            semantic_validator=validate_persisted_null_row,
+        )
+
+        existing_keys = set()
+
+        for raw_key in existing_raw_keys:
+            try:
+                normalized = (
+                    int(raw_key[0]),
+                )
+            except Exception as exc:
+                raise PhasePContractError(
+                    "Malformed null checkpoint key."
+                ) from exc
+
+            existing_keys.add(
+                normalized
+            )
+
+        expected = set(
+            expected_null_keys()
+        )
+
+        unexpected = (
+            existing_keys - expected
+        )
+
+        if unexpected:
+            raise PhasePContractError(
+                "Unexpected atomic key(s) in null checkpoint: "
+                f"{sorted(unexpected)!r}"
+            )
+
+        X = representations[
+            "esm_layer_18"
+        ]
+
+        for c in range(
+            PERMUTATION_NULL_SEED_START,
+            PERMUTATION_NULL_SEED_END + 1,
+        ):
+            key = (
+                c,
+            )
+
+            if key in existing_keys:
+                continue
+
+            context = (
+                "phase_p_permutation_null:"
+                f"c={c}:"
+                "N=139:"
+                "representation=esm_layer_18"
+            )
+
+            result = run_permutation_null_per_perturbation(
+                X,
+                y,
+                c=c,
+                context=context,
+            )
+
+            persisted = perturbation_result_to_persisted_row(
+                result,
+                perturbation_id=c,
+                target_n=PERMUTATION_NULL_TARGET_N,
+                representation="esm_layer_18",
+                null_path=True,
+            )
+
+            append_csv_row_fsync(
+                output_csv,
+                fieldnames=NULL_OUTPUT_FIELDS,
+                row=persisted,
+            )
+
+            existing_keys.add(
+                key
+            )
+
+        if existing_keys != expected:
+            missing = sorted(
+                expected - existing_keys
+            )
+
+            raise PhasePContractError(
+                "Null sweep did not close at the exact 100-row census. "
+                f"missing={missing[:10]!r}"
+            )
+
+
+    def paired_raw_minus_baseline_auroc(
+        rows: list[dict[str, object]],
+    ) -> list[dict[str, object]]:
+        """
+        Derive paired raw-ESM-minus-baseline AUROC only from persisted,
+        same-perturbation / same-target-N rows.
+
+        No unpaired replacement is permitted.
+        """
+        lookup = {}
+
+        for row in rows:
+            key = (
+                int(row["biological_perturbation_id"]),
+                int(row["target_n"]),
+                str(row["representation"]),
+            )
+
+            if key in lookup:
+                raise PhasePContractError(
+                    f"Duplicate main result key during paired derivation: "
+                    f"{key!r}"
+                )
+
+            lookup[key] = row
+
+        derived = []
+
+        for c in range(
+            MAIN_BIOLOGICAL_SEED_START,
+            MAIN_BIOLOGICAL_SEED_END + 1,
+        ):
+            for target_n in TARGET_N_VALUES:
+                baseline_key = (
+                    c,
+                    target_n,
+                    "baseline_21d",
+                )
+
+                if baseline_key not in lookup:
+                    raise PhasePContractError(
+                        "Paired baseline row missing."
+                    )
+
+                baseline_auroc = float(
+                    lookup[baseline_key][
+                        "stage_a_eval_auroc"
+                    ]
+                )
+
+                for representation in REPRESENTATION_ORDER[:-1]:
+                    raw_key = (
+                        c,
+                        target_n,
+                        representation,
+                    )
+
+                    if raw_key not in lookup:
+                        raise PhasePContractError(
+                            "Paired raw-ESM row missing."
+                        )
+
+                    raw_auroc = float(
+                        lookup[raw_key][
+                            "stage_a_eval_auroc"
+                        ]
+                    )
+
+                    derived.append(
+                        {
+                            "biological_perturbation_id": c,
+                            "target_n": target_n,
+                            "representation": representation,
+                            "raw_auroc": raw_auroc,
+                            "baseline_auroc": baseline_auroc,
+                            "delta_raw_minus_baseline_auroc": (
+                                raw_auroc
+                                - baseline_auroc
+                            ),
+                        }
+                    )
+
+        if len(derived) != 1800:
+            raise PhasePContractError(
+                "Expected exactly 1,800 paired raw-minus-baseline deltas."
+            )
+
+        return derived
+
+
+    def build_phase_p_execution_manifest(
+        *,
+        input_provenance: dict[str, object],
+    ) -> dict[str, object]:
+        """
+        Build the exact prospective execution manifest from externally audited
+        immutable input provenance.
+
+        No input provenance is inferred here.
+        """
+        return {
+            "orchestration_output_contract_sha256": (
+                ORCHESTRATION_OUTPUT_CONTRACT_SHA256
+            ),
+            "phase_p_inheritance_contract_sha256": (
+                PHASE_P_INHERITANCE_CONTRACT_SHA256
+            ),
+            "main_biological_seed_authorization_sha256": (
+                MAIN_BIOLOGICAL_SEED_AUTHORIZATION_SHA256
+            ),
+            "biological_seed_derivation_spec_sha256": (
+                BIOLOGICAL_SEED_DERIVATION_SPEC_SHA256
+            ),
+            "authoritative_corrected_mechanics_sha256": (
+                AUTHORITATIVE_CORRECTED_MECHANICS_SHA256
+            ),
+            "representation_order": list(
+                REPRESENTATION_ORDER
+            ),
+            "target_n_values": list(
+                TARGET_N_VALUES
+            ),
+            "main_perturbation_range": [
+                MAIN_BIOLOGICAL_SEED_START,
+                MAIN_BIOLOGICAL_SEED_END,
+            ],
+            "null_perturbation_range": [
+                PERMUTATION_NULL_SEED_START,
+                PERMUTATION_NULL_SEED_END,
+            ],
+            "null_target_n": (
+                PERMUTATION_NULL_TARGET_N
+            ),
+            "c_grid": list(
+                C_GRID
+            ),
+            "main_expected_rows": 2100,
+            "null_expected_rows": 100,
+            "support_nonzero_convention": (
+                "beta != 0.0"
+            ),
+            "support_empty_jaccard_convention": (
+                "Jaccard(empty, empty) = 0"
+            ),
+            "input_provenance": input_provenance,
+        }
+
+
+    def run_phase_p_orchestration_from_loaded_inputs(
+        representations: dict[str, np.ndarray],
+        y: np.ndarray,
+        *,
+        output_dir: Path,
+        input_provenance: dict[str, object],
+    ) -> None:
+        """
+        Prospective full experiment-level orchestration entrypoint.
+
+        IMPORTANT:
+        This function is DEFINED but never CALLED at this hard-disabled source
+        freeze.  The terminal PhasePContractError below remains in force.
+
+        Frozen execution order once separately authorized:
+          1. validate already-loaded inputs;
+          2. create/validate manifest;
+          3. main 2,100-row sweep;
+          4. verify exact main census;
+          5. 100-row layer-18 permutation-null sweep;
+          6. verify exact null census.
+
+        RESULT.md and interpretive summaries are intentionally downstream of a
+        separate read-only post-execution audit.
+        """
+        validate_loaded_phase_p_inputs(
+            representations,
+            y,
+        )
+
+        output_dir.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        manifest = build_phase_p_execution_manifest(
+            input_provenance=input_provenance,
+        )
+
+        write_manifest_once_or_validate(
+            output_dir / EXECUTION_MANIFEST_FILENAME,
+            manifest,
+        )
+
+        run_main_sweep_from_loaded_inputs(
+            representations,
+            y,
+            output_csv=(
+                output_dir
+                / MAIN_OUTPUT_FILENAME
+            ),
+        )
+
+        main_rows, main_keys_raw = read_existing_csv_rows_exact(
+            output_dir / MAIN_OUTPUT_FILENAME,
+            fieldnames=MAIN_OUTPUT_FIELDS,
+            key_fields=MAIN_ATOMIC_KEY_FIELDS,
+            semantic_validator=validate_persisted_main_row,
+        )
+
+        main_keys = {
+            (
+                int(k[0]),
+                int(k[1]),
+                str(k[2]),
+            )
+            for k in main_keys_raw
+        }
+
+        if main_keys != set(expected_main_keys()):
+            raise PhasePContractError(
+                "Main census verification failed after sweep."
+            )
+
+        if len(main_rows) != 2100:
+            raise PhasePContractError(
+                "Main output must contain exactly 2,100 rows."
+            )
+
+        run_null_sweep_from_loaded_inputs(
+            representations,
+            y,
+            output_csv=(
+                output_dir
+                / NULL_OUTPUT_FILENAME
+            ),
+        )
+
+        null_rows, null_keys_raw = read_existing_csv_rows_exact(
+            output_dir / NULL_OUTPUT_FILENAME,
+            fieldnames=NULL_OUTPUT_FIELDS,
+            key_fields=NULL_ATOMIC_KEY_FIELDS,
+            semantic_validator=validate_persisted_null_row,
+        )
+
+        null_keys = {
+            (int(k[0]),)
+            for k in null_keys_raw
+        }
+
+        if null_keys != set(expected_null_keys()):
+            raise PhasePContractError(
+                "Null census verification failed after sweep."
+            )
+
+        if len(null_rows) != 100:
+            raise PhasePContractError(
+                "Null output must contain exactly 100 rows."
+            )
+
+
+
     # Implementation freeze checks. These are definitions only while the
     # outer execution gate remains False.
     assert TARGET_N_VALUES == (100, 120, 139)
