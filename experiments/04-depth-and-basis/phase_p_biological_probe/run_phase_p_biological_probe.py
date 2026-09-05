@@ -126,6 +126,25 @@ PHASE_E_PROVENANCE_SHA256: Final[str] = (
 )
 
 
+# Frozen Phase-P attachment identities.
+PHASE_E_ROWS_FILENAME: Final[str] = "phase_e_matrix_rows.tsv"
+PHASE_E_PROVENANCE_FILENAME: Final[str] = "PHASE_E_PROVENANCE.json"
+
+BASELINE_21D_REL: Final[str] = (
+    "experiments/04-depth-and-basis/phase_p_biological_probe/input/baseline_21d.npy"
+)
+BASELINE_21D_SHA256: Final[str] = (
+    "95fa09075b24dbd11133bdf157f9e4a9b27a01f54d644860a074d5bae4c32d98"
+)
+
+BASELINE_21D_PROVENANCE_REL: Final[str] = (
+    "experiments/04-depth-and-basis/phase_p_biological_probe/input/BASELINE_21D_PROVENANCE.json"
+)
+BASELINE_21D_PROVENANCE_SHA256: Final[str] = (
+    "98f72c402c07d2e5a48e41a6d8fd0d88dd57af6ccf0acd252fd4b7ca86cbb25f"
+)
+
+
 # ============================================================================
 # Frozen biological geometry
 # ============================================================================
@@ -1727,13 +1746,15 @@ def run_enabled_phase_p() -> None:
     # ──────────────────────────────────────────────────────────────────────
     # Hard-disabled Phase-P experiment-level orchestration core.
     #
-    # These are definitions only.  No function in this block is called at
-    # this source freeze.  The existing terminal PhasePContractError below
+    # These are definitions only. No function in this block is called at
+    # this source freeze. The existing terminal PhasePContractError below
     # remains effective even if the outer gate is changed prematurely.
     #
-    # Input loading is intentionally NOT implemented here.  A later,
-    # separately audited attachment must provide already-loaded immutable
-    # representation matrices and the frozen biological label vector.
+    # Frozen Phase-E + baseline attachment is implemented below, but remains
+    # unreachable while the top-level biological execution gate is False.
+    # The attachment derives labels only from the authoritative Phase-E row
+    # manifest and verifies all frozen artifact identities before returning
+    # already-loaded immutable inputs to the orchestration boundary.
     # ──────────────────────────────────────────────────────────────────────
 
     ORCHESTRATION_OUTPUT_CONTRACT_SHA256 = (
@@ -2639,6 +2660,503 @@ def run_enabled_phase_p() -> None:
         return keys
 
 
+    def load_json_object_exact(
+        path: Path,
+        *,
+        expected_sha256: str,
+        label: str,
+    ) -> dict[str, object]:
+        """
+        Hash-verify and parse one frozen JSON provenance object.
+        """
+        if not path.is_file():
+            raise PhasePContractError(
+                f"Missing frozen {label}: {path}"
+            )
+
+        got_sha = sha256_file(path)
+
+        if got_sha != expected_sha256:
+            raise PhasePContractError(
+                f"Frozen {label} SHA-256 mismatch."
+            )
+
+        try:
+            obj = json.loads(
+                path.read_text(encoding="utf-8")
+            )
+        except Exception as exc:
+            raise PhasePContractError(
+                f"Frozen {label} is not valid JSON."
+            ) from exc
+
+        if not isinstance(obj, dict):
+            raise PhasePContractError(
+                f"Frozen {label} must be a JSON object."
+            )
+
+        return obj
+
+
+    def load_phase_e_rows_and_labels(
+        path: Path,
+    ) -> tuple[list[dict[str, str]], np.ndarray]:
+        """
+        Load the frozen authoritative 278-row Phase-E manifest and derive y.
+
+        Label authority:
+          positive -> 1
+          negative -> 0
+
+        No label source other than class_name in this manifest is permitted.
+        """
+        if not path.is_file():
+            raise PhasePContractError(
+                f"Missing frozen Phase-E row manifest: {path}"
+            )
+
+        if sha256_file(path) != PHASE_E_ROWS_SHA256:
+            raise PhasePContractError(
+                "Frozen Phase-E row-manifest SHA-256 mismatch."
+            )
+
+        import csv
+        import io
+
+        raw = path.read_text(encoding="utf-8")
+
+        reader = csv.DictReader(
+            io.StringIO(raw),
+            delimiter="\t",
+        )
+
+        expected_fields = [
+            "matrix_row",
+            "class_name",
+            "identifier",
+            "retrieved_length",
+            "sequence_sha256",
+        ]
+
+        if reader.fieldnames != expected_fields:
+            raise PhasePContractError(
+                "Frozen Phase-E row-manifest schema mismatch."
+            )
+
+        rows = list(reader)
+
+        if len(rows) != N_DISCOVERY_TOTAL:
+            raise PhasePContractError(
+                "Frozen Phase-E row manifest must contain exactly 278 rows."
+            )
+
+        labels = []
+
+        for expected_row, row in enumerate(rows):
+            try:
+                matrix_row = int(row["matrix_row"])
+            except Exception as exc:
+                raise PhasePContractError(
+                    "Invalid matrix_row in frozen Phase-E manifest."
+                ) from exc
+
+            if matrix_row != expected_row:
+                raise PhasePContractError(
+                    "Frozen Phase-E matrix_row order must be exactly 0..277."
+                )
+
+            class_name = row["class_name"]
+
+            if class_name == "positive":
+                label_value = 1
+            elif class_name == "negative":
+                label_value = 0
+            else:
+                raise PhasePContractError(
+                    "Frozen Phase-E manifest contains unknown class_name."
+                )
+
+            identifier = row["identifier"]
+
+            if not identifier:
+                raise PhasePContractError(
+                    "Frozen Phase-E manifest contains empty identifier."
+                )
+
+            try:
+                retrieved_length = int(
+                    row["retrieved_length"]
+                )
+            except Exception as exc:
+                raise PhasePContractError(
+                    "Invalid retrieved_length in frozen Phase-E manifest."
+                ) from exc
+
+            if retrieved_length <= 0:
+                raise PhasePContractError(
+                    "Frozen Phase-E manifest contains non-positive length."
+                )
+
+            sequence_sha = row["sequence_sha256"]
+
+            if (
+                len(sequence_sha) != 64
+                or any(
+                    ch not in "0123456789abcdef"
+                    for ch in sequence_sha
+                )
+            ):
+                raise PhasePContractError(
+                    "Frozen Phase-E manifest contains invalid sequence SHA-256."
+                )
+
+            labels.append(label_value)
+
+        y = np.asarray(
+            labels,
+            dtype=np.int64,
+        )
+
+        unique, counts = np.unique(
+            y,
+            return_counts=True,
+        )
+
+        if (
+            unique.tolist() != [0, 1]
+            or counts.tolist() != [139, 139]
+        ):
+            raise PhasePContractError(
+                "Manifest-derived biological labels are not exactly "
+                "139 negatives and 139 positives."
+            )
+
+        y.setflags(write=False)
+
+        return rows, y
+
+
+    def load_frozen_npy_exact(
+        path: Path,
+        *,
+        expected_sha256: str,
+        expected_shape: tuple[int, int],
+        label: str,
+    ) -> np.ndarray:
+        """
+        Hash-verify then load one frozen NumPy matrix without mutation.
+        """
+        if not path.is_file():
+            raise PhasePContractError(
+                f"Missing frozen {label}: {path}"
+            )
+
+        if sha256_file(path) != expected_sha256:
+            raise PhasePContractError(
+                f"Frozen {label} SHA-256 mismatch."
+            )
+
+        try:
+            arr = np.load(
+                path,
+                allow_pickle=False,
+            )
+        except Exception as exc:
+            raise PhasePContractError(
+                f"Could not load frozen {label}."
+            ) from exc
+
+        if arr.shape != expected_shape:
+            raise PhasePContractError(
+                f"Frozen {label} has unexpected shape {arr.shape!r}."
+            )
+
+        if arr.dtype != np.dtype("float32"):
+            raise PhasePContractError(
+                f"Frozen {label} must have dtype float32."
+            )
+
+        if not np.all(np.isfinite(arr)):
+            raise PhasePContractError(
+                f"Frozen {label} contains non-finite values."
+            )
+
+        arr.setflags(write=False)
+
+        return arr
+
+
+    def attach_frozen_phase_p_inputs(
+    ) -> tuple[
+        dict[str, np.ndarray],
+        np.ndarray,
+        dict[str, object],
+    ]:
+        """
+        Attach the frozen Phase-E matrices, frozen 21-D baseline, and
+        manifest-derived biological labels.
+
+        This function performs no fitting, CV, AUROC, support computation,
+        RNG construction, or seed access.
+        """
+        phase_e_dir = REPO_ROOT / PHASE_E_OUTPUT_REL
+
+        rows_path = (
+            phase_e_dir
+            / PHASE_E_ROWS_FILENAME
+        )
+
+        phase_e_provenance_path = (
+            phase_e_dir
+            / PHASE_E_PROVENANCE_FILENAME
+        )
+
+        baseline_path = (
+            REPO_ROOT
+            / BASELINE_21D_REL
+        )
+
+        baseline_provenance_path = (
+            REPO_ROOT
+            / BASELINE_21D_PROVENANCE_REL
+        )
+
+        rows, y = load_phase_e_rows_and_labels(
+            rows_path
+        )
+
+        phase_e_provenance = load_json_object_exact(
+            phase_e_provenance_path,
+            expected_sha256=PHASE_E_PROVENANCE_SHA256,
+            label="Phase-E provenance",
+        )
+
+        baseline_provenance = load_json_object_exact(
+            baseline_provenance_path,
+            expected_sha256=BASELINE_21D_PROVENANCE_SHA256,
+            label="baseline provenance",
+        )
+
+        # Cross-check frozen provenance statements against the already
+        # hash-authorized attachment contract.
+        if phase_e_provenance.get("expected_rows") != N_DISCOVERY_TOTAL:
+            raise PhasePContractError(
+                "Phase-E provenance expected_rows mismatch."
+            )
+
+        if phase_e_provenance.get("discovery_positive") != 139:
+            raise PhasePContractError(
+                "Phase-E provenance positive census mismatch."
+            )
+
+        if phase_e_provenance.get("discovery_negative") != 139:
+            raise PhasePContractError(
+                "Phase-E provenance negative census mismatch."
+            )
+
+        if phase_e_provenance.get("hidden_width") != ESM_WIDTH:
+            raise PhasePContractError(
+                "Phase-E provenance hidden width mismatch."
+            )
+
+        if tuple(
+            phase_e_provenance.get("layers", [])
+        ) != LAYERS:
+            raise PhasePContractError(
+                "Phase-E provenance layer order mismatch."
+            )
+
+        rows_manifest_obj = phase_e_provenance.get(
+            "rows_manifest"
+        )
+
+        if not isinstance(rows_manifest_obj, dict):
+            raise PhasePContractError(
+                "Phase-E provenance rows_manifest missing."
+            )
+
+        if (
+            rows_manifest_obj.get("sha256")
+            != PHASE_E_ROWS_SHA256
+        ):
+            raise PhasePContractError(
+                "Phase-E provenance row-manifest identity mismatch."
+            )
+
+        artifact_obj = baseline_provenance.get(
+            "artifact"
+        )
+
+        if not isinstance(artifact_obj, dict):
+            raise PhasePContractError(
+                "Baseline provenance artifact object missing."
+            )
+
+        if artifact_obj.get("sha256") != BASELINE_21D_SHA256:
+            raise PhasePContractError(
+                "Baseline provenance artifact SHA mismatch."
+            )
+
+        if artifact_obj.get("shape") != [
+            N_DISCOVERY_TOTAL,
+            BASELINE_DIM,
+        ]:
+            raise PhasePContractError(
+                "Baseline provenance shape mismatch."
+            )
+
+        label_authority = baseline_provenance.get(
+            "label_authority"
+        )
+
+        if not isinstance(label_authority, dict):
+            raise PhasePContractError(
+                "Baseline provenance label authority missing."
+            )
+
+        if label_authority.get("source") != (
+            "authoritative matrix manifest class_name"
+        ):
+            raise PhasePContractError(
+                "Baseline provenance label authority changed."
+            )
+
+        if label_authority.get("mapping") != {
+            "negative": 0,
+            "positive": 1,
+        }:
+            raise PhasePContractError(
+                "Baseline provenance label mapping changed."
+            )
+
+        correspondence = baseline_provenance.get(
+            "correspondence_proof"
+        )
+
+        if not isinstance(correspondence, dict):
+            raise PhasePContractError(
+                "Baseline provenance correspondence proof missing."
+            )
+
+        if correspondence.get("passed") is not True:
+            raise PhasePContractError(
+                "Baseline row-correspondence proof is not PASS."
+            )
+
+        if correspondence.get("rows_checked") != N_DISCOVERY_TOTAL:
+            raise PhasePContractError(
+                "Baseline correspondence row count mismatch."
+            )
+
+        if correspondence.get(
+            "matrix_row_exact_0_to_277"
+        ) is not True:
+            raise PhasePContractError(
+                "Baseline matrix-row correspondence not exact."
+            )
+
+        representations: dict[str, np.ndarray] = {}
+
+        for layer in LAYERS:
+            representation = f"esm_layer_{layer}"
+
+            matrix_path = (
+                phase_e_dir
+                / f"raw_esm_layer_{layer}.npy"
+            )
+
+            representations[representation] = (
+                load_frozen_npy_exact(
+                    matrix_path,
+                    expected_sha256=PHASE_E_MATRIX_SHA256[layer],
+                    expected_shape=(
+                        N_DISCOVERY_TOTAL,
+                        ESM_WIDTH,
+                    ),
+                    label=f"Phase-E layer-{layer} matrix",
+                )
+            )
+
+        representations["baseline_21d"] = (
+            load_frozen_npy_exact(
+                baseline_path,
+                expected_sha256=BASELINE_21D_SHA256,
+                expected_shape=(
+                    N_DISCOVERY_TOTAL,
+                    BASELINE_DIM,
+                ),
+                label="21-D baseline matrix",
+            )
+        )
+
+        if tuple(representations.keys()) != REPRESENTATION_ORDER:
+            raise PhasePContractError(
+                "Attachment representation order mismatch."
+            )
+
+        validate_loaded_phase_p_inputs(
+            representations,
+            y,
+        )
+
+        input_provenance = {
+            "phase_e_rows": {
+                "path": str(
+                    Path(PHASE_E_OUTPUT_REL)
+                    / PHASE_E_ROWS_FILENAME
+                ),
+                "sha256": PHASE_E_ROWS_SHA256,
+                "rows": len(rows),
+                "label_authority": "class_name",
+                "label_mapping": {
+                    "negative": 0,
+                    "positive": 1,
+                },
+            },
+            "phase_e_provenance": {
+                "path": str(
+                    Path(PHASE_E_OUTPUT_REL)
+                    / PHASE_E_PROVENANCE_FILENAME
+                ),
+                "sha256": PHASE_E_PROVENANCE_SHA256,
+            },
+            "phase_e_matrices": {
+                f"esm_layer_{layer}": {
+                    "path": str(
+                        Path(PHASE_E_OUTPUT_REL)
+                        / f"raw_esm_layer_{layer}.npy"
+                    ),
+                    "sha256": PHASE_E_MATRIX_SHA256[layer],
+                    "shape": [
+                        N_DISCOVERY_TOTAL,
+                        ESM_WIDTH,
+                    ],
+                    "dtype": "float32",
+                }
+                for layer in LAYERS
+            },
+            "baseline_21d": {
+                "path": BASELINE_21D_REL,
+                "sha256": BASELINE_21D_SHA256,
+                "provenance_path": BASELINE_21D_PROVENANCE_REL,
+                "provenance_sha256": (
+                    BASELINE_21D_PROVENANCE_SHA256
+                ),
+                "shape": [
+                    N_DISCOVERY_TOTAL,
+                    BASELINE_DIM,
+                ],
+                "dtype": "float32",
+            },
+        }
+
+        return (
+            representations,
+            y,
+            input_provenance,
+        )
+
+
     def validate_loaded_phase_p_inputs(
         representations: dict[str, np.ndarray],
         y: np.ndarray,
@@ -3278,6 +3796,16 @@ def run_enabled_phase_p() -> None:
 
     # Implementation freeze checks. These are definitions only while the
     # outer execution gate remains False.
+    # Attachment freeze checks. Definitions only; no input is loaded here.
+    assert PHASE_E_ROWS_FILENAME == "phase_e_matrix_rows.tsv"
+    assert PHASE_E_PROVENANCE_FILENAME == "PHASE_E_PROVENANCE.json"
+    assert BASELINE_21D_SHA256 == (
+        "95fa09075b24dbd11133bdf157f9e4a9b27a01f54d644860a074d5bae4c32d98"
+    )
+    assert BASELINE_21D_PROVENANCE_SHA256 == (
+        "98f72c402c07d2e5a48e41a6d8fd0d88dd57af6ccf0acd252fd4b7ca86cbb25f"
+    )
+
     assert TARGET_N_VALUES == (100, 120, 139)
     assert N_CV_FOLDS == 5
     assert STABILITY_FRACTION == 0.80
