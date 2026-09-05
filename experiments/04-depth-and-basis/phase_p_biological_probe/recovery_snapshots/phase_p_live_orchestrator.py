@@ -9,7 +9,7 @@ import tempfile
 from pathlib import Path
 
 
-ENABLE_LIVE_PHASE_P_ORCHESTRATION = False
+ENABLE_LIVE_PHASE_P_ORCHESTRATION = True
 
 DATASET_REF = "ocholla/exp04-phase-p-private-checkpoints"
 
