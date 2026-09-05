@@ -444,8 +444,19 @@ def stop_child_and_wait(
     )
 
     deadline = (
-        time.monotonic()
-        + timeout_seconds
+
+        None
+
+        if timeout_seconds is None
+
+        else (
+
+            time.monotonic()
+
+            + float(timeout_seconds)
+
+        )
+
     )
 
     while (
@@ -515,7 +526,8 @@ def supervise_child(
     main_filename: str = MAIN_FILENAME,
     null_filename: str = NULL_FILENAME,
     initial_verified: Optional[RowCounts] = None,
-    timeout_seconds: float = 60.0,
+    timeout_seconds: Optional[float] = 60.0,
+    child_initially_stopped: bool = False,
 ) -> list[VerifiedCheckpoint]:
     """
     Observe one already-started child.
@@ -563,15 +575,39 @@ def supervise_child(
         source_dir
     )
 
+    if child_initially_stopped:
+        if child.poll() is not None:
+            os.close(fd)
+            raise SupervisorContractError(
+                "initially-stopped child already exited"
+            )
+
+        if not process_is_stopped(
+            child.pid
+        ):
+            os.close(fd)
+            raise SupervisorContractError(
+                "child_initially_stopped=True but child is not stopped"
+            )
+
+        resume_child(
+            child
+        )
+
     deadline = (
-        time.monotonic()
-        + timeout_seconds
+        None
+        if timeout_seconds is None
+        else (
+            time.monotonic()
+            + float(timeout_seconds)
+        )
     )
 
     try:
         while True:
             if (
-                time.monotonic()
+                deadline is not None
+                and time.monotonic()
                 > deadline
             ):
                 raise SupervisorContractError(
@@ -643,6 +679,8 @@ def supervise_child(
                         child
                     )
 
+                    quiescent_ok = False
+
                     try:
                         # Recount only after the process is proven quiescent.
                         stable_counts = count_rows(
@@ -676,11 +714,16 @@ def supervise_child(
                             )
 
                             last_verified = (
+
                                 stable_counts
+
                             )
 
+
+                        quiescent_ok = True
+
                     finally:
-                        if stopped:
+                        if stopped and quiescent_ok:
                             resume_child(
                                 child
                             )
