@@ -400,14 +400,6 @@ def run_enabled_phase_p() -> None:
 
     RUNNER_NAMESPACE = 200
 
-    STREAM_TARGET_N = 21
-    STREAM_STAGE_A_SPLIT = 22
-    STREAM_CV = 23
-    STREAM_STAGE_A_FITS = 24
-    STREAM_STAGE_B_FIT = 25
-    STREAM_STABILITY_SUBSAMPLE = 26
-    STREAM_STABILITY_FIT = 27
-
     STAGE_A_FIT_CHILD_COUNT = 46
     STAGE_A_CV_FIT_CHILDREN = tuple(range(45))
     STAGE_A_FINAL_REFIT_CHILD = 45
@@ -1027,7 +1019,7 @@ def run_enabled_phase_p() -> None:
         """
         target_ss = permutation_null_seedsequence(
             c,
-            STREAM_TARGET_N,
+            STREAM_SUBSAMPLE,
         )
         target_rng = np.random.default_rng(target_ss)
 
@@ -1105,6 +1097,632 @@ def run_enabled_phase_p() -> None:
             X_eval,
             y_eval,
         )
+
+    def validate_stability_membership_labels(
+        y_target: np.ndarray,
+        pos_membership: np.ndarray,
+        neg_membership: np.ndarray,
+        *,
+        context: str,
+    ) -> None:
+        """
+        Validate stability membership by label-at-index.
+
+        Valid for both the ordinary biological layout and the interleaved
+        stream-28 permutation-null layout. No fixed positive/negative index
+        ranges are assumed.
+        """
+        y_target = np.asarray(y_target, dtype=int)
+        pos_membership = np.asarray(pos_membership, dtype=int)
+        neg_membership = np.asarray(neg_membership, dtype=int)
+
+        if y_target.ndim != 1:
+            raise CalibrationContractError(
+                f"{context}: target labels must be one-dimensional"
+            )
+
+        if pos_membership.ndim != 1 or neg_membership.ndim != 1:
+            raise CalibrationContractError(
+                f"{context}: stability membership arrays must be one-dimensional"
+            )
+
+        if np.any(pos_membership < 0) or np.any(
+            pos_membership >= len(y_target)
+        ):
+            raise CalibrationContractError(
+                f"{context}: positive stability membership index out of bounds"
+            )
+
+        if np.any(neg_membership < 0) or np.any(
+            neg_membership >= len(y_target)
+        ):
+            raise CalibrationContractError(
+                f"{context}: negative stability membership index out of bounds"
+            )
+
+        if len(np.unique(pos_membership)) != len(pos_membership):
+            raise CalibrationContractError(
+                f"{context}: duplicate positive stability membership"
+            )
+
+        if len(np.unique(neg_membership)) != len(neg_membership):
+            raise CalibrationContractError(
+                f"{context}: duplicate negative stability membership"
+            )
+
+        if np.intersect1d(
+            pos_membership,
+            neg_membership,
+        ).size != 0:
+            raise CalibrationContractError(
+                f"{context}: positive/negative stability memberships overlap"
+            )
+
+        if not np.all(y_target[pos_membership] == 1):
+            raise CalibrationContractError(
+                f"{context}: positive stability membership contains "
+                "a row whose current label is not positive"
+            )
+
+        if not np.all(y_target[neg_membership] == 0):
+            raise CalibrationContractError(
+                f"{context}: negative stability membership contains "
+                "a row whose current label is not negative"
+            )
+
+
+    def seedsequence_for_frozen_path(
+        *,
+        path_kind: str,
+        c: int,
+        target_n: int,
+        stream_id: int,
+    ) -> np.random.SeedSequence:
+        """
+        Route a stochastic address solely by frozen path identity.
+        """
+        if path_kind == "biological":
+            return runner_seedsequence(
+                c,
+                target_n,
+                stream_id,
+            )
+
+        if path_kind == "permutation_null":
+            if int(target_n) != PERMUTATION_NULL_TARGET_N:
+                raise CalibrationContractError(
+                    "permutation-null downstream mechanics require N=139"
+                )
+
+            return permutation_null_seedsequence(
+                c,
+                stream_id,
+            )
+
+        raise CalibrationContractError(
+            f"unknown frozen Phase-P path identity: {path_kind}"
+        )
+
+
+    def run_downstream_perturbation_mechanics(
+        Xn: np.ndarray,
+        yn_work: np.ndarray,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_eval: np.ndarray,
+        y_eval: np.ndarray,
+        *,
+        c: int,
+        target_n: int,
+        path_kind: str,
+        context: str,
+    ) -> dict[str, object]:
+        """
+        Frozen streams 23-27 per-perturbation mechanics.
+
+          23 — shared five-fold CV
+          24 — Stage-A CV fits + child-45 final Stage-A refit
+          25 — full-target-N Stage-B fit
+          26 — independent stability subsample
+          27 — stability fit
+
+        Definition only while Phase-P remains hard-disabled.
+        """
+        Xn = np.asarray(Xn, dtype=float)
+        yn_work = np.asarray(yn_work, dtype=int)
+        X_train = np.asarray(X_train, dtype=float)
+        y_train = np.asarray(y_train, dtype=int)
+        X_eval = np.asarray(X_eval, dtype=float)
+        y_eval = np.asarray(y_eval, dtype=int)
+
+        if Xn.ndim != 2:
+            raise CalibrationContractError(
+                f"{context}: target-pool X must be two-dimensional"
+            )
+
+        if yn_work.shape != (2 * int(target_n),):
+            raise CalibrationContractError(
+                f"{context}: target-pool label shape inconsistent with N"
+            )
+
+        if Xn.shape[0] != len(yn_work):
+            raise CalibrationContractError(
+                f"{context}: target-pool row/label count mismatch"
+            )
+
+        if int(np.sum(yn_work == 1)) != int(target_n):
+            raise CalibrationContractError(
+                f"{context}: target pool does not contain exactly N positives"
+            )
+
+        if int(np.sum(yn_work == 0)) != int(target_n):
+            raise CalibrationContractError(
+                f"{context}: target pool does not contain exactly N negatives"
+            )
+
+        if X_train.shape[0] != len(y_train):
+            raise CalibrationContractError(
+                f"{context}: Stage-A training row/label count mismatch"
+            )
+
+        if X_eval.shape[0] != len(y_eval):
+            raise CalibrationContractError(
+                f"{context}: Stage-A evaluation row/label count mismatch"
+            )
+
+        # stream 23
+        cv_ss = seedsequence_for_frozen_path(
+            path_kind=path_kind,
+            c=c,
+            target_n=target_n,
+            stream_id=STREAM_CV,
+        )
+        cv_seed = seedsequence_to_uint32(cv_ss)
+
+        # stream 24
+        stage_a_fit_ss = seedsequence_for_frozen_path(
+            path_kind=path_kind,
+            c=c,
+            target_n=target_n,
+            stream_id=STREAM_STAGE_A_FIT,
+        )
+
+        stage_a_fit_children = tuple(
+            stage_a_fit_ss.spawn(STAGE_A_FIT_CHILD_COUNT)
+        )
+
+        if len(stage_a_fit_children) != STAGE_A_FIT_CHILD_COUNT:
+            raise CalibrationContractError(
+                f"{context}: Stage-A seed spawn count changed"
+            )
+
+        selection = select_C_R2(
+            X_train,
+            y_train,
+            cv_seed=cv_seed,
+            stage_a_fit_children=stage_a_fit_children,
+            context=f"{context}:stage_a_cv",
+        )
+
+        selected_C = float(selection.selected_C)
+
+        stage_a_final_seed = seedsequence_to_uint32(
+            stage_a_fit_children[STAGE_A_FINAL_REFIT_CHILD]
+        )
+
+        stage_a_model = fit_probe_or_fail(
+            X_train,
+            y_train,
+            C=selected_C,
+            random_state=stage_a_final_seed,
+            context=f"{context}:stage_a_final_refit",
+        )
+
+        stage_a_eval_score = np.asarray(
+            stage_a_model.predict_proba(X_eval)[:, 1],
+            dtype=float,
+        )
+
+        stage_a_eval_auroc = float(
+            roc_auc_score(
+                y_eval,
+                stage_a_eval_score,
+            )
+        )
+
+        # stream 25
+        stage_b_ss = seedsequence_for_frozen_path(
+            path_kind=path_kind,
+            c=c,
+            target_n=target_n,
+            stream_id=STREAM_STAGE_B_FIT,
+        )
+        stage_b_seed = seedsequence_to_uint32(stage_b_ss)
+
+        stage_b_model = fit_probe_or_fail(
+            Xn,
+            yn_work,
+            C=selected_C,
+            random_state=stage_b_seed,
+            context=f"{context}:stage_b_full_target_n",
+        )
+
+        stage_b_coef = np.asarray(
+            stage_b_model.coef_[0],
+            dtype=float,
+        )
+
+        if stage_b_coef.ndim != 1:
+            raise CalibrationContractError(
+                f"{context}: Stage-B coefficient vector has wrong shape"
+            )
+
+        # stream 26
+        stability_ss = seedsequence_for_frozen_path(
+            path_kind=path_kind,
+            c=c,
+            target_n=target_n,
+            stream_id=STREAM_STABILITY_SUBSAMPLE,
+        )
+        stability_rng = np.random.default_rng(stability_ss)
+
+        (
+            stability_indices,
+            pos_membership,
+            neg_membership,
+            membership_sha256,
+        ) = select_stability_subsample(
+            yn_work,
+            target_n=target_n,
+            rng=stability_rng,
+        )
+
+        stability_indices = np.asarray(stability_indices, dtype=int)
+        pos_membership = np.asarray(pos_membership, dtype=int)
+        neg_membership = np.asarray(neg_membership, dtype=int)
+
+        validate_stability_membership_labels(
+            yn_work,
+            pos_membership,
+            neg_membership,
+            context=f"{context}:stability_membership",
+        )
+
+        expected_stability_indices = np.concatenate(
+            [
+                pos_membership,
+                neg_membership,
+            ]
+        )
+
+        if not np.array_equal(
+            stability_indices,
+            expected_stability_indices,
+        ):
+            raise CalibrationContractError(
+                f"{context}: inherited stability membership order changed"
+            )
+
+        # stream 27
+        stability_fit_ss = seedsequence_for_frozen_path(
+            path_kind=path_kind,
+            c=c,
+            target_n=target_n,
+            stream_id=STREAM_STABILITY_FIT,
+        )
+        stability_fit_seed = seedsequence_to_uint32(
+            stability_fit_ss
+        )
+
+        stability_model = fit_probe_or_fail(
+            Xn[stability_indices],
+            yn_work[stability_indices],
+            C=selected_C,
+            random_state=stability_fit_seed,
+            context=f"{context}:stability_fit",
+        )
+
+        stability_coef = np.asarray(
+            stability_model.coef_[0],
+            dtype=float,
+        )
+
+        if stability_coef.shape != stage_b_coef.shape:
+            raise CalibrationContractError(
+                f"{context}: Stage-B/stability coefficient dimensions differ"
+            )
+
+        return {
+            "selected_C": selected_C,
+            "selection": selection,
+            "stage_a_eval_auroc": stage_a_eval_auroc,
+            "stage_a_model": stage_a_model,
+            "stage_b_model": stage_b_model,
+            "stage_b_coef": stage_b_coef,
+            "stability_indices": stability_indices,
+            "pos_membership": pos_membership,
+            "neg_membership": neg_membership,
+            "membership_sha256": membership_sha256,
+            "stability_model": stability_model,
+            "stability_coef": stability_coef,
+        }
+
+
+    def replay_permutation_null_stability_membership(
+        X: np.ndarray,
+        y: np.ndarray,
+        *,
+        c: int,
+        original_yn_perm: np.ndarray,
+        original_pos_membership: np.ndarray,
+        original_neg_membership: np.ndarray,
+        original_membership_sha256: str,
+    ) -> dict[str, object]:
+        """
+        Exact null replay:
+
+          stream 21
+            -> stream 28
+            -> exact row-level yn_perm equality
+            -> stream 26 membership replay
+        """
+        original_yn_perm = np.asarray(
+            original_yn_perm,
+            dtype=int,
+        )
+        original_pos_membership = np.asarray(
+            original_pos_membership,
+            dtype=int,
+        )
+        original_neg_membership = np.asarray(
+            original_neg_membership,
+            dtype=int,
+        )
+
+        target_ss = permutation_null_seedsequence(
+            c,
+            STREAM_SUBSAMPLE,
+        )
+        target_rng = np.random.default_rng(target_ss)
+
+        replay_Xn, replay_yn = select_target_n(
+            X,
+            y,
+            target_n=PERMUTATION_NULL_TARGET_N,
+            rng=target_rng,
+        )
+
+        permutation_ss = permutation_null_seedsequence(
+            c,
+            STREAM_LABEL_PERMUTATION,
+        )
+        permutation_rng = np.random.default_rng(
+            permutation_ss
+        )
+
+        replay_perm = permutation_rng.permutation(
+            len(replay_yn)
+        )
+
+        replay_yn_perm = np.asarray(
+            replay_yn[replay_perm],
+            dtype=int,
+        )
+
+        if replay_yn_perm.shape != original_yn_perm.shape:
+            raise CalibrationContractError(
+                "permutation-null replay label shape mismatch"
+            )
+
+        if not np.array_equal(
+            replay_yn_perm,
+            original_yn_perm,
+        ):
+            raise CalibrationContractError(
+                "permutation-null replay did not reconstruct the exact "
+                "row-level yn_perm state"
+            )
+
+        stability_ss = permutation_null_seedsequence(
+            c,
+            STREAM_STABILITY_SUBSAMPLE,
+        )
+        stability_rng = np.random.default_rng(
+            stability_ss
+        )
+
+        (
+            replay_stability_indices,
+            replay_pos_membership,
+            replay_neg_membership,
+            replay_membership_sha256,
+        ) = select_stability_subsample(
+            replay_yn_perm,
+            target_n=PERMUTATION_NULL_TARGET_N,
+            rng=stability_rng,
+        )
+
+        replay_stability_indices = np.asarray(
+            replay_stability_indices,
+            dtype=int,
+        )
+        replay_pos_membership = np.asarray(
+            replay_pos_membership,
+            dtype=int,
+        )
+        replay_neg_membership = np.asarray(
+            replay_neg_membership,
+            dtype=int,
+        )
+
+        validate_stability_membership_labels(
+            replay_yn_perm,
+            replay_pos_membership,
+            replay_neg_membership,
+            context="permutation_null_replay",
+        )
+
+        if not np.array_equal(
+            replay_pos_membership,
+            original_pos_membership,
+        ):
+            raise CalibrationContractError(
+                "permutation-null replay positive stability membership mismatch"
+            )
+
+        if not np.array_equal(
+            replay_neg_membership,
+            original_neg_membership,
+        ):
+            raise CalibrationContractError(
+                "permutation-null replay negative stability membership mismatch"
+            )
+
+        if (
+            str(replay_membership_sha256)
+            != str(original_membership_sha256)
+        ):
+            raise CalibrationContractError(
+                "permutation-null replay stability membership SHA mismatch"
+            )
+
+        return {
+            "replay_Xn": replay_Xn,
+            "replay_yn_perm": replay_yn_perm,
+            "replay_stability_indices": replay_stability_indices,
+            "replay_pos_membership": replay_pos_membership,
+            "replay_neg_membership": replay_neg_membership,
+            "replay_membership_sha256": replay_membership_sha256,
+        }
+
+
+    def run_biological_per_perturbation(
+        X: np.ndarray,
+        y: np.ndarray,
+        *,
+        c: int,
+        target_n: int,
+        context: str,
+    ) -> dict[str, object]:
+        """
+        Frozen biological per-perturbation path:
+
+          21 -> 22 -> 23 -> 24 -> 25 -> 26 -> 27
+        """
+        target_ss = runner_seedsequence(
+            c,
+            target_n,
+            STREAM_SUBSAMPLE,
+        )
+        target_rng = np.random.default_rng(target_ss)
+
+        Xn, yn = select_target_n(
+            X,
+            y,
+            target_n=target_n,
+            rng=target_rng,
+        )
+
+        stage_a_ss = runner_seedsequence(
+            c,
+            target_n,
+            STREAM_STAGE_A_SPLIT,
+        )
+        stage_a_rng = np.random.default_rng(stage_a_ss)
+
+        X_train, y_train, X_eval, y_eval = stage_a_split(
+            Xn,
+            yn,
+            target_n=target_n,
+            rng=stage_a_rng,
+        )
+
+        downstream = run_downstream_perturbation_mechanics(
+            Xn,
+            yn,
+            X_train,
+            y_train,
+            X_eval,
+            y_eval,
+            c=c,
+            target_n=target_n,
+            path_kind="biological",
+            context=context,
+        )
+
+        return {
+            "Xn": Xn,
+            "yn": yn,
+            "X_train": X_train,
+            "y_train": y_train,
+            "X_eval": X_eval,
+            "y_eval": y_eval,
+            **downstream,
+        }
+
+
+    def run_permutation_null_per_perturbation(
+        X: np.ndarray,
+        y: np.ndarray,
+        *,
+        c: int,
+        context: str,
+    ) -> dict[str, object]:
+        """
+        Frozen permutation-null per-perturbation path:
+
+          21 -> 28 -> 22 -> 23 -> 24 -> 25 -> 26 -> 27
+
+        Exact stream-21 + stream-28 replay is then required before
+        stream-26 membership replay comparison.
+        """
+        (
+            Xn,
+            yn_perm,
+            X_train,
+            y_train,
+            X_eval,
+            y_eval,
+        ) = prepare_permutation_null_stage_a(
+            X,
+            y,
+            c=c,
+        )
+
+        downstream = run_downstream_perturbation_mechanics(
+            Xn,
+            yn_perm,
+            X_train,
+            y_train,
+            X_eval,
+            y_eval,
+            c=c,
+            target_n=PERMUTATION_NULL_TARGET_N,
+            path_kind="permutation_null",
+            context=context,
+        )
+
+        replay = replay_permutation_null_stability_membership(
+            X,
+            y,
+            c=c,
+            original_yn_perm=yn_perm,
+            original_pos_membership=downstream["pos_membership"],
+            original_neg_membership=downstream["neg_membership"],
+            original_membership_sha256=downstream["membership_sha256"],
+        )
+
+        return {
+            "Xn": Xn,
+            "yn_perm": yn_perm,
+            "X_train": X_train,
+            "y_train": y_train,
+            "X_eval": X_eval,
+            "y_eval": y_eval,
+            **downstream,
+            **replay,
+        }
+
 
     # Implementation freeze checks. These are definitions only while the
     # outer execution gate remains False.
