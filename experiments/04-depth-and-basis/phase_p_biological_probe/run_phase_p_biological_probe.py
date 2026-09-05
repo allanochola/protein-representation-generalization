@@ -1758,7 +1758,7 @@ def run_enabled_phase_p() -> None:
     # ──────────────────────────────────────────────────────────────────────
 
     ORCHESTRATION_OUTPUT_CONTRACT_SHA256 = (
-        "5c62729c16c906faf0c158c17499524ee3a6eb79d938d26b1f88846e8fc7f348"
+        "39d878469dd7297c40155842fc2f43a6d1165efb0f70d6a11f4c04003b94de92"
     )
 
     REPRESENTATION_ORDER = (
@@ -1780,6 +1780,11 @@ def run_enabled_phase_p() -> None:
         "esm_layer_33": 33,
         "baseline_21d": None,
     }
+
+    PHASE_P_OUTPUT_REL = (
+        "experiments/04-depth-and-basis/"
+        "phase_p_biological_probe/output"
+    )
 
     MAIN_OUTPUT_FILENAME = "main_per_perturbation.csv"
     NULL_OUTPUT_FILENAME = "permutation_null_per_perturbation.csv"
@@ -3682,6 +3687,55 @@ def run_enabled_phase_p() -> None:
         }
 
 
+    def establish_phase_p_output_directory(
+        output_dir: Path,
+    ) -> None:
+        """
+        Establish the frozen Phase-P execution-output directory.
+
+        First execution:
+          output_dir must be absent and is created exclusively.
+
+        Resume:
+          an existing output_dir is only a resume candidate when
+          execution_manifest.json already exists as a regular file.
+          Exact manifest byte-equivalence is subsequently enforced by
+          write_manifest_once_or_validate() before either sweep proceeds.
+
+        This function does not weaken checkpoint validation.
+        """
+
+        manifest_path = (
+            output_dir
+            / EXECUTION_MANIFEST_FILENAME
+        )
+
+        if output_dir.exists():
+
+            if not output_dir.is_dir():
+                raise PhasePContractError(
+                    "Phase-P output path exists but is not a directory."
+                )
+
+            if not manifest_path.is_file():
+                raise PhasePContractError(
+                    "Phase-P output collision inconsistent with valid resume: "
+                    "existing directory lacks execution_manifest.json."
+                )
+
+            return
+
+        try:
+            output_dir.mkdir(
+                parents=True,
+                exist_ok=False,
+            )
+        except FileExistsError as exc:
+            raise PhasePContractError(
+                "Phase-P output-directory collision during exclusive creation."
+            ) from exc
+
+
     def run_phase_p_orchestration_from_loaded_inputs(
         representations: dict[str, np.ndarray],
         y: np.ndarray,
@@ -3693,8 +3747,9 @@ def run_enabled_phase_p() -> None:
         Prospective full experiment-level orchestration entrypoint.
 
         IMPORTANT:
-        This function is DEFINED but never CALLED at this hard-disabled source
-        freeze.  The terminal PhasePContractError below remains in force.
+        This function is reachable only through a definition-only production
+        wrapper at this hard-disabled source freeze.  That wrapper has no call
+        site, and the terminal PhasePContractError below remains in force.
 
         Frozen execution order once separately authorized:
           1. validate already-loaded inputs;
@@ -3712,9 +3767,8 @@ def run_enabled_phase_p() -> None:
             y,
         )
 
-        output_dir.mkdir(
-            parents=True,
-            exist_ok=True,
+        establish_phase_p_output_directory(
+            output_dir,
         )
 
         manifest = build_phase_p_execution_manifest(
@@ -3839,6 +3893,33 @@ def run_enabled_phase_p() -> None:
     # source freeze. Even if somebody changes the outer gate prematurely,
     # this implementation raises before any biological matrix, label,
     # SeedSequence, RNG, probe, CV, AUROC, or support computation.
+    def run_wired_phase_p_from_frozen_attachments() -> None:
+        """
+        Definition-only production wiring boundary.
+
+        Biological execution remains unreachable at this source freeze because
+        this wrapper has no call site, the module gate remains literal False,
+        and the terminal PhasePContractError remains the final direct statement
+        of run_enabled_phase_p().
+        """
+
+        (
+            representations,
+            y,
+            input_provenance,
+        ) = attach_frozen_phase_p_inputs()
+
+        run_phase_p_orchestration_from_loaded_inputs(
+            representations,
+            y,
+            output_dir=(
+                REPO_ROOT
+                / PHASE_P_OUTPUT_REL
+            ),
+            input_provenance=input_provenance,
+        )
+
+
     raise PhasePContractError(
         "Phase-P corrected mechanics are encoded, but biological execution "
         "is not yet authorized at this freeze."
