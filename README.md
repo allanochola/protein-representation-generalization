@@ -330,6 +330,17 @@ The frozen biological SAE stability instrument failed Jaccard
 (`0.00588 < 0.35`). The confirmatory set remained unobserved, so no
 representation-versus-sequence confirmatory verdict was made.
 
+**Experiment 04:** Phase-P biological probing complete. Raw ESM-2
+representations show strong toxin-related linear accessibility within the
+frozen discovery universe, substantially beyond the 21-dimensional
+sequence-length/composition baseline. The six-layer depth profile peaks
+descriptively at layer 24. At the protocol-designated layer-18/N=139 anchor,
+the biological-label median AUROC is `0.9305` versus `0.5000` under the scoped
+label-permutation null. Combined with Experiment 03, the result is consistent
+with a representation-basis gap, SAE-basis misalignment, or distributed
+accessibility. It does not establish cross-family toxin generalization or a
+causal toxin mechanism.
+
 The program now demonstrates three distinct outcomes:
 
 - Experiment 01 shows that a fixed protein-model representation can retain
@@ -444,75 +455,174 @@ Those alternatives motivate Experiment 04.
 
 ### Experiment 04 — Depth and Basis
 
-**Status: active.**
+**Status: Phase-P biological probing complete.**
 
-Experiment 04 is designed to distinguish:
+Experiment 04 followed directly from the Experiment 03 stability failure.
 
-- representational-depth effects;
-- SAE-basis misalignment;
-- sparse linear accessibility;
-- distributed or unstable accessibility.
+The central question was deliberately narrower than a mechanistic claim:
 
-It evaluates ESM-2 650M at six protocol-defined layers:
+> **Is toxin-related information strongly accessible in the raw ESM-2
+> representation even when the frozen SAE basis does not expose a compact,
+> stable feature set?**
 
-- 1
-- 9
-- 18
-- 24
-- 30
-- 33
+Phase P used the frozen Experiment 03 discovery universe:
 
-Layer 18 is inherited as the already-observed Experiment-03 anchor.
+- **139 toxin-positive proteins**;
+- **139 family-aware negatives**;
+- per-class perturbation sizes **N = 100, 120, 139**;
+- ESM-2 650M layers **1, 9, 18, 24, 30, 33**;
+- a frozen **21-dimensional sequence-length/composition baseline**;
+- L1-regularized logistic probes with the preregistered C grid;
+- **100 biological perturbations**;
+- and a scoped **100-perturbation label-permutation null** at
+  layer 18 / N=139.
 
-The fresh layers are:
+The confirmatory protein universe remained outside Phase P. These results
+therefore concern **predictive accessibility within the frozen discovery
+universe**, not cross-family toxin generalization.
 
-- 1
-- 9
-- 24
-- 30
-- 33
+#### Raw ESM representations contain a strong accessible signal
 
-No best-performing layer may be selected post hoc.
+Across all perturbation sizes, median AUROC was:
 
-#### Arm A — ESM depth × InterPLM SAE stability
+| Representation | Median AUROC |
+|---|---:|
+| 21-D baseline | 0.5695 |
+| ESM layer 1 | 0.7418 |
+| ESM layer 9 | 0.9288 |
+| ESM layer 18 | 0.9275 |
+| **ESM layer 24** | **0.9575** |
+| ESM layer 30 | 0.9115 |
+| ESM layer 33 | 0.9097 |
 
-Arm A retains the Experiment-03 SAE discovery and stability instrument
-unchanged and applies it across depth.
+Layer 24 beat its paired sequence baseline in **300/300 perturbation-size
+comparisons**, with mean paired `ΔAUROC = +0.3915` and median paired
+`ΔAUROC = +0.3868`.
 
-The raw workflow is:
+<p align="center">
+  <img src="experiments/04-depth-and-basis/phase_p_biological_probe/figures/exp04_depth_profile.png" width="760">
+</p>
 
-1. obtain residue-level ESM-2 representations;
-2. encode through the corresponding normalized InterPLM SAE;
-3. residue-max pool each SAE latent;
-4. apply the inherited signed-feature stability instrument.
+The depth profile is **non-monotonic**. Toxin-related information becomes
+strongly linearly accessible by layer 9, remains strong at layer 18, reaches
+its highest descriptive accessibility at layer 24, and decreases somewhat at
+layers 30–33.
 
-Arm A remains the preregistered depth-profile component of Experiment 04.
+This is a depth profile, not evidence that layer 24 is a unique mechanistic
+toxin layer.
 
-#### Arm B — Supervised sparse probe
+#### The result is robust across the frozen discovery sizes
 
-Arm B asks whether toxin-associated information is accessible in the raw
-1,280-dimensional ESM-2 representation even when it is not localized into a
-stable compact SAE feature set.
+The strong raw-ESM accessibility is not confined to a single perturbation
+size. The same broad ordering persists at N=100, 120, and 139.
 
-The frozen representation and model class are:
+<p align="center">
+  <img src="experiments/04-depth-and-basis/phase_p_biological_probe/figures/exp04_sample_size_robustness.png" width="760">
+</p>
 
-1. raw 1,280-dimensional ESM-2 residue representations;
-2. coordinate-wise residue-max pooling over residues;
-3. L1-regularized logistic regression;
-4. discovery-only regularization selection.
+#### Fake-smoke control: shuffled labels collapse to chance
 
-Candidate inverse-regularization grid:
+The protocol-designated anchor was **layer 18 / N=139**.
 
-`1e-4, 3e-4, 1e-3, 3e-3, 1e-2, 3e-2, 1e-1, 3e-1, 1.0`
+With the real biological labels:
 
-The discovery geometry is inherited from Experiment 03:
+- median AUROC = **0.9305**.
 
-- 139 toxin-positive sequences;
-- 139 family-aware negative sequences;
-- realized per-class discovery sizes N = 100, 120, and 139.
+With the same representation geometry and fitting machinery but shuffled
+labels:
 
-The confirmatory universe remains outside the current exploratory Arm-B
-analysis.
+- median AUROC = **0.5000**.
+
+The median real-minus-null separation is therefore approximately **+0.4305
+AUROC**.
+
+<p align="center">
+  <img src="experiments/04-depth-and-basis/phase_p_biological_probe/figures/exp04_real_vs_permuted.png" width="720">
+</p>
+
+In smoke-detector terms, the probe detects the real biological "smoke," but
+when the smoke/clean labels are deliberately scrambled while the ESM geometry
+is left intact, the detector falls back to chance. This argues against the
+high AUROC being automatically manufactured by the sparse-probe machinery
+from correlated ESM coordinates alone.
+
+The permutation null is a scoped diagnostic control. It does **not** create a
+new biological significance threshold.
+
+#### Sparse supports are more recurrent under real labels
+
+At N=139, the unsigned support-stability statistic `I_stat` was:
+
+| Representation | I_stat | G_stat | Median stable-support size |
+|---|---:|---:|---:|
+| 21-D baseline | 1.000 | 1.000 | 1.0 |
+| ESM layer 1 | 0.274 | 0.271 | 77 |
+| ESM layer 9 | 0.371 | 0.371 | 47 |
+| ESM layer 18 | 0.354 | 0.352 | 68 |
+| **ESM layer 24** | **0.409** | **0.407** | **67** |
+| ESM layer 30 | 0.341 | 0.341 | 79 |
+| ESM layer 33 | 0.397 | 0.397 | 39 |
+| Permutation null | 0.000 | 0.000 | 2.5 |
+
+<p align="center">
+  <img src="experiments/04-depth-and-basis/phase_p_biological_probe/figures/exp04_support_stability.png" width="760">
+</p>
+
+The baseline's `I_stat = G_stat = 1` is a degenerate one-coordinate solution
+and should not be confused with strong predictive performance. Its median
+AUROC is only about 0.57.
+
+For the ESM representations, shared selected coordinates generally retain
+their coefficient orientation, so `G_stat` is close to `I_stat`. Signed
+support remains **descriptive and calibration-limited**, however, because the
+S7-v2 synthetic calibration did not validate the stronger signed-instability
+criterion required for a mechanistic interpretation.
+
+#### Experiment 03 + Experiment 04
+
+Experiment 03 established that the frozen InterPLM SAE representation did
+**not** yield the compact, identity-stable feature set required to proceed to
+confirmatory evaluation.
+
+Experiment 04 now establishes a different fact: under the same discovery
+universe, **strong toxin-related predictive information is nevertheless
+linearly accessible in the raw ESM representation**.
+
+Together, those observations are consistent with several possibilities:
+
+1. the relevant information is distributed across raw ESM coordinates;
+2. the InterPLM SAE basis is not aligned with the discriminative direction;
+3. the information is accessible but does not decompose into the compact,
+   stable SAE feature set required by Experiment 03.
+
+The experiment does not distinguish uniquely among those explanations.
+
+#### Interpretation boundary
+
+Experiment 04 supports the following descriptive conclusion:
+
+> **Toxin-related information is strongly linearly accessible in raw ESM-2
+> representations within the frozen discovery universe, substantially beyond
+> a simple sequence-length/composition baseline. Accessibility varies across
+> depth and is highest descriptively around layer 24. At the
+> protocol-designated layer-18/N=139 anchor, real biological labels produce
+> high predictive accessibility and substantially more recurrent sparse
+> supports than the scoped label-permutation null. Combined with weaker SAE
+> stability in Experiment 03, this pattern is consistent with a
+> representation-basis gap, SAE-basis misalignment, or distributed
+> accessibility.**
+
+It does **not** establish:
+
+- a causal toxin mechanism;
+- unique toxin specificity;
+- a mechanistic decomposition of the representation;
+- cross-family toxin generalization;
+- robustness to deliberately engineered evasion;
+- or that one unique SAE failure mechanism has been identified.
+
+See the
+[canonical Phase-P result](experiments/04-depth-and-basis/phase_p_biological_probe/RESULT.md).
 
 ---
 
