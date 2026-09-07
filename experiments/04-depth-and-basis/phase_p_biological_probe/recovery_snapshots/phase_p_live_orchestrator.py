@@ -545,7 +545,7 @@ def process_is_stopped(pid: int) -> bool:
     ).splitlines():
 
         if line.startswith("State:"):
-            return "\\tT" in line or " T " in line
+            return "\tT" in line or " T " in line
 
     return False
 
