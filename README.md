@@ -241,6 +241,11 @@ https://doi.org/10.5281/zenodo.22134890
 Ochola, A. (2026). *Pre-data feasibility analysis for catalytic-residue representation generalization under a 30%-identity family holdout* (Version 1.0.0). Zenodo.  
 https://doi.org/10.5281/zenodo.22164680
 
+### Experiment 04 — linear accessibility without sparse decomposition
+
+Ochola, A. (2026). *Linear Accessibility Without Sparse Decomposition: Toxin-Related Information in Protein Language Model Representations* (Version v1.0). Zenodo.  
+https://doi.org/10.5281/zenodo.22637265
+
 ---
 
 ## Implementation discipline
