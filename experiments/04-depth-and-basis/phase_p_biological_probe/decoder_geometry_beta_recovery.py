@@ -703,7 +703,7 @@ def original_environment_provenance(
 
 def coefficient_sha256(
     beta: Any,
-) -> tuple[str, bool]:
+) -> str:
     import numpy as np
 
     arr = np.asarray(
@@ -724,13 +724,6 @@ def coefficient_sha256(
             "Stage-B coefficient contains non-finite values."
         )
 
-    zero_beta = bool(
-        float(
-            np.linalg.norm(arr)
-        )
-        == 0.0
-    )
-
     little = np.ascontiguousarray(
         arr.astype(
             "<f8",
@@ -747,10 +740,7 @@ def coefficient_sha256(
     del little
     del arr
 
-    return (
-        digest,
-        zero_beta,
-    )
+    return digest
 
 
 # ---------------------------------------------------------------------------
@@ -931,7 +921,6 @@ def run_pass1(
             "mismatches": [],
             "exception": None,
             "stage_b_coefficient_sha256": None,
-            "zero_beta": None,
         }
 
         result = None
@@ -963,7 +952,7 @@ def run_pass1(
                 csv_safe_row=csv_safe,
             )
 
-            digest, zero_beta = (
+            digest = (
                 coefficient_sha256(
                     result[
                         "stage_b_coef"
@@ -974,10 +963,6 @@ def run_pass1(
             record[
                 "stage_b_coefficient_sha256"
             ] = digest
-
-            record[
-                "zero_beta"
-            ] = zero_beta
 
             record[
                 "mismatches"
@@ -1053,7 +1038,6 @@ def run_pass1(
             "mismatches": [],
             "exception": None,
             "stage_b_coefficient_sha256": None,
-            "zero_beta": None,
         }
 
         result = None
@@ -1084,7 +1068,7 @@ def run_pass1(
                 csv_safe_row=csv_safe,
             )
 
-            digest, zero_beta = (
+            digest = (
                 coefficient_sha256(
                     result[
                         "stage_b_coef"
@@ -1095,10 +1079,6 @@ def run_pass1(
             record[
                 "stage_b_coefficient_sha256"
             ] = digest
-
-            record[
-                "zero_beta"
-            ] = zero_beta
 
             record[
                 "mismatches"
@@ -1163,28 +1143,6 @@ def run_pass1(
         ]
     ]
 
-    bio_zero = sum(
-        1
-        for record in records
-        if (
-            record["population"]
-            == "biological"
-            and record["zero_beta"]
-            is True
-        )
-    )
-
-    null_zero = sum(
-        1
-        for record in records
-        if (
-            record["population"]
-            == "permutation_null"
-            and record["zero_beta"]
-            is True
-        )
-    )
-
     report = {
         "pass": 1,
         "status": (
@@ -1242,10 +1200,6 @@ def run_pass1(
         "mismatch_count": len(
             mismatch_records
         ),
-        "zero_beta_count": {
-            "biological": bio_zero,
-            "permutation_null": null_zero,
-        },
         "records": records,
     }
 
@@ -1263,12 +1217,6 @@ def run_pass1(
     print(
         "mismatches/exceptions:",
         len(mismatch_records),
-    )
-
-    print(
-        "zero beta:"
-        f" bio={bio_zero}"
-        f" null={null_zero}"
     )
 
     print(
