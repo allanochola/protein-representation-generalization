@@ -56,7 +56,7 @@ import types
 # Hard execution gate
 # ---------------------------------------------------------------------------
 
-ENABLE_PASS1 = True
+ENABLE_PASS1 = False
 
 
 # ---------------------------------------------------------------------------
@@ -785,7 +785,7 @@ def compare_exact_row(
 
     for field in fields:
         expected = canonical_row[field]
-        observed = normalized[field]
+        observed = str(normalized[field])
 
         if observed != expected:
             mismatches.append({
