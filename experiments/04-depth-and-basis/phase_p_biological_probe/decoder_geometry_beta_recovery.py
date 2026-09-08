@@ -657,6 +657,46 @@ def load_original_manifest(
     return obj
 
 
+def original_environment_provenance(
+    manifest: dict[str, Any],
+) -> dict[str, Any]:
+    """
+    Record only environment provenance actually present in the historical
+    Phase-P execution manifest.
+
+    The frozen historical manifest contains no execution-environment fields.
+    No missing value is inferred or reconstructed.
+    """
+
+    concepts = (
+        "python",
+        "numpy",
+        "scipy",
+        "sklearn",
+        "blas_or_lapack",
+        "platform",
+        "architecture_or_machine",
+        "thread_environment",
+    )
+
+    return {
+        "source": "historical Phase-P execution_manifest.json",
+        "availability": "unavailable",
+        "reason": (
+            "The frozen historical Phase-P execution manifest contains "
+            "input/scientific provenance but no execution-environment "
+            "provenance fields."
+        ),
+        "fields": {
+            concept: {
+                "available": False,
+                "value": None,
+            }
+            for concept in concepts
+        },
+    }
+
+
 # ---------------------------------------------------------------------------
 # Coefficient hash
 # ---------------------------------------------------------------------------
@@ -773,6 +813,12 @@ def run_pass1(
         )
     )
 
+    original_env = (
+        original_environment_provenance(
+            original_manifest
+        )
+    )
+
     env_now = current_environment()
 
     (
@@ -791,6 +837,16 @@ def run_pass1(
     print(
         "PASS — original execution manifest read "
         "before replay."
+    )
+
+    print(
+        "Original execution-environment provenance: "
+        "UNAVAILABLE in historical manifest."
+    )
+
+    print(
+        "PASS — missing original environment fields "
+        "recorded explicitly; none inferred."
     )
 
     print(
@@ -1168,6 +1224,17 @@ def run_pass1(
         "original_execution_manifest": (
             original_manifest
         ),
+        "original_execution_environment": (
+            original_env
+        ),
+        "environment_comparison": {
+            "status": (
+                "original_environment_unavailable"
+            ),
+            "exact_comparison_possible": False,
+            "inference_performed": False,
+            "replay_contract_changed": False,
+        },
         "current_environment": env_now,
         "input_provenance": input_provenance,
         "verified_count": verified_count,
