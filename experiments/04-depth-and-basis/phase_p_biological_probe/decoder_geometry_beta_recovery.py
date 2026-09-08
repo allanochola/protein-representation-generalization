@@ -49,13 +49,14 @@ import json
 import platform
 import sys
 import tempfile
+import types
 
 
 # ---------------------------------------------------------------------------
 # Hard execution gate
 # ---------------------------------------------------------------------------
 
-ENABLE_PASS1 = True
+ENABLE_PASS1 = False
 
 
 # ---------------------------------------------------------------------------
@@ -318,10 +319,31 @@ def build_frozen_phase_p_namespace() -> dict[str, Any]:
 
     ast.fix_missing_locations(tree)
 
-    namespace: dict[str, Any] = {
-        "__name__": "_exp04_beta_recovery_frozen_runner",
-        "__file__": str(RUNNER_PATH),
-    }
+    module_name = (
+        "_exp04_beta_recovery_frozen_runner"
+    )
+
+    if module_name in sys.modules:
+        raise RecoveryError(
+            "Synthetic frozen-runner module name "
+            "already registered."
+        )
+
+    module = types.ModuleType(
+        module_name
+    )
+
+    module.__file__ = str(
+        RUNNER_PATH
+    )
+
+    namespace: dict[str, Any] = (
+        module.__dict__
+    )
+
+    sys.modules[
+        module_name
+    ] = module
 
     compiled = compile(
         tree,
