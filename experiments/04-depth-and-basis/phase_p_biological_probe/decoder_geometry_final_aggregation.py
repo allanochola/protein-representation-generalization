@@ -1349,19 +1349,117 @@ def discover_isotropic_records(
                 f"Incomplete isotropic record: {index}"
             )
 
-        # Isotropic object has the same direction-level geometry schema,
-        # without the outer population-record wrapper.
+        # Historical private isotropic checkpoints were persisted
+        # using a flattened direction-level serialization.  Normalize
+        # that exact historical schema in memory only.  No archived
+        # record is modified and no scientific value is transformed.
+        normalized_obj = dict(
+            obj
+        )
+
+        nested_omp = obj.get(
+            "omp"
+        )
+
+        nested_raw_weight = obj.get(
+            "raw_weight"
+        )
+
+        if (
+            isinstance(
+                nested_omp,
+                dict,
+            )
+            and isinstance(
+                nested_raw_weight,
+                dict,
+            )
+        ):
+
+            # Native nested schema: preserve exactly.
+            pass
+
+        elif (
+            nested_omp is None
+            and nested_raw_weight is None
+        ):
+
+            flattened_required = (
+                "omp_status",
+                "rank_deficient",
+                "rank_deficiency_step",
+                "exact_reconstruction_step",
+                "r_by_k",
+                "rank_by_k",
+                "condition_by_k",
+                "raw_weight_status",
+                "topk_mass",
+                "n_eff",
+            )
+
+            missing_flattened = [
+                field
+                for field in flattened_required
+                if field not in obj
+            ]
+
+            if missing_flattened:
+
+                raise RuntimeError(
+                    "Historical flattened isotropic schema incomplete "
+                    f"at vector index {index}: "
+                    f"missing={missing_flattened}"
+                )
+
+            normalized_obj[
+                "omp"
+            ] = {
+                "status":
+                    obj["omp_status"],
+                "rank_deficient":
+                    obj["rank_deficient"],
+                "rank_deficiency_step":
+                    obj["rank_deficiency_step"],
+                "exact_reconstruction_step":
+                    obj["exact_reconstruction_step"],
+                "r_by_k":
+                    obj["r_by_k"],
+                "rank_by_k":
+                    obj["rank_by_k"],
+                "condition_by_k":
+                    obj["condition_by_k"],
+            }
+
+            normalized_obj[
+                "raw_weight"
+            ] = {
+                "status":
+                    obj["raw_weight_status"],
+                "topk_mass":
+                    obj["topk_mass"],
+                "n_eff":
+                    obj["n_eff"],
+            }
+
+        else:
+
+            raise RuntimeError(
+                "Ambiguous isotropic geometry serialization "
+                f"at vector index {index}."
+            )
+
+        # Validate the normalized in-memory object using the unchanged
+        # population geometry validator.
         synthetic_wrapper = {
             "eligibility": "eligible_nonzero_beta",
             "analysis_status": "complete",
             "geometry": {
-                "status": obj["status"],
-                "omp": obj.get(
-                    "omp"
-                ),
-                "raw_weight": obj.get(
-                    "raw_weight"
-                ),
+                "status":
+                    normalized_obj["status"],
+                "omp":
+                    normalized_obj["omp"],
+                "raw_weight":
+                    normalized_obj["raw_weight"],
             },
         }
 
@@ -1371,7 +1469,7 @@ def discover_isotropic_records(
 
         by_index[
             index
-        ] = obj
+        ] = normalized_obj
 
     expected = set(
         range(
