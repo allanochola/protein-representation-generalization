@@ -52,7 +52,7 @@ import numpy as np
 # HARD EXECUTION GATE
 # ---------------------------------------------------------------------------
 
-ENABLE_AGGREGATION = True
+ENABLE_AGGREGATION = False
 
 
 # ---------------------------------------------------------------------------
