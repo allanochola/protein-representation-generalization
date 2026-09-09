@@ -73,7 +73,7 @@ EXPECTED_HISTORICAL_PASS1_AUTHORIZED_SOURCE_SHA256 = (
     "4279b8b064ccc53471a4d633707a60d4d0e453599e297b7d9972ba7fed3e30d1"
 )
 
-ENABLE_PASS1 = False
+ENABLE_PASS1 = True
 
 
 # ---------------------------------------------------------------------------
