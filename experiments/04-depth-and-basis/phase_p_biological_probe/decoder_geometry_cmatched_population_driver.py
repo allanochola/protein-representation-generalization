@@ -61,7 +61,7 @@ import tempfile
 # HARD EXECUTION GATE
 # ---------------------------------------------------------------------------
 
-ENABLE_CMATCHED_GEOMETRY_POPULATION = False
+ENABLE_CMATCHED_GEOMETRY_POPULATION = True
 
 
 # ---------------------------------------------------------------------------
