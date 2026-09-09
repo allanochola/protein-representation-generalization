@@ -61,7 +61,7 @@ import tempfile
 # HARD EXECUTION GATE
 # ---------------------------------------------------------------------------
 
-ENABLE_CMATCHED_RECOVERY = False
+ENABLE_CMATCHED_RECOVERY = True
 
 
 # ---------------------------------------------------------------------------
