@@ -1,4 +1,18 @@
-# Protein representation generalization
+# Protein Representation Generalization
+
+<p align="center">
+  <strong>From representation generalization to biological-function interpretability</strong>
+</p>
+
+<p align="center">
+  <a href="https://doi.org/10.5281/zenodo.22134890">Experiment 01</a>
+  ·
+  <a href="https://doi.org/10.5281/zenodo.22164680">Experiment 02</a>
+  ·
+  <a href="https://doi.org/10.5281/zenodo.22637265">Linear accessibility</a>
+  ·
+  <a href="https://doi.org/10.5281/zenodo.22681898">Decoder geometry</a>
+</p>
 
 **Can biological information inside protein foundation models survive explicit sequence-divergence controls — and can interpretable internal features provide functional evidence beyond sequence and family shortcuts?**
 
@@ -14,6 +28,33 @@ The research progresses from representation generalization to function-relevant 
 The experiments use frozen representation choices, explicit sequence comparators, sequence-identity and family controls, cluster-level uncertainty estimates, model-blind feasibility checks, and pre-data decision rules.
 
 The current work does **not** claim a production biosecurity screening system or robustness to deliberately engineered evasion. Those require separate evaluation beyond natural evolutionary divergence.
+
+---
+
+## Research program at a glance
+
+| Experiment | Question | Outcome |
+|---|---|---|
+| **01 — Representation generalization** | Does ESM-2 retain biological structure under explicit sequence divergence? | **Yes — `H_repr`** |
+| **02 — Catalytic-site feasibility** | Can the planned family-holdout design support the intended inference? | **No — closed pre-data** |
+| **03 — Sparse toxin signatures** | Does the tested SAE expose a compact, stable toxin-related feature set? | **No — stability gate failed** |
+| **04 — Accessibility & geometry** | Is toxin-related information present in raw ESM-2, and is it compact in the tested SAE basis? | **Strongly accessible, but distributed** |
+
+### Smoke-detector intuition
+
+> Experiment 03 tried to find a small, stable set of alarms. That failed.
+>
+> Experiment 04 then checked the raw sensor network and showed that the signal
+> was clearly detectable.
+>
+> The decoder-geometry follow-up showed that the signal was distributed rather
+> than concentrated in a few alarms.
+>
+> **The smoke is there, but it is smeared across the alarm panel.**
+
+The current work does **not** establish cross-family toxin generalization,
+causal toxin mechanisms, robustness to deliberately engineered evasion, or
+production synthesis-screening performance.
 
 ---
 
@@ -229,6 +270,117 @@ Protein membership is disjoint across all three splits.
 
 ---
 
+
+## Experiment 04 — visual summary
+
+Experiment 04 resolved the main ambiguity left by the failed Experiment 03 SAE
+stability instrument.
+
+Raw ESM-2 representations contained strong toxin-related linearly accessible
+information within the frozen discovery universe, but the subsequent
+decoder-geometry analysis showed that this supervised direction was not
+compactly represented in the tested InterPLM SAE decoder basis.
+
+### Analysis design
+
+<p align="center">
+  <img src="figures/readme/exp04_fig1_design.png" width="900">
+</p>
+
+The geometry follow-up used the frozen InterPLM layer-18 decoder and compared
+biological directions with canonical label-null, C-matched null, and isotropic
+reference directions.
+
+### Reconstruction versus sparsity
+
+<p align="center">
+  <img src="figures/readme/exp04_fig2_reconstruction.png" width="900">
+</p>
+
+At `k = 32`, decoder atoms reconstructed a median **25.68%** of the biological
+supervised direction.
+
+For comparison:
+
+| Population | Median R(32) |
+|---|---:|
+| Biological | **0.2568** |
+| Canonical eligible null | **0.2567** |
+| C-matched null | **0.2433** |
+| Isotropic | **0.2412** |
+
+The dominant result is not the small between-population difference. It is that
+roughly **three quarters of the biological direction remains unreconstructed
+at 32 atoms**.
+
+### Reconstruction thresholds
+
+<p align="center">
+  <img src="figures/readme/exp04_fig4_thresholds.png" width="900">
+</p>
+
+For all 100 biological directions:
+
+- more than **64 atoms** were required to reach 50% reconstruction;
+- more than **128 atoms** were required to reach 80%;
+- more than **256 atoms** were required to reach 90%.
+
+Equivalent isotropic threshold fields were never serialized in the frozen
+historical records and are therefore reported as unavailable rather than
+reconstructed post hoc.
+
+### Decoder support
+
+<p align="center">
+  <img src="figures/readme/exp04_fig5_decoder.png" width="900">
+</p>
+
+The biological decoder-weight distribution has median effective support of
+approximately **6,374 atoms out of 10,231 usable decoder atoms**.
+
+This is consistent with a highly distributed representation rather than a
+compact sparse decomposition.
+
+<details>
+<summary><strong>Descriptive pairwise geometry comparisons</strong></summary>
+
+<br>
+
+<p align="center">
+  <img src="figures/readme/exp04_fig3_differences.png" width="900">
+</p>
+
+Biological directions show modest preferential decoder alignment relative to
+C-matched and isotropic controls in point estimates.
+
+However, the biological perturbations at `N = 139` reuse the complete target-N
+pool and mainly vary solver initialization. Their bootstrap intervals therefore
+characterize **solver-seed variation conditional on the fixed dataset**, not
+biological sampling uncertainty across independently sampled proteins or
+families.
+
+</details>
+
+### Experiment 04 interpretation
+
+> **Strong linear accessibility without compact SAE-basis decomposition.**
+
+The Experiment 03 SAE stability failure cannot be attributed to absence of
+linearly accessible toxin-related information. The distributed decoder geometry
+provides a plausible geometric explanation for why the tested SAE procedure
+did not recover a compact recurrent feature set.
+
+It does not establish that distributed geometry is the unique cause of that
+failure.
+
+**New paper:**  
+Ochola, A. (2026). *Distributed, Not Sparse: Decoder-Basis Geometry of
+Toxin-Related Directions in a Protein Language Model* (Version v1.0). Zenodo.
+
+**DOI:** [10.5281/zenodo.22681898](https://doi.org/10.5281/zenodo.22681898)
+
+---
+
 ## Citable releases
 
 ### Experiment 01 — secondary-structure representation generalization
@@ -245,6 +397,12 @@ https://doi.org/10.5281/zenodo.22164680
 
 Ochola, A. (2026). *Linear Accessibility Without Sparse Decomposition: Toxin-Related Information in Protein Language Model Representations* (Version v1.0). Zenodo.  
 https://doi.org/10.5281/zenodo.22637265
+
+### Experiment 04 — decoder-basis geometry
+
+Ochola, A. (2026). *Distributed, Not Sparse: Decoder-Basis Geometry of
+Toxin-Related Directions in a Protein Language Model* (Version v1.0). Zenodo.  
+https://doi.org/10.5281/zenodo.22681898
 
 ---
 
@@ -335,7 +493,7 @@ The frozen biological SAE stability instrument failed Jaccard
 (`0.00588 < 0.35`). The confirmatory set remained unobserved, so no
 representation-versus-sequence confirmatory verdict was made.
 
-**Experiment 04:** Phase-P biological probing complete. Raw ESM-2
+**Experiment 04:** CLOSED. Phase-P biological probing and the post hoc decoder-geometry follow-up are complete. Raw ESM-2
 representations show strong toxin-related linear accessibility within the
 frozen discovery universe, substantially beyond the 21-dimensional
 sequence-length/composition baseline. The six-layer depth profile peaks
