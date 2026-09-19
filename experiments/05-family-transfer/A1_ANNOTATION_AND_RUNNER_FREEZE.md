@@ -1,6 +1,7 @@
 # A1 Fresh-Annotation Snapshot, Runner Freeze, and Authorization
 
-**Status:** frozen, authorized, and not yet executed.
+**Status:** superseded before execution; authorization revoked pending the
+scan/archive and census split.
 
 ## Classification
 
@@ -62,18 +63,18 @@ assigned positives, while unassigned share and largest-component share use all
 139 discovery positives. The snapshot carries the binding 0.25, 0.15, and 0.10
 routing values rather than leaving them implicit in runner source.
 
-## Runner authorization state
+## Superseded runner state
 
-`run_gate_a1.py` contains the complete deterministic construction. Its two
-independent execution locks were changed together in the isolated authorization
-commit:
+`run_gate_a1.py` contains the original combined scan-and-census construction.
+It was authorized but never executed. Both execution locks were revoked in a
+prospective repair commit after the archive-before-analysis defect was found:
 
-1. source constant `EXECUTION_AUTHORIZED = True`; and
-2. snapshot field `execution_authorized: true`.
+1. source constant `EXECUTION_AUTHORIZED = False`; and
+2. snapshot field `execution_authorized: false`.
 
-Authorization permits one deterministic A1 execution only after the staged
-Pfam artifacts, HMMER source/build identity, repository inputs, and authorization
-diff pass preflight. Authorization itself does not produce census outputs.
+This combined runner is permanently ineligible for A1 execution. Successor
+scan/archive and census programs require separate freeze, audit, and
+authorization commits under `A1_SCAN_CENSUS_SPLIT_AMENDMENT.md`.
 
 The runner accepts no caller-supplied discovery or confirmatory path. All
 discovery inputs are fixed repository-relative constants, and all Pfam inputs
@@ -93,10 +94,8 @@ are fixed filenames under the A1 input directory. There is no network code.
   `fpr`, `score`, or `threshold`;
 - frozen repository-input hashes and snapshot self-consistency.
 
-Passing this audit certifies the authorized source but does not establish that
-its external inputs were staged correctly. The execution cell must repeat the
-Pfam hashes, HMMER source/build identity, repository-input hashes, and remote
-authorization-commit check before invoking the runner.
+Passing this audit certifies only that the superseded runner remains disabled.
+It does not authorize either successor phase.
 
 ## Required outputs after later authorization
 

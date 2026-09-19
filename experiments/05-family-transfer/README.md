@@ -55,9 +55,12 @@ Phase-0 implementation freezes:
   authorization;
 - `a1_annotation_snapshot.json` — exact discovery, Pfam, and HMMER identities
   and hashes;
-- `run_gate_a1.py` — deterministic A1 implementation, authorized but not yet
-  executed;
-- `audit_gate_a1.py` — static source and input audit for the authorized runner.
+- `run_gate_a1.py` — superseded combined A1 implementation, disabled before
+  first use;
+- `audit_gate_a1.py` — static audit confirming the superseded runner remains
+  disabled;
+- `A1_SCAN_CENSUS_SPLIT_AMENDMENT.md` — binding prospective repair separating
+  immutable scan archiving from census computation.
 
 These documents are Phase-0 scaffolds, not a complete frozen confirmatory
 protocol. Clauses explicitly labelled frozen are binding and cannot be revised

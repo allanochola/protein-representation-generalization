@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static audit for the authorized, not-yet-executed Gate-A1 runner."""
+"""Static audit confirming the superseded combined A1 runner is disabled."""
 
 from __future__ import annotations
 
@@ -38,8 +38,8 @@ source = RUNNER.read_text(encoding="utf-8")
 tree = ast.parse(source, filename=str(RUNNER))
 snapshot = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
 
-if snapshot["execution_authorized"] is not True:
-    raise RuntimeError("Snapshot execution authorization is not true")
+if snapshot["execution_authorized"] is not False:
+    raise RuntimeError("Superseded snapshot execution gate is not false")
 
 authorization_values = []
 for node in tree.body:
@@ -47,8 +47,8 @@ for node in tree.body:
         for target in node.targets:
             if isinstance(target, ast.Name) and target.id == "EXECUTION_AUTHORIZED":
                 authorization_values.append(ast.literal_eval(node.value))
-if authorization_values != [True]:
-    raise RuntimeError("Runner execution authorization is absent, duplicated, or not true")
+if authorization_values != [False]:
+    raise RuntimeError("Superseded runner gate is absent, duplicated, or not false")
 
 for node in ast.walk(tree):
     if isinstance(node, ast.Import):
@@ -113,6 +113,6 @@ expected_routing = {
 if snapshot["routing"] != expected_routing:
     raise RuntimeError("Frozen routing thresholds or denominators changed")
 
-print("PASS — Gate A1 source is syntactically valid, statically clean, and authorized")
+print("PASS — superseded combined Gate A1 runner is statically clean and disabled")
 print("Runner SHA-256:", sha256_path(RUNNER))
 print("Snapshot SHA-256:", sha256_path(SNAPSHOT))
