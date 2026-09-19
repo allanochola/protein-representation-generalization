@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""A1-S: immutable Pfam scan archive, authorized but not yet executed."""
+"""A1-S: immutable Pfam scan archive. Executed once at commit 663b6116; archive committed; execution closed."""
 import csv, gzip, hashlib, json, shutil, subprocess, tempfile
 from pathlib import Path
 
-SCAN_AUTHORIZED = True
+SCAN_AUTHORIZED = False
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
 CONFIG = HERE / "a1_annotation_snapshot.json"
