@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""A1-C: authorized census from the committed immutable A1-S archive."""
+"""A1-C: census from the committed immutable A1-S archive. Disabled pending grouping-rule repair (void record 001)."""
 import csv,gzip,hashlib,json,subprocess
 from collections import defaultdict
 from pathlib import Path
 
-CENSUS_AUTHORIZED=True
+CENSUS_AUTHORIZED=False
 HERE=Path(__file__).resolve().parent; ARCHIVE=HERE/"a1_scan_archive"; OUTPUT=HERE/"a1_census_output"
 BANNED_COLUMNS=("auroc","tpr","fpr","score","threshold")
 def digest(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
