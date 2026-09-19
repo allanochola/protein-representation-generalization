@@ -696,7 +696,8 @@ def main():
     session, hmmscan, mmseqs, pfam_hmm = verify_session()
 
     with tempfile.TemporaryDirectory(
-        prefix="exp05_a2ss_"
+        prefix="exp05_a2ss_",
+        dir=OUTPUT.parent,
     ) as temporary:
         stage = Path(temporary) / OUTPUT.name
         stage.mkdir()
