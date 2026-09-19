@@ -1,0 +1,74 @@
+{
+  "binary_hash_claim": "session identity only; not a reproducible-build guarantee",
+  "commands": [
+    [
+      "/kaggle/working/exp05-a1m-tools/install/bin/mmseqs",
+      "easy-cluster",
+      "/kaggle/working/protein-representation-generalization/experiments/05-family-transfer/a1ms_fdhhlg5e/canonical_positive.fasta",
+      "/kaggle/working/protein-representation-generalization/experiments/05-family-transfer/a1ms_fdhhlg5e/run_1/clusters",
+      "/kaggle/working/protein-representation-generalization/experiments/05-family-transfer/a1ms_fdhhlg5e/run_1/tmp",
+      "--min-seq-id",
+      "0.3",
+      "-c",
+      "0.8",
+      "--cov-mode",
+      "1",
+      "--cluster-mode",
+      "0",
+      "-s",
+      "7.5",
+      "--threads",
+      "8"
+    ],
+    [
+      "/kaggle/working/exp05-a1m-tools/install/bin/mmseqs",
+      "easy-cluster",
+      "/kaggle/working/protein-representation-generalization/experiments/05-family-transfer/a1ms_fdhhlg5e/canonical_positive.fasta",
+      "/kaggle/working/protein-representation-generalization/experiments/05-family-transfer/a1ms_fdhhlg5e/run_2/clusters",
+      "/kaggle/working/protein-representation-generalization/experiments/05-family-transfer/a1ms_fdhhlg5e/run_2/tmp",
+      "--min-seq-id",
+      "0.3",
+      "-c",
+      "0.8",
+      "--cov-mode",
+      "1",
+      "--cluster-mode",
+      "0",
+      "-s",
+      "7.5",
+      "--threads",
+      "8"
+    ]
+  ],
+  "confirmatory_accessed": false,
+  "file_sha256": {
+    "canonical_cluster_rows.tsv": "c3cd8a0b81a230613098b4ffa071470f968369ad049302a83624410004964ac1",
+    "canonical_partition.tsv": "0d27c57c4e65a55d50bbfbf0ef60437e0b5a839511cc54a2f32786ae4fe30598",
+    "canonical_positive.fasta": "35a18f81eec471904c6bceb8671e7531db1ddaeb610bbf34e8b2f2efa6126878",
+    "run_1.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "run_1.stdout": "ed590191bcf9164504c6309ab3abe48a21f571fd577c2db21f51fa5768d431f3",
+    "run_1_raw_cluster.tsv": "c3cd8a0b81a230613098b4ffa071470f968369ad049302a83624410004964ac1",
+    "run_2.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "run_2.stdout": "6a8bed3e7914f1a0019f15bd58208bfc01af2687314b028a374700d41b0f684a",
+    "run_2_raw_cluster.tsv": "0c48dd8942ff30fe2ca4c2c6d6cf762ac6756168dc1a530c4fef449b2a74372b"
+  },
+  "mmseqs_version": "eec9c354be4276d2373996af2e50808b1390d527",
+  "replay_gate": {
+    "canonical_row_sets_identical": true,
+    "independent_runs": 2,
+    "partitions_identical": true
+  },
+  "scientific_definition": {
+    "cluster_mode": 0,
+    "command": "easy-cluster",
+    "coverage": 0.8,
+    "coverage_mode": 1,
+    "min_seq_id": 0.3,
+    "sensitivity": 7.5,
+    "threads": 8
+  },
+  "session_binary_sha256": "16c2df62ad552650e1ad3c20746812438d300ba861148243edf503af0a72c162",
+  "snapshot_sha256": "bbed2977a2a2e1419e8c77d0375e7a563b0b8cc07739085fad03b3475273f1f2",
+  "source_archive_sha256": "de5085207c04902c4b8810ab3092859c5a8e22ab70d56427f54001be4e554379",
+  "source_commit": "eec9c354be4276d2373996af2e50808b1390d527"
+}
