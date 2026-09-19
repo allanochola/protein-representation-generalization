@@ -1,4 +1,4 @@
-"""A2-SR: deterministic UniProt sequence recovery. Authorized for one execution."""
+"""A2-SR: deterministic UniProt sequence recovery. Disabled after void archive-transfer failure."""
 
 import csv
 import hashlib
@@ -13,7 +13,7 @@ import urllib.request
 from pathlib import Path
 
 
-A2_SEQUENCE_RECOVERY_AUTHORIZED = True
+A2_SEQUENCE_RECOVERY_AUTHORIZED = False
 
 EXPECTED_POSITIVES = 161
 EXPECTED_NEGATIVES = 3541
