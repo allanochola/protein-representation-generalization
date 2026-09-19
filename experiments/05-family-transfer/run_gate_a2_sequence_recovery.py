@@ -753,7 +753,8 @@ def main():
     )
 
     with tempfile.TemporaryDirectory(
-        prefix="exp05_a2sr_"
+        prefix="exp05_a2sr_",
+        dir=OUTPUT.parent,
     ) as temporary:
         stage = Path(temporary) / OUTPUT.name
         stage.mkdir()
