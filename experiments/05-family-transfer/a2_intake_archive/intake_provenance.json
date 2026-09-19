@@ -1,0 +1,45 @@
+{
+  "accession_aliases_frozen": [
+    "accession",
+    "identifier",
+    "protein_id",
+    "uniprot_accession",
+    "cluster_rep"
+  ],
+  "confirmatory_metadata_accessed": true,
+  "confirmatory_outcomes_accessed": false,
+  "geometry_computed": false,
+  "length_aliases_frozen": [
+    "length",
+    "frozen_length",
+    "sequence_length",
+    "retrieved_length",
+    "representative_length"
+  ],
+  "models_loaded": false,
+  "negative_accession_column": "accession",
+  "negative_input_header": [
+    "accession",
+    "length",
+    "length_stratum_stage1"
+  ],
+  "negative_input_path": "experiments/03-toxin-representation/stage1_model_blind/confirmatory_negative_universe.tsv",
+  "negative_input_sha256": "9705f964fd26ce786f080bed29758ece2283f00c406a885e92c4b8f7b9c53e64",
+  "negative_length_column": "length",
+  "output_sha256": {
+    "confirmatory_accession_manifest.tsv": "fe3e3b14bfc70bf79928975156a07fbd1ccd1e091a2a83880b01dc8e1c247f9e",
+    "intake_summary.json": "d6615e35806648860507135cd3a8c7d5c60ad81ce19791ed83b24b39a568e40c"
+  },
+  "positive_accession_column": "cluster_rep",
+  "positive_input_header": [
+    "cluster_rep",
+    "representative_length",
+    "length_stratum_stage1",
+    "annotation_status"
+  ],
+  "positive_input_path": "experiments/03-toxin-representation/stage1_model_blind/confirmatory_positive_universe.tsv",
+  "positive_input_sha256": "42a08582492ff8ec9cd38604b425e20ee795c1479f4f3aa47a0949ebf52479e1",
+  "positive_length_column": "representative_length",
+  "predictions_computed": false,
+  "scores_computed": false
+}

@@ -1,0 +1,11 @@
+{
+  "discovery_negative_accession_overlap": 0,
+  "discovery_positive_accession_overlap": 0,
+  "negative_count": 3541,
+  "negative_length_column_present": true,
+  "positive_count": 161,
+  "positive_length_column_present": true,
+  "positive_negative_accession_overlap": 0,
+  "status": "A2_INTAKE_COMPLETE",
+  "total_count": 3702
+}
