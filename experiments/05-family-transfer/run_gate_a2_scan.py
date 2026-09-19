@@ -134,12 +134,7 @@ ARCHIVE_ALLOWLIST = (
 
 PROVENANCE_MEMBER = "scan_provenance.json"
 
-MAPPING_COLUMNS = (
-    "identifier",
-    "universe",
-    "class_name",
-    "accession",
-)
+MAPPING_COLUMNS = ('protein_id', 'universe', 'class_name', 'accession', 'sequence_length', 'sequence_sha256')
 
 ACCEPTED_HIT_COLUMNS = (
     "identifier",
@@ -500,10 +495,17 @@ def build_joint(
         "\t".join(MAPPING_COLUMNS)
         + "\n"
         + "".join(
-            f"{identifier}\t{universe}\t{class_name}\t{accession}\n"
-            for identifier, universe, class_name, accession, _ in entries
+            "\t".join((
+                identifier,
+                universe,
+                class_name,
+                accession,
+                str(len(sequence)),
+                digest_bytes(sequence.encode("ascii")),
+            )) + "\n"
+            for identifier, universe, class_name, accession, sequence in entries
         )
-    ).encode("utf-8")
+    ).encode("ascii")
 
     require(
         len(fasta) == JOINT_FASTA_BYTES,
