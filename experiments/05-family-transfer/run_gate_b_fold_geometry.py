@@ -1,4 +1,4 @@
-"""Authorized Gate B grouped-fold geometry; no model fitting."""
+"""Gate B grouped-fold geometry disabled pending failure-path repair."""
 
 import csv
 import hashlib
@@ -11,7 +11,7 @@ import numpy as np
 import sklearn
 from sklearn.model_selection import StratifiedGroupKFold
 
-FOLD_GEOMETRY_AUTHORIZED = True
+FOLD_GEOMETRY_AUTHORIZED = False
 
 REPO = Path(__file__).resolve().parents[2]
 EXP = REPO / "experiments/05-family-transfer"
