@@ -30,8 +30,8 @@ EXPECTED_POSITIVES = 161
 EXPECTED_NEGATIVES = 3541
 EXPECTED_DISCOVERY = 278
 
-ACCESSION_ALIASES = ('accession', 'identifier', 'protein_id', 'uniprot_accession')
-LENGTH_ALIASES = ('length', 'frozen_length', 'sequence_length', 'retrieved_length')
+ACCESSION_ALIASES = ('accession', 'identifier', 'protein_id', 'uniprot_accession', 'cluster_rep')
+LENGTH_ALIASES = ('length', 'frozen_length', 'sequence_length', 'retrieved_length', 'representative_length')
 BANNED = ('auroc', 'auprc', 'tpr', 'fpr', 'score', 'prediction', 'probability', 'threshold', 'embedding', 'activation')
 
 
