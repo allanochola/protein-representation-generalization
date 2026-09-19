@@ -76,10 +76,7 @@ MMSEQS_PARAMETERS = {
     "independent_runs": 2,
 }
 
-EXPECTED_SESSION_MANIFEST_SHA256 = (
-    "957aef98a65d5dc646cdc33a02fd352bf"
-    "8b7d8d0afd9d6c4500013acd8873d2e"
-)
+EXPECTED_SESSION_MANIFEST_SHA256 = '46f16cddd0b823f6a2f37ae60508bb7576f6724362141c27cf55dafc812ed25a'
 
 REPO = Path(__file__).resolve().parents[2]
 EXP = REPO / "experiments/05-family-transfer"
