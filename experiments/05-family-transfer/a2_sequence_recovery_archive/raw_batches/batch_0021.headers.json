@@ -1,0 +1,21 @@
+{
+  "accept-ranges": "bytes",
+  "access-control-allow-credentials": "true",
+  "access-control-allow-headers": "DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization",
+  "access-control-allow-methods": "GET, PUT, POST, DELETE, PATCH, OPTIONS",
+  "access-control-allow-origin": "*",
+  "access-control-expose-headers": "Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date",
+  "access-control-max-age": "1728000",
+  "cache-control": "public, max-age=43200",
+  "connection": "close",
+  "content-length": "21064",
+  "content-type": "text/plain;format=tsv",
+  "date": "Sat, 19 Sep 2026 18:27:53 GMT",
+  "strict-transport-security": "max-age=31536000; includeSubDomains",
+  "vary": "accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent",
+  "x-api-deployment-date": "02-September-2026",
+  "x-cache": "hit cached",
+  "x-total-results": "100",
+  "x-uniprot-release": "2026_03",
+  "x-uniprot-release-date": "02-September-2026"
+}

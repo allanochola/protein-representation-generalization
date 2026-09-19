@@ -1,0 +1,10 @@
+{
+  "drift_count": 0,
+  "negative_count": 3541,
+  "positive_count": 161,
+  "recovered_count": 3702,
+  "requested_count": 3702,
+  "status": "PASS",
+  "uniprot_release": "2026_03",
+  "uniprot_release_date": "02-September-2026"
+}

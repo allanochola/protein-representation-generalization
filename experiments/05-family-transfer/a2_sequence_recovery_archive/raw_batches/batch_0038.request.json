@@ -1,0 +1,8 @@
+{
+  "accessions": [
+    "W7K9M0",
+    "W7MSI0"
+  ],
+  "attempt": 1,
+  "url": "https://rest.uniprot.org/uniprotkb/accessions?accessions=W7K9M0%2CW7MSI0&format=tsv&fields=accession%2Clength%2Csequence"
+}
