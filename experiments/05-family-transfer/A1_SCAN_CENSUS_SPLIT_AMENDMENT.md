@@ -1,7 +1,7 @@
 # A1 Scan/Archive and Census Split Amendment
 
-**Status:** frozen prospective repair; neither successor phase is implemented
-or authorized by this document.
+**Status:** frozen prospective repair; both successor implementations exist and
+are hard-disabled. Neither is authorized by this document.
 
 ## Why this repair is prospective
 

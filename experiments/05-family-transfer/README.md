@@ -61,6 +61,9 @@ Phase-0 implementation freezes:
   disabled;
 - `A1_SCAN_CENSUS_SPLIT_AMENDMENT.md` — binding prospective repair separating
   immutable scan archiving from census computation.
+- `run_gate_a1_scan.py` — hard-disabled A1-S scan/archive implementation;
+- `run_gate_a1_census.py` — hard-disabled A1-C committed-archive census;
+- `audit_gate_a1_split.py` — static phase-separation and authorization audit.
 
 These documents are Phase-0 scaffolds, not a complete frozen confirmatory
 protocol. Clauses explicitly labelled frozen are binding and cannot be revised
