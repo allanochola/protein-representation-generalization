@@ -38,6 +38,12 @@ small candidate universe.
 7. `IMPLEMENTATION_FAILURE_CLASSIFICATION.md` — frozen distinction between a
    void implementation run, a valid surprising result, and a scientific gate
    failure.
+8. `GATE_A_SPLIT_AND_ORDER.md` — frozen A1/A2 firewall, run order, routing
+   table, and A1 execution discipline.
+9. `PFAM_PROVENANCE_ARCHAEOLOGY.md` — recovered historical Pfam semantics,
+   hashes, and the missing-artifact boundary.
+10. `COMPARATOR_PROVENANCE_ARCHAEOLOGY.md` — recovered 0.9494 Gate-D model
+    construction and unresolved cross-accession/family contamination status.
 
 These documents are Phase-0 scaffolds, not a complete frozen confirmatory
 protocol. Clauses explicitly labelled frozen are binding and cannot be revised

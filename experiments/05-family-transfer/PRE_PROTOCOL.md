@@ -108,6 +108,10 @@ Simulator acceptance is governed by `RESOLVABILITY_PLAN.md`. Run validity and
 scientific gate interpretation are governed by
 `IMPLEMENTATION_FAILURE_CLASSIFICATION.md`.
 
+Gate A is split into discovery-only A1 and separately authorized A2 under
+`GATE_A_SPLIT_AND_ORDER.md`. The binding order is A1, comparator audit B in
+parallel, A2, then simulator validation and the resolvability surface.
+
 ## 7. Permitted Phase-0 analyses
 
 - database/version/source documentation;

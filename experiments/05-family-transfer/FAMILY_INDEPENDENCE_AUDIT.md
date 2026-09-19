@@ -101,3 +101,6 @@ regardless of the gate outcome.
 - If the largest-family condition fails, Gate A does not pass merely because
   `L` is large. The concentration problem must be closed or the design must be
   redesigned before protected computation.
+
+The complete routing table, A1/A2 firewall, chaining audit, and execution
+discipline are frozen in `GATE_A_SPLIT_AND_ORDER.md`.

@@ -22,6 +22,12 @@ evaluation partition:
 - hypothetical simulation results independent of observed model predictions;
 - implementation tests on synthetic data.
 
+Discovery-only A1 family structure is permitted only after its family
+definition and executable specification are frozen. Confirmatory family
+geometry belongs to A2 and requires a separate written authorization. A2 is an
+acknowledged weak metadata leak about confirmatory difficulty and cannot be
+used to choose the A1 route or revise the family definition.
+
 ## Spend prerequisites
 
 Protected evaluation is not eligible until a committed frozen protocol records:
