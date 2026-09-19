@@ -1,0 +1,14 @@
+{
+  "archive_members_verified_tracked": true,
+  "confirmatory_accessed": false,
+  "grouping_rule": "all accepted clan-first/family-fallback identifiers; full transitive closure",
+  "l_denominator": "assigned discovery positives",
+  "largest_component_share_denominator": "all 139 discovery positives",
+  "output_sha256": {
+    "assignments.tsv": "409d10353ec93da190b7652f3590e91ed8ddd4fb4105e42fd4c4515ecd488344",
+    "components.tsv": "a954e2204f772b3ad6df911d4d234d6509e1194b83051299a8b224689c3f0a8c",
+    "summary.json": "83128ef9935a59325378a791659ca3e50d3a65b3bd276661973d59cb1aa6f03c"
+  },
+  "scan_provenance_sha256": "fb26109ec44dd6e11d570317a47bf79eaa49e8b9fe88bd6f8cd3daf7379d33db",
+  "unassigned_share_denominator": "all 139 discovery positives"
+}
