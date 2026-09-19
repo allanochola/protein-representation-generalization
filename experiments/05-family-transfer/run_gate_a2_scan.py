@@ -24,7 +24,7 @@ from collections import defaultdict
 from pathlib import Path
 
 
-A2_SCAN_AUTHORIZED = True
+A2_SCAN_AUTHORIZED = False
 
 EXPECTED_DISCOVERY = 278
 EXPECTED_CONFIRMATORY = 3702
