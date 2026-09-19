@@ -1,0 +1,10 @@
+{
+  "component_count": 117,
+  "direct_cross_label_mmseqs_edge_count": 2,
+  "direct_cross_label_pfam_edge_count": 25,
+  "mixed_label_component_count": 7,
+  "negative_records": 139,
+  "positive_records": 139,
+  "status": "HISTORICAL_MMSEQS_FILTER_CONTRADICTION",
+  "total_records": 278
+}
