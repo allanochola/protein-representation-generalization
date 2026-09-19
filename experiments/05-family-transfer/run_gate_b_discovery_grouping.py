@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gate B discovery-wide grouping runner. Hard-disabled pending authorization."""
+"""Gate B discovery-wide grouping runner. Authorized for one archived execution."""
 
 import csv
 import gzip
@@ -14,7 +14,7 @@ import tempfile
 from collections import defaultdict
 from pathlib import Path
 
-GROUPING_AUTHORIZED = False
+GROUPING_AUTHORIZED = True
 
 REPO = Path(__file__).resolve().parents[2]
 EXP = REPO / "experiments/05-family-transfer"
