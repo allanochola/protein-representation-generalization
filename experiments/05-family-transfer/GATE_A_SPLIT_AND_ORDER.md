@@ -15,7 +15,10 @@ It reports:
 2. full component-size distribution;
 3. largest-family share;
 4. singleton fraction;
-5. `L`, as defined in `FAMILY_INDEPENDENCE_AUDIT.md`.
+5. assigned-positive count and fraction;
+6. unassigned-positive count and fraction;
+7. `L`, as defined in `FAMILY_INDEPENDENCE_AUDIT.md`, with its explicit
+   assigned-positive denominator.
 
 A1 has zero confirmatory contact. It alone determines the architecture fork.
 The fork therefore cannot depend on confirmatory family geometry.
@@ -106,9 +109,19 @@ including the Pfam family-to-clan mapping.
 `L = assigned positives with >=1 same-component neighbour / assigned positives`
 
 The unassigned share uses all discovery positives as its denominator. A1 must
-report assigned count, unassigned count/share, and the denominator used for
-`L`. Unassigned proteins are excluded from both the numerator and denominator
-of `L`.
+report assigned count/fraction, unassigned count/share, and the denominator
+used for `L` as first-class routing outputs. Unassigned proteins are excluded
+from both the numerator and denominator of `L`. Every A1 outcome record must
+state that `L` is conditional on annotation assignment and therefore does not
+describe the family structure of unassigned positives.
+
+If the two-stage route is selected, `UNASSIGNED` discovery positives are
+excluded from Stage 1 entirely: they enter neither family-blocked fitting nor
+Stage-1 evaluation. They are not treated as singleton blocks, because missing
+annotation does not establish independence, and they are not pooled into one
+block, because missing annotation does not establish relatedness. The Stage-1
+estimand and gate therefore apply to the annotation-assigned discovery-positive
+subpopulation. The assigned fraction must accompany every Stage-1 result.
 
 Connected-component structure is reported before `L`. The largest-family
 constraint is first a definition-validity test and only second a blocking-power
@@ -140,3 +153,11 @@ Clan-first grouping is not relaxed to family-only grouping if the 0.15
 concentration rule fails. Such failure means this discovery set cannot support
 the intended structural-family-blocked stage under the frozen definition; it
 does not license a weaker biological-independence claim.
+
+The two safeguards address distinct problems. Direct per-protein annotation,
+rather than aggregation across MMseqs2 cluster members, removes the inherited
+cluster-mediated chaining mechanism. Clan-first grouping is separately frozen
+as the conservative biological holdout rule: it prevents closely related Pfam
+families in the same clan from appearing independent. Both choices were made
+before the census and neither may be relaxed in response to the observed `L`
+or component concentration.

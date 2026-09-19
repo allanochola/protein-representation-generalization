@@ -1,7 +1,9 @@
 # Family-Independence and Leakage Audit
 
-**State:** candidate audit plan. The `L` and family-concentration thresholds
-are frozen; the biological-family definition is not yet frozen.
+**State:** Phase-0 audit plan. The `L`, assignment-coverage, and
+family-concentration thresholds and the primary biological-family definition
+are frozen; the executable A1 implementation and annotation-release pin remain
+to be frozen.
 
 ## Principle
 
@@ -89,10 +91,15 @@ The frozen missing-family condition is:
 
 `UNASSIGNED discovery-positive share <= 0.10`
 
-The census must report `L`, its assigned-positive denominator,
-largest-component share, assigned-singleton fraction, and unassigned
-count/share regardless of the gate outcome. Connected-component structure is
-validated before `L` is interpreted.
+The census must report `L`, its assigned-positive denominator, assigned count
+and fraction, largest-component share, assigned-singleton fraction, and
+unassigned count/share regardless of the gate outcome. Assigned fraction is a
+first-class routing output rather than a descriptive footnote: `L` is
+conditional on assignment, so identical values of `L` at materially different
+coverage do not support the same blocking claim. Every outcome record must say
+that the frozen `L_min` derivation assumed broad positive-set coverage and is
+being applied only to the reported assigned subpopulation. Connected-component
+structure is validated before `L` is interpreted.
 
 - If `L >= 0.25` and the largest-family condition passes, the blocking stage is
   eligible, subject to all other Phase-0 gates.
@@ -106,6 +113,13 @@ validated before `L` is interpreted.
 - If unassigned share exceeds 0.10, A1 returns `INCONCLUSIVE`; the architecture
   fork remains unread and a prospectively frozen secondary grouping source is
   required.
+
+If Stage 1 is authorized, `UNASSIGNED` discovery positives are dropped from
+Stage 1 rather than represented as singleton blocks or one pooled block. They
+participate in neither Stage-1 model fitting nor Stage-1 evaluation. This
+avoids asserting either independence or relatedness where the frozen annotation
+provides neither. The resulting Stage-1 claim is explicitly limited to assigned
+discovery positives, and its reported result must include the assigned fraction.
 
 The complete routing table, A1/A2 firewall, chaining audit, and execution
 discipline are frozen in `GATE_A_SPLIT_AND_ORDER.md`.

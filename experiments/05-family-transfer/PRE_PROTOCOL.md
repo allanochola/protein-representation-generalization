@@ -114,6 +114,11 @@ fresh comparator build/freeze, A2, then simulator validation and the
 resolvability surface. The historical 0.9494 Gate-D model is evidence only and
 is not an admissible Experiment 05 comparator.
 
+`L` is conditional on annotation assignment. A1 reports assignment coverage as
+a first-class output, and any Stage-1 analysis excludes unassigned discovery
+positives rather than asserting that they are mutually independent or mutually
+related. Stage-1 conclusions are scoped to the assigned-positive subpopulation.
+
 ## 7. Permitted Phase-0 analyses
 
 - database/version/source documentation;

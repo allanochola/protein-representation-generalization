@@ -30,6 +30,12 @@ Gate B may use only:
 Gate B may not access confirmatory sequences, family geometry, annotations,
 scores, embeddings, labels joined to features, or performance summaries.
 
+For any family-blocked Stage-1 construction, discovery positives marked
+`UNASSIGNED` by A1 are excluded from both fitting and evaluation. They may not
+be encoded as singleton groups or pooled into a synthetic family. Development
+reports must carry the assigned-positive fraction so comparator adequacy is not
+interpreted as applying to the full discovery-positive universe.
+
 ## Required specification before fitting
 
 A later executable Gate-B specification must freeze:
