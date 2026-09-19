@@ -6,6 +6,7 @@ import gzip
 import hashlib
 import json
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -74,6 +75,92 @@ def require_hash(path, expected):
         raise RuntimeError(
             f"SHA-256 mismatch for {path}: {observed} != {expected}"
         )
+
+
+def resolve_mmseqs_binary(snapshot):
+    """Resolve and validate this session's MMseqs2 executable.
+
+    Binary bytes are session identity only. The committed durable identities
+    are the source commit, source archive hash, and required version output.
+    """
+    required_version = snapshot["build"]["required_version_output"]
+    source_commit = snapshot["source"]["commit"]
+
+    if required_version != source_commit:
+        raise RuntimeError(
+            "MMseqs2 snapshot version/commit identity mismatch"
+        )
+
+    candidates = []
+
+    configured = os.environ.get("EXP05_MMSEQS_BINARY")
+    if configured:
+        candidates.append(Path(configured))
+
+    from_path = shutil.which("mmseqs")
+    if from_path:
+        candidates.append(Path(from_path))
+
+    candidates.append(
+        Path(
+            "/kaggle/working/"
+            "exp05-a1m-tools/install/bin/mmseqs"
+        )
+    )
+
+    unique_candidates = []
+    seen = set()
+
+    for candidate in candidates:
+        candidate = candidate.expanduser().resolve()
+        key = str(candidate)
+        if key not in seen:
+            seen.add(key)
+            unique_candidates.append(candidate)
+
+    diagnostics = []
+
+    for candidate in unique_candidates:
+        if not candidate.is_file():
+            diagnostics.append(f"{candidate}: absent")
+            continue
+
+        result = subprocess.run(
+            [str(candidate), "version"],
+            text=True,
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+        combined = "\n".join(
+            part.strip()
+            for part in (result.stdout, result.stderr)
+            if part.strip()
+        )
+
+        if result.returncode != 0:
+            diagnostics.append(
+                f"{candidate}: version exited {result.returncode}"
+            )
+            continue
+
+        if required_version not in combined:
+            diagnostics.append(
+                f"{candidate}: version identity mismatch"
+            )
+            continue
+
+        return {
+            "path": candidate,
+            "sha256": digest(candidate),
+            "version_output": combined,
+        }
+
+    raise RuntimeError(
+        "No session MMseqs2 binary satisfies the frozen source identity: "
+        + "; ".join(diagnostics)
+    )
 
 
 def read_tsv(path):
@@ -443,10 +530,9 @@ def main():
     snapshot = json.loads(
         MMSEQS_SNAPSHOT.read_text(encoding="utf-8")
     )
-    binary_path = Path(snapshot["session_toolchain"]["binary_path"])
-    expected_binary_hash = snapshot["session_toolchain"]["binary_sha256"]
-
-    require_hash(binary_path, expected_binary_hash)
+    toolchain = resolve_mmseqs_binary(snapshot)
+    binary_path = toolchain["path"]
+    observed_binary_hash = toolchain["sha256"]
 
     with tempfile.TemporaryDirectory(
         prefix="gate_b_discovery_grouping_"
@@ -645,7 +731,13 @@ def main():
             "mmseqs_source_commit": (
                 "eec9c354be4276d2373996af2e50808b1390d527"
             ),
-            "mmseqs_binary_sha256": expected_binary_hash,
+            "mmseqs_binary_path": str(binary_path),
+            "mmseqs_binary_sha256": observed_binary_hash,
+            "mmseqs_version_output": toolchain["version_output"],
+            "binary_identity_scope": (
+                "session identity only; source commit, source archive "
+                "SHA-256, and required version output are durable"
+            ),
             "parameters": PARAMETERS,
             "command_1": command_1,
             "command_2": command_2,
