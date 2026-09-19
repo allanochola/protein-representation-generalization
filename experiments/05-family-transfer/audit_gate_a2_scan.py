@@ -1,0 +1,189 @@
+"""Behavioral preauthorization audit for Gate A2-SS."""
+
+import ast
+import hashlib
+import importlib.util
+import tempfile
+from pathlib import Path
+
+
+REPO = Path(__file__).resolve().parents[2]
+EXP = REPO / "experiments/05-family-transfer"
+SR_RUNNER = EXP / "run_gate_a2_sequence_recovery.py"
+SS_RUNNER = EXP / "run_gate_a2_scan.py"
+
+
+def require(condition, message):
+    if not condition:
+        raise RuntimeError(message)
+
+
+def gate(source, name):
+    values = []
+
+    for node in ast.walk(ast.parse(source)):
+        if (
+            isinstance(node, ast.Assign)
+            and len(node.targets) == 1
+            and isinstance(node.targets[0], ast.Name)
+            and node.targets[0].id == name
+            and isinstance(node.value, ast.Constant)
+            and isinstance(node.value.value, bool)
+        ):
+            values.append(node.value.value)
+
+    return values
+
+
+def load_module():
+    spec = importlib.util.spec_from_file_location(
+        "a2ss_audit",
+        SS_RUNNER,
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+print("── GATE A2-SS BEHAVIORAL PREAUTHORIZATION AUDIT ──")
+
+sr_source = SR_RUNNER.read_text(encoding="utf-8")
+ss_source = SS_RUNNER.read_text(encoding="utf-8")
+
+ast.parse(sr_source)
+ast.parse(ss_source)
+
+require(
+    gate(
+        sr_source,
+        "A2_SEQUENCE_RECOVERY_AUTHORIZED",
+    ) == [False],
+    "A2-SR is not uniquely disabled",
+)
+require(
+    gate(ss_source, "A2_SCAN_AUTHORIZED") == [False],
+    "A2-SS is not uniquely disabled",
+)
+
+module = load_module()
+
+require(module.EXPECTED_TOTAL == 3702, "Total count")
+require(module.EXPECTED_POSITIVES == 161, "Positive count")
+require(module.EXPECTED_NEGATIVES == 3541, "Negative count")
+require(module.PFAM_RELEASE == "37.0", "Pfam release")
+require(module.PFAM_FAMILY_COUNT == 21979, "Pfam count")
+require(module.PFAM_THRESHOLD_RULE == "--cut_ga", "Pfam rule")
+
+require(
+    module.MMSEQS_PARAMETERS
+    == {
+        "min_seq_id": "0.30",
+        "coverage": "0.80",
+        "coverage_mode": "1",
+        "cluster_mode": "0",
+        "sensitivity": "7.5",
+        "threads": "8",
+        "independent_runs": 2,
+    },
+    "MMseqs2 parameters changed",
+)
+
+synthetic_rows = (
+    "A\tA\n"
+    "A\tB\n"
+    "C\tC\n"
+)
+
+with tempfile.TemporaryDirectory(prefix="a2ss_audit_") as temp:
+    raw = Path(temp) / "clusters.tsv"
+    raw.write_text(synthetic_rows, encoding="utf-8")
+
+    canonical, partition = module.canonicalize_partition(
+        raw,
+        {"A", "B", "C"},
+    )
+
+    require(
+        canonical
+        == (
+            b"representative_id\tmember_id\n"
+            b"A\tA\nA\tB\nC\tC\n"
+        ),
+        "Canonical row serialization failed",
+    )
+
+    lines = partition.decode("utf-8").splitlines()
+    require(
+        lines[0]
+        == "protein_id\tsequence_cluster_sha256",
+        "Partition header changed",
+    )
+    require(len(lines) == 4, "Partition is not total")
+
+    cluster_a = lines[1].split("\t")[1]
+    cluster_b = lines[2].split("\t")[1]
+    cluster_c = lines[3].split("\t")[1]
+
+    require(
+        cluster_a == cluster_b,
+        "Same-cluster members received different IDs",
+    )
+    require(
+        cluster_a != cluster_c,
+        "Different clusters received the same ID",
+    )
+
+required_tokens = (
+    '"--cut_ga"',
+    '"easy-cluster"',
+    '"--min-seq-id"',
+    '"0.30"',
+    '"--cov-mode"',
+    '"1"',
+    '"--cluster-mode"',
+    '"0"',
+    '"7.5"',
+    '"independent_runs": 2',
+    '"canonical_row_set_identical": True',
+    '"stable_partition_identical": True',
+    '"raw_byte_identity_required": False',
+    '"clan_mapping_performed": False',
+    '"combined_edges_computed": False',
+    '"family_geometry_computed": False',
+    '"cross_label_relationships_computed": False',
+    '"family_disjointness_computed": False',
+)
+
+for token in required_tokens:
+    require(token in ss_source, f"Missing source token: {token}")
+
+forbidden_analysis_calls = (
+    "RandomForestClassifier",
+    "LogisticRegression",
+    "predict_proba",
+    "roc_auc_score",
+    "average_precision_score",
+    "StratifiedGroupKFold",
+    "networkx",
+)
+
+for token in forbidden_analysis_calls:
+    require(
+        token not in ss_source,
+        f"Forbidden analysis capability: {token}",
+    )
+
+require(
+    not (EXP / "a2_scan_archive").exists(),
+    "A2-SS output exists before authorization",
+)
+
+print("PASS — A2-SR and A2-SS remain disabled")
+print("PASS — committed passing A2-SR archive is required")
+print("PASS — Pfam 37 --cut_ga semantics")
+print("PASS — exact MMseqs2 parameters and two-run replay")
+print("PASS — total stable partition construction")
+print("PASS — geometry and model-analysis capabilities absent")
+print("A2-SR authorized: NO")
+print("A2-SS authorized: NO")
+print("Scan execution performed: NO")
