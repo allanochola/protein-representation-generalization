@@ -1,17 +1,4 @@
-"""A2-SS: immutable raw joint Pfam/MMseqs2 scan. Hard-disabled.
-
-Scope (GATE_A2_JOINT_SCAN_AMENDMENT_001):
-  - derive the namespaced joint FASTA and identifier mapping in-process and
-    reproduce both frozen hashes;
-  - verify committed A2-SR recovery inputs and frozen discovery bytes;
-  - scan both universes under the frozen Pfam 37 --cut_ga rule and the frozen
-    MMseqs2 parameters, with two-run replay on the derived partition;
-  - archive only an explicit allowlist, excluding MMseqs2 scratch databases.
-
-It does not map clans, build combined edges, compute components or
-concentration, relate labels across universes, or decide family
-disjointness. Those remain confined to separately authorized A2-C.
-"""
+'A2-SS: immutable raw joint Pfam/MMseqs2 scan. Authorized.\n\nScope (GATE_A2_JOINT_SCAN_AMENDMENT_001):\n  - derive the namespaced joint FASTA and identifier mapping in-process and\n    reproduce both frozen hashes;\n  - verify committed A2-SR recovery inputs and frozen discovery bytes;\n  - scan both universes under the frozen Pfam 37 --cut_ga rule and the frozen\n    MMseqs2 parameters, with two-run replay on the derived partition;\n  - archive only an explicit allowlist, excluding MMseqs2 scratch databases.\n\nIt does not map clans, build combined edges, compute components or\nconcentration, relate labels across universes, or decide family\ndisjointness. Those remain confined to separately authorized A2-C.\n'
 
 import csv
 import gzip
@@ -24,7 +11,7 @@ from collections import defaultdict
 from pathlib import Path
 
 
-A2_SCAN_AUTHORIZED = False
+A2_SCAN_AUTHORIZED = True
 
 EXPECTED_DISCOVERY = 278
 EXPECTED_CONFIRMATORY = 3702
