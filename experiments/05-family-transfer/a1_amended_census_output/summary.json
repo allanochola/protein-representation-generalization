@@ -1,0 +1,15 @@
+{
+  "assigned_positive_count": 139,
+  "assigned_positive_fraction": 1.0,
+  "component_count": 103,
+  "l_value_all_positives": 0.33093525179856115,
+  "largest_component_count": 15,
+  "largest_component_share_all_positives": 0.1079136690647482,
+  "route": "TWO_STAGE_ELIGIBLE",
+  "singleton_positive_count": 93,
+  "singleton_positive_fraction": 0.6690647482014388,
+  "supported_positive_count": 46,
+  "total_positive_count": 139,
+  "unassigned_positive_count": 0,
+  "unassigned_positive_share": 0.0
+}

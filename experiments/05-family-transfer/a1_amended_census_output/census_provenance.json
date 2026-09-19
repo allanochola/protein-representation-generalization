@@ -1,0 +1,20 @@
+{
+  "archives_verified_committed": true,
+  "confirmatory_accessed": false,
+  "grouping_rule": "full transitive closure over the union of committed Pfam clan-first/family-fallback edges and committed MMseqs2 cluster edges",
+  "l_denominator": "all 139 discovery positives",
+  "largest_component_share_denominator": "all 139 discovery positives",
+  "mmseqs_scan_provenance_sha256": "eb3f203b66b8938a2d9675d3870ddce3a56e65362163eecb37c89a67ec130e7c",
+  "output_sha256": {
+    "assignments.tsv": "871426481d686fb072df70ea7607430984ecdb75c68765ba23c1c2d311a268da",
+    "components.tsv": "70473ed0250cab937f125ef8b7be4c232624da810652e472518de447aa751c59",
+    "summary.json": "1980c59a2648c8467005616ea3b76ff3c34f0ea3696eda5ac5c0f64af1e7bbbc"
+  },
+  "pfam_scan_provenance_sha256": "fb26109ec44dd6e11d570317a47bf79eaa49e8b9fe88bd6f8cd3daf7379d33db",
+  "routing_precedence": [
+    "largest_component_share > 0.15",
+    "L >= 0.25",
+    "otherwise"
+  ],
+  "total_partition_asserted": true
+}
