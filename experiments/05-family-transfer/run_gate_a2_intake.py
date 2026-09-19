@@ -6,7 +6,7 @@ import json
 import subprocess
 from pathlib import Path
 
-A2_INTAKE_AUTHORIZED = False
+A2_INTAKE_AUTHORIZED = True
 
 REPO = Path(__file__).resolve().parents[2]
 EXP = REPO / "experiments/05-family-transfer"
