@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Deterministic Gate-A1 census runner. Execution is deliberately disabled."""
+"""Deterministic Gate-A1 census runner authorized for its one A1 execution."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from collections import defaultdict
 from pathlib import Path
 
 
-EXECUTION_AUTHORIZED = False
+EXECUTION_AUTHORIZED = True
 EXPECTED_BANNED_COLUMNS = ("auroc", "tpr", "fpr", "score", "threshold")
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]

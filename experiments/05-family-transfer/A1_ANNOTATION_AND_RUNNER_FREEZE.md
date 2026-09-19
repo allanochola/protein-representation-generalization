@@ -1,6 +1,6 @@
-# A1 Fresh-Annotation Snapshot and Disabled Runner Freeze
+# A1 Fresh-Annotation Snapshot, Runner Freeze, and Authorization
 
-**Status:** frozen implementation candidate; execution is hard-disabled.
+**Status:** frozen, authorized, and not yet executed.
 
 ## Classification
 
@@ -62,16 +62,18 @@ assigned positives, while unassigned share and largest-component share use all
 139 discovery positives. The snapshot carries the binding 0.25, 0.15, and 0.10
 routing values rather than leaving them implicit in runner source.
 
-## Runner state
+## Runner authorization state
 
-`run_gate_a1.py` contains the complete deterministic construction but has two
-independent execution locks:
+`run_gate_a1.py` contains the complete deterministic construction. Its two
+independent execution locks were changed together in the isolated authorization
+commit:
 
-1. source constant `EXECUTION_AUTHORIZED = False`; and
-2. snapshot field `execution_authorized: false`.
+1. source constant `EXECUTION_AUTHORIZED = True`; and
+2. snapshot field `execution_authorized: true`.
 
-Both must be changed in a later, isolated authorization commit after audit.
-The current commit must not produce census outputs.
+Authorization permits one deterministic A1 execution only after the staged
+Pfam artifacts, HMMER source/build identity, repository inputs, and authorization
+diff pass preflight. Authorization itself does not produce census outputs.
 
 The runner accepts no caller-supplied discovery or confirmatory path. All
 discovery inputs are fixed repository-relative constants, and all Pfam inputs
@@ -91,9 +93,10 @@ are fixed filenames under the A1 input directory. There is no network code.
   `fpr`, `score`, or `threshold`;
 - frozen repository-input hashes and snapshot self-consistency.
 
-Passing this audit certifies only the disabled source. It does not authorize
-execution. After the Pfam files and HMMER executable are staged, a separate
-preflight must verify their hashes and version before an authorization commit.
+Passing this audit certifies the authorized source but does not establish that
+its external inputs were staged correctly. The execution cell must repeat the
+Pfam hashes, HMMER source/build identity, repository-input hashes, and remote
+authorization-commit check before invoking the runner.
 
 ## Required outputs after later authorization
 

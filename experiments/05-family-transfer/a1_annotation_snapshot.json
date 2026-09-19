@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "status": "FROZEN_NOT_AUTHORIZED",
-  "execution_authorized": false,
+  "status": "AUTHORIZED_NOT_EXECUTED",
+  "execution_authorized": true,
   "annotation_classification": "fresh_annotation",
   "discovery": {
     "fasta_path": "experiments/03-toxin-representation/stage1_model_blind/precontact_gate/discovery_sequences.fasta",
