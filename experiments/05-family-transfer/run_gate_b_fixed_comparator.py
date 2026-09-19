@@ -1,9 +1,9 @@
-"""Gate B fixed comparator. Hard-disabled until authorization."""
+"""Authorized one-time Gate B fixed-comparator fit."""
 import csv,hashlib,json,joblib,sklearn
 from pathlib import Path
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-COMPARATOR_FIT_AUTHORIZED=False
+COMPARATOR_FIT_AUTHORIZED=True
 REPO=Path(__file__).resolve().parents[2]
 EXP=REPO/'experiments/05-family-transfer'
 MANIFEST=EXP/'a1_scan_archive/discovery_sequence_manifest.tsv'
