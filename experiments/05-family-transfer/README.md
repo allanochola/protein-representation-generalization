@@ -35,9 +35,14 @@ small candidate universe.
    criteria.
 5. `RESOLVABILITY_PLAN.md` — family-level power, precision, and FPR-tail plan.
 6. `FIREWALL.md` — protected-data rules and authorization conditions.
+7. `IMPLEMENTATION_FAILURE_CLASSIFICATION.md` — frozen distinction between a
+   void implementation run, a valid surprising result, and a scientific gate
+   failure.
 
-These documents are design scaffolds, not a frozen protocol. Phase 0 may end
-in pre-data closure if any gate fails.
+These documents are Phase-0 scaffolds, not a complete frozen confirmatory
+protocol. Clauses explicitly labelled frozen are binding and cannot be revised
+in response to census, simulation, or protected results. Phase 0 may end in
+pre-data closure if any gate fails.
 
 ## Prohibited until protocol freeze
 
@@ -47,3 +52,14 @@ in pre-data closure if any gate fails.
 - threshold selection from protected negatives;
 - layer selection using held-out toxin-transfer performance;
 - changing the `+0.10` target after learning protected results.
+
+## Frozen primary representation
+
+The primary representation is raw ESM-2 650M **layer 24**. It was selected
+while the confirmatory universe remained dark as an admissible representative
+of the mid-to-late-layer plateau observed in Experiment 04.
+
+Layer 24 is not claimed to be the optimal ESM-2 layer. A null Experiment 05
+result is therefore a result about this frozen layer under the specified
+family holdout, not a universal negative claim about ESM-2. Layer 18 is
+secondary and reference-only and may not replace layer 24 after unblinding.

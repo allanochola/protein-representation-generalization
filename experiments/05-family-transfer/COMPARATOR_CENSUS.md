@@ -61,3 +61,23 @@ For each candidate record:
 `provenance_risk, family_grouped_tuning_support, known_failure_modes, status`
 
 No candidate is approved merely because it is easy to run.
+
+## Prior 0.9494 comparator provenance recovery
+
+The earlier family-aware random-forest comparator with AUROC 0.9494 is prior
+evidence, not automatically an admissible Experiment 05 comparator. Before it
+can inform comparator selection, Gate D must recover and record:
+
+- its exact training records, accessions, sequence hashes, and family
+  assignments;
+- whether any training protein is present in the protected confirmatory set
+  under the same accession;
+- whether the same protein sequence appears under a different accession;
+- whether a training protein and protected protein belong to the same frozen
+  biological-family component despite differing accession and sequence;
+- the database releases and annotation sources used on both sides.
+
+Accession non-overlap is insufficient. Any same-sequence or same-family bridge
+between prior-model training data and the protected set is contamination for
+the corresponding reuse claim and must be recorded before the comparator is
+admitted or rejected.

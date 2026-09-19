@@ -1,6 +1,8 @@
 # Resolvability and Operating-Point Plan
 
-**State:** simulation specification; no protected performance inputs allowed.
+**State:** Phase-0 simulation specification. The known-answer acceptance rules
+are frozen; the interval method and resolvability surface are not yet executed.
+No protected performance inputs are allowed.
 
 ## Targets
 
@@ -59,6 +61,41 @@ Compare only methods valid for clustered paired data, such as:
 Coverage, type-I error, power, interval width, failure rate, and boundary
 behavior must be reported for every candidate method. The selected method must
 be frozen before protected evaluation.
+
+## Binding simulator validation before surface access
+
+All three known-answer validations below must run before any resolvability
+surface is viewed. If a binding validation fails, the simulator is rejected
+and the surface remains unread.
+
+### V1 — Null calibration
+
+- True `DeltaTPR = 0`.
+- At least 10,000 replicates.
+- Use the public 161-positive / 3,541-negative geometry with family clustering.
+- At nominal alpha 0.05, empirical type-I error must lie in `[0.030, 0.070]`.
+
+### V2 — Coverage
+
+The nominal 95% interval must attain empirical coverage in `[0.93, 0.97]` at
+at least three non-zero `DeltaTPR` grid points.
+
+### V3 — Boundary behaviour
+
+Both of the following fixtures must terminate with a defined, explicitly
+recorded result rather than an exception or silently clipped estimate:
+
+1. perfect separation;
+2. a degenerate case in which the 5% FPR threshold lies between adjacent
+   negative scores.
+
+Failure rate and interval width are mandatory reports but are not acceptance
+gates. They characterize the instrument rather than certify it.
+
+Validation failures are classified under
+`IMPLEMENTATION_FAILURE_CLASSIFICATION.md`. A failure of an internal integrity
+invariant voids the run; a valid simulator that later fails a frozen scientific
+resolvability gate is not repaired.
 
 ## Gate-B output
 
