@@ -64,9 +64,10 @@ No candidate is approved merely because it is easy to run.
 
 ## Prior 0.9494 comparator provenance recovery
 
-The earlier family-aware random-forest comparator with AUROC 0.9494 is prior
-evidence, not automatically an admissible Experiment 05 comparator. Before it
-can inform comparator selection, Gate D must recover and record:
+The earlier family-aware random-forest diagnostic with AUROC 0.9494 is prior
+shortcut evidence and is not an admissible Experiment 05 comparator. Historical
+provenance recovery may document, but cannot promote, that model. Any recovery
+must record:
 
 - its exact training records, accessions, sequence hashes, and family
   assignments;
@@ -78,6 +79,6 @@ can inform comparator selection, Gate D must recover and record:
 - the database releases and annotation sources used on both sides.
 
 Accession non-overlap is insufficient. Any same-sequence or same-family bridge
-between prior-model training data and the protected set is contamination for
-the corresponding reuse claim and must be recorded before the comparator is
-admitted or rejected.
+between prior-model training data and the protected set is contamination of the
+historical record. Experiment 05 uses the fresh discovery-only comparator path
+specified in `GATE_B_FRESH_COMPARATOR_SCOPE.md` regardless of recovery outcome.

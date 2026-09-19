@@ -22,30 +22,24 @@ model performance from the following evidence layers:
 Connected components under the frozen edge rule become indivisible allocation
 units. Edge provenance and the rule that generated every edge must be retained.
 
-## Candidate definitions to census
+## Frozen primary definition
 
-The census should compare a small prespecified ladder rather than search for a
-definition that improves performance:
+The earlier D1-D4 ladder is superseded for the primary A1 fork. A1 uses the
+clan-first, family-fallback, per-protein connected-component definition frozen
+in `GATE_A_SPLIT_AND_ORDER.md`.
 
-- **D1:** sequence clusters only;
-- **D2:** sequence clusters plus curated functional-family links;
-- **D3:** D2 plus Pfam family/clan links;
-- **D4:** D3 plus a prespecified remote-homology method.
-
-For each definition report positive and negative component counts, component
-size concentration, singleton share, cross-label components, and the largest
-component share. Do not report model performance.
-
-The final definition should be the least restrictive one that supports the
-claim being made while closing known leakage routes. It must not be selected
-to maximize usable sample size without accounting for biological leakage.
+Alternative definitions are not computed beside the primary census. Doing so
+would create a result-dependent menu for a later amendment. If the frozen
+definition is invalidated by concentration or missingness, its result remains
+recorded and any successor requires a prospective amendment before execution.
 
 ## Leakage tests before partition freeze
 
 - exact sequence and accession overlap;
 - component overlap across partitions;
 - positive/negative collision within components;
-- shared Pfam families/clans across protected and development partitions;
+- shared clan-first/family-fallback components across protected and
+  development partitions;
 - remote-homology bridges under the frozen rule;
 - duplicated source records or isoforms split across partitions;
 - feature construction using corpus statistics from protected sequences;
@@ -68,10 +62,12 @@ edge types.
 
 ## Frozen blocking-power threshold
 
-Define `L` as the fraction of discovery positives that have at least one
-same-family positive neighbour whose removal distinguishes family blocking from
-an unblocked split. Positives in singleton families do not contribute to `L`
-because blocking cannot change their training-neighbour status.
+Define `L` among assigned discovery positives as the fraction that have at
+least one same-component positive neighbour whose removal distinguishes family
+blocking from an unblocked split. Positives in assigned singleton families do
+not contribute to the numerator because blocking cannot change their
+training-neighbour status. `UNASSIGNED` positives are excluded from both the
+numerator and denominator and are governed by a separate missing-family gate.
 
 The threshold is frozen before the census:
 
@@ -89,8 +85,14 @@ regime without adapting to the observed census.
 
 `largest discovery-positive family share <= 0.15`
 
-The census must report `L`, largest-family share, and singleton fraction
-regardless of the gate outcome.
+The frozen missing-family condition is:
+
+`UNASSIGNED discovery-positive share <= 0.10`
+
+The census must report `L`, its assigned-positive denominator,
+largest-component share, assigned-singleton fraction, and unassigned
+count/share regardless of the gate outcome. Connected-component structure is
+validated before `L` is interpreted.
 
 - If `L >= 0.25` and the largest-family condition passes, the blocking stage is
   eligible, subject to all other Phase-0 gates.
@@ -101,6 +103,9 @@ regardless of the gate outcome.
 - If the largest-family condition fails, Gate A does not pass merely because
   `L` is large. The concentration problem must be closed or the design must be
   redesigned before protected computation.
+- If unassigned share exceeds 0.10, A1 returns `INCONCLUSIVE`; the architecture
+  fork remains unread and a prospectively frozen secondary grouping source is
+  required.
 
 The complete routing table, A1/A2 firewall, chaining audit, and execution
 discipline are frozen in `GATE_A_SPLIT_AND_ORDER.md`.

@@ -1,6 +1,7 @@
 # Prior Comparator Provenance Archaeology
 
-**Status:** repository archaeology complete; contamination audit unresolved.
+**Status:** repository archaeology complete; historical model inadmissible as
+the Experiment 05 comparator.
 
 ## Recovered Gate-D construction
 
@@ -72,13 +73,11 @@ The 0.9494 result remains valid as a historical diagnostic statistic, but its
 training universe is not provenance-clean enough to serve as or select the
 Experiment 05 comparator.
 
-Gate B may proceed in one of two ways:
+Gate B therefore constructs a fresh discovery-only sequence comparator under a
+new frozen provenance manifest. This is the default and only confirmatory path,
+not a fallback conditional on recovery failure. Exact external recovery may
+clarify the historical record but cannot promote the 0.9494 model into the
+Experiment 05 comparator.
 
-1. recover the exact historical artifacts and verify their recorded hashes,
-   then run same-sequence/different-accession and same-family audits; or
-2. treat the historical model as non-reusable prior evidence and construct a
-   fresh discovery-only sequence comparator under a new frozen provenance
-   manifest.
-
-No absence of contamination may be inferred from missing artifacts. If exact
-recovery fails, option 2 is mandatory before any A2 access.
+No absence of contamination may be inferred from missing artifacts. Fresh
+comparator construction must finish before any A2 access.

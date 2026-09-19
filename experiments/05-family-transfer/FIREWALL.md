@@ -28,6 +28,11 @@ geometry belongs to A2 and requires a separate written authorization. A2 is an
 acknowledged weak metadata leak about confirmatory difficulty and cannot be
 used to choose the A1 route or revise the family definition.
 
+When a fresh annotation snapshot is used, A2 also re-verifies confirmatory
+positive family-disjointness, negative family awareness, and all
+discovery-to-confirmatory clan/family bridges. This metadata opening remains
+ineligible until the fresh comparator is frozen.
+
 ## Spend prerequisites
 
 Protected evaluation is not eligible until a committed frozen protocol records:

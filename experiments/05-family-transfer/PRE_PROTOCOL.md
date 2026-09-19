@@ -109,8 +109,10 @@ scientific gate interpretation are governed by
 `IMPLEMENTATION_FAILURE_CLASSIFICATION.md`.
 
 Gate A is split into discovery-only A1 and separately authorized A2 under
-`GATE_A_SPLIT_AND_ORDER.md`. The binding order is A1, comparator audit B in
-parallel, A2, then simulator validation and the resolvability surface.
+`GATE_A_SPLIT_AND_ORDER.md`. The binding order is fresh-comparator scope, A1,
+fresh comparator build/freeze, A2, then simulator validation and the
+resolvability surface. The historical 0.9494 Gate-D model is evidence only and
+is not an admissible Experiment 05 comparator.
 
 ## 7. Permitted Phase-0 analyses
 

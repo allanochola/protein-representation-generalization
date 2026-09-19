@@ -28,6 +28,12 @@ simulator for the 161 confirmatory positives and 3,541 confirmatory negatives,
 plus discovery-to-confirmatory family relationships under the same frozen
 definition and code path.
 
+If A1 uses a fresh annotation snapshot, A2 must also re-evaluate whether the
+161 positives remain family-disjoint and whether the negative universe remains
+family-aware under that snapshot. “161 family-disjoint positives” is then a
+claim to test, not an inherited premise. A2 must report attrition and
+cross-partition bridges before Gate C receives any geometry.
+
 A2 is not outcome access, but it is not information-theoretically blind.
 Confirmatory family geometry provides weak information about confirmatory
 difficulty. That leakage is necessary for Gate B resolvability and must be
@@ -38,11 +44,13 @@ selection, comparator choice, estimand, or scientific thresholds.
 
 ## Frozen run order
 
-`A1 -> B in parallel/independently -> A2 authorization -> C validation -> C surface`
+`B scope -> A1 -> B build/freeze -> A2 authorization -> C validation -> C surface`
 
-- Comparator provenance audit B may begin alongside A1 because it is
-  archaeology on Experiment 03 artifacts and does not require A1 or A2.
-- A2 is ineligible until A1 has been executed, audited, and committed.
+- Comparator B is a fresh discovery-only model build, not an audit of the
+  historical 0.9494 model. Its scope is frozen before A1; its family-grouped
+  construction follows A1 and must be frozen before A2.
+- A2 is ineligible until A1 has been executed, audited, and committed and one
+  fresh comparator has been fully frozen.
 - Gate C cannot be executed before A2 because its clustered geometry is an A2
   output.
 - The C resolvability surface remains unread until its three known-answer
@@ -55,11 +63,15 @@ selection, comparator choice, estimand, or scientific thresholds.
 | `>=0.25` | `<=0.15` | Two-stage: discovery-only family-blocked Stage 1, then confirmatory Stage 2 only under the frozen Stage-1 gate |
 | `<0.25` | `<=0.15` | Skip Stage 1 as near-vacuous; direct preregistered confirmatory test, conditional on Gate C and all remaining gates |
 | any | `>0.15` | Neither route; prospective amendment required before A1 may be rerun |
+| any | any | `INCONCLUSIVE` if unassigned share exceeds 0.10; secondary grouping source required before the fork may be read |
 
 The third row is not a PASS or scientific FAIL. A dominant component makes the
 blocking variance uninterpretable. Any replacement family definition or
 modified blocking scheme must be written and frozen before a new A1 execution;
 the observed first-run structure must remain permanently recorded.
+
+The unassigned rule is evaluated before the other rows. If it binds, neither
+`L` nor family concentration may select an architecture route.
 
 ## Family-definition requirements
 
@@ -72,6 +84,31 @@ Before A1 execution, one definition must be frozen with all of the following:
 - explicit handling of missing and multiple annotations;
 - canonical component serialization independent of row order;
 - a chaining audit performed before `L` is interpreted.
+
+The frozen grouping rule is:
+
+1. assign each protein directly from its own domain annotations;
+2. use Pfam clan identity wherever its Pfam family belongs to a clan;
+3. otherwise use the Pfam family identity;
+4. do not aggregate annotations across MMseqs2 cluster members;
+5. proteins with no assignable Pfam family are `UNASSIGNED`, not singleton
+   families;
+6. form connected components over proteins sharing at least one resulting
+   clan-or-family identifier;
+7. canonicalize every component and identifier list by lexical byte order.
+
+The same pure construction function is used byte-identically by A1 and A2.
+Its annotation inputs must pin both a UniProt release and a Pfam release,
+including the Pfam family-to-clan mapping.
+
+`L` is calculated among assigned discovery positives only:
+
+`L = assigned positives with >=1 same-component neighbour / assigned positives`
+
+The unassigned share uses all discovery positives as its denominator. A1 must
+report assigned count, unassigned count/share, and the denominator used for
+`L`. Unassigned proteins are excluded from both the numerator and denominator
+of `L`.
 
 Connected-component structure is reported before `L`. The largest-family
 constraint is first a definition-validity test and only second a blocking-power
@@ -98,3 +135,8 @@ the literal field `"confirmatory_accessed": false`.
 
 The family definition and outputs are hashed together. Results cannot be
 detached from the definition that produced them.
+
+Clan-first grouping is not relaxed to family-only grouping if the 0.15
+concentration rule fails. Such failure means this discovery set cannot support
+the intended structural-family-blocked stage under the frozen definition; it
+does not license a weaker biological-independence claim.

@@ -72,7 +72,7 @@ not Pfam clan membership. However, a naive connected-component closure over
 component. The frozen A1 concentration rule detects this outcome but does not
 justify the definition in advance.
 
-Before A1 implementation, a separate recovery decision must choose between:
+Before A1 implementation, provenance may yield either:
 
 1. exact recovery of the historical UniProt/Pfam annotation artifact followed
    by hash verification; or
@@ -83,3 +83,14 @@ If exact recovery is attempted, only a byte- or canonical-content match to the
 recorded hashes establishes inheritance. A mismatch is not silently accepted as
 the historical state. If a new snapshot is used, it is explicitly a new
 Experiment 05 definition and may not borrow the old output hashes as validation.
+
+Fresh annotation is the default design path because the historical full
+assignments are absent and the new clan-first grouping additionally requires a
+versioned Pfam family-to-clan map that the historical census did not record.
+An exact recovery attempt may still preserve historical evidence, but it is not
+allowed to delay fresh comparator scoping or silently supply missing clan
+semantics.
+
+Under fresh annotation, the historical claims that 161 positives were
+family-disjoint and that the negative universe was family-aware must be
+re-verified in A2. They are not inherited across annotation releases.

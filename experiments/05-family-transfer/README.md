@@ -43,7 +43,10 @@ small candidate universe.
 9. `PFAM_PROVENANCE_ARCHAEOLOGY.md` — recovered historical Pfam semantics,
    hashes, and the missing-artifact boundary.
 10. `COMPARATOR_PROVENANCE_ARCHAEOLOGY.md` — recovered 0.9494 Gate-D model
-    construction and unresolved cross-accession/family contamination status.
+    construction and the decision that it is historically informative but
+    inadmissible as the Experiment 05 comparator.
+11. `GATE_B_FRESH_COMPARATOR_SCOPE.md` — frozen scope for the required new
+    discovery-only sequence comparator.
 
 These documents are Phase-0 scaffolds, not a complete frozen confirmatory
 protocol. Clauses explicitly labelled frozen are binding and cannot be revised
