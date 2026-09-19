@@ -36,6 +36,10 @@ SOURCE_FASTA_SHA256 = (
 MANIFEST_SHA256 = (
     "7ac8d253d06ab86b67f2f3d42d7b5ad0c770360a2d4959dc8d325bed00b9ce09"
 )
+CANONICAL_FASTA_SHA256 = (
+    "e54ddf390c9569857663c029ec4679a18f4a0384d391c9183f550be3e0ebe94d"
+)
+CANONICAL_FASTA_BYTES = 74972
 
 FORBIDDEN_COLUMNS = (
     "auroc",
@@ -282,6 +286,17 @@ def derive_canonical_fasta(manifest):
         f">{identifier}\n{records[identifier]}\n"
         for identifier in sorted(records)
     ).encode("ascii")
+
+    if len(data) != CANONICAL_FASTA_BYTES:
+        raise RuntimeError(
+            "Canonical discovery FASTA byte-count mismatch"
+        )
+
+    observed_hash = hashlib.sha256(data).hexdigest()
+    if observed_hash != CANONICAL_FASTA_SHA256:
+        raise RuntimeError(
+            "Canonical discovery FASTA SHA-256 mismatch"
+        )
 
     return data, tuple(sorted(records))
 

@@ -42,6 +42,15 @@ The runner must reproduce all manifest sequence hashes and lengths before
 clustering. FASTA records are serialized in ascending protein-identifier order,
 with one unwrapped uppercase sequence line and a terminal newline per record.
 
+The frozen canonical 278-record serialization identity is:
+
+- byte count: `74972`;
+- SHA-256:
+  `e54ddf390c9569857663c029ec4679a18f4a0384d391c9183f550be3e0ebe94d`.
+
+Both values must be asserted before MMseqs2 execution. Agreement with the
+manifest membership alone is insufficient.
+
 No confirmatory sequence, annotation, family geometry, feature, score, label
 join, or performance summary is an input.
 
