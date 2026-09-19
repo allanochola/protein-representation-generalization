@@ -445,15 +445,39 @@ def run_mmseqs_once(binary, fasta, directory):
 def build_components(manifest, partition):
     members = tuple(sorted(manifest))
     union_find = UnionFind(members)
+    edges = []
+
+    def add_edge(left, right, source, relationship_id):
+        if left == right:
+            return
+
+        left, right = sorted((left, right))
+        edge = (
+            source,
+            relationship_id,
+            left,
+            right,
+        )
+        edges.append(edge)
+        union_find.union(left, right)
 
     by_sequence_cluster = defaultdict(list)
     for protein_id, cluster_id in partition.items():
         by_sequence_cluster[cluster_id].append(protein_id)
 
-    for cluster_members in by_sequence_cluster.values():
+    for cluster_id, cluster_members in sorted(
+        by_sequence_cluster.items()
+    ):
+        cluster_members = sorted(cluster_members)
         anchor = cluster_members[0]
+
         for member in cluster_members[1:]:
-            union_find.union(anchor, member)
+            add_edge(
+                anchor,
+                member,
+                "mmseqs2",
+                cluster_id,
+            )
 
     clans = load_clan_map()
     hits = read_tsv(PFAM_HITS)
@@ -484,13 +508,27 @@ def build_components(manifest, partition):
         identifiers_by_protein[protein_id].add(identifier)
         proteins_by_identifier[identifier].add(protein_id)
 
-    for protein_id, identifiers in identifiers_by_protein.items():
-        related = set()
-        for identifier in identifiers:
-            related.update(proteins_by_identifier[identifier])
+    for identifier, related_proteins in sorted(
+        proteins_by_identifier.items()
+    ):
+        related_proteins = sorted(related_proteins)
 
-        for other in related:
-            union_find.union(protein_id, other)
+        if not related_proteins:
+            continue
+
+        anchor = related_proteins[0]
+
+        for other in related_proteins[1:]:
+            add_edge(
+                anchor,
+                other,
+                "pfam",
+                identifier,
+            )
+
+    # Deduplicate edges without discarding distinct provenance sources or
+    # relationship identifiers.
+    edges = tuple(sorted(set(edges)))
 
     components = defaultdict(list)
     for member in members:
@@ -498,23 +536,27 @@ def build_components(manifest, partition):
 
     normalized = []
     collisions = []
+    component_by_member = {}
 
     for component_members in components.values():
         component_members = tuple(sorted(component_members))
         component_id = hashlib.sha256(
             "\n".join(component_members).encode("utf-8")
         ).hexdigest()
-        labels = sorted({
+        labels = tuple(sorted({
             manifest[member]["label"]
             for member in component_members
-        })
+        }))
 
         record = {
             "component_id": component_id,
             "member_ids": component_members,
-            "labels": tuple(labels),
+            "labels": labels,
         }
         normalized.append(record)
+
+        for member in component_members:
+            component_by_member[member] = component_id
 
         if len(labels) != 1:
             collisions.append(record)
@@ -522,7 +564,44 @@ def build_components(manifest, partition):
     normalized.sort(key=lambda record: record["component_id"])
     collisions.sort(key=lambda record: record["component_id"])
 
-    return normalized, collisions, identifiers_by_protein
+    edge_records = []
+
+    for source, relationship_id, left, right in edges:
+        left_component = component_by_member[left]
+        right_component = component_by_member[right]
+
+        if left_component != right_component:
+            raise RuntimeError(
+                "Edge endpoints occupy different final components"
+            )
+
+        edge_records.append({
+            "component_id": left_component,
+            "edge_source": source,
+            "relationship_id": relationship_id,
+            "left_protein_id": left,
+            "right_protein_id": right,
+            "left_class_name": manifest[left]["label"],
+            "right_class_name": manifest[right]["label"],
+        })
+
+    edge_records.sort(
+        key=lambda record: (
+            record["component_id"],
+            record["edge_source"],
+            record["relationship_id"],
+            record["left_protein_id"],
+            record["right_protein_id"],
+        )
+    )
+
+    return (
+        normalized,
+        collisions,
+        identifiers_by_protein,
+        edge_records,
+    )
+
 
 
 def main():
@@ -576,7 +655,12 @@ def main():
         if partition_1 != partition_2:
             raise RuntimeError("MMseqs2 partition replay mismatch")
 
-        components, collisions, pfam_ids = build_components(
+        (
+            components,
+            collisions,
+            pfam_ids,
+            edge_records,
+        ) = build_components(
             manifest,
             partition_1,
         )
@@ -656,6 +740,51 @@ def main():
                 for protein_id in sorted(manifest)
             )
 
+        edge_columns = (
+            "component_id",
+            "edge_source",
+            "relationship_id",
+            "left_protein_id",
+            "right_protein_id",
+            "left_class_name",
+            "right_class_name",
+        )
+        check_columns(edge_columns)
+
+        with (OUTPUT / "edge_provenance.tsv").open(
+            "w", encoding="utf-8", newline=""
+        ) as handle:
+            writer = csv.DictWriter(
+                handle,
+                fieldnames=edge_columns,
+                delimiter="\t",
+                lineterminator="\n",
+            )
+            writer.writeheader()
+            writer.writerows(edge_records)
+
+        collision_component_ids = {
+            collision["component_id"]
+            for collision in collisions
+        }
+        collision_edge_records = [
+            record
+            for record in edge_records
+            if record["component_id"] in collision_component_ids
+        ]
+
+        with (OUTPUT / "collision_edge_provenance.tsv").open(
+            "w", encoding="utf-8", newline=""
+        ) as handle:
+            writer = csv.DictWriter(
+                handle,
+                fieldnames=edge_columns,
+                delimiter="\t",
+                lineterminator="\n",
+            )
+            writer.writeheader()
+            writer.writerows(collision_edge_records)
+
         component_columns = (
             "component_id",
             "class_name",
@@ -708,6 +837,25 @@ def main():
                     ";".join(collision["member_ids"]),
                 ))
 
+        direct_cross_label_mmseqs_edges = [
+            record
+            for record in edge_records
+            if (
+                record["edge_source"] == "mmseqs2"
+                and record["left_class_name"]
+                != record["right_class_name"]
+            )
+        ]
+        direct_cross_label_pfam_edges = [
+            record
+            for record in edge_records
+            if (
+                record["edge_source"] == "pfam"
+                and record["left_class_name"]
+                != record["right_class_name"]
+            )
+        ]
+
         summary = {
             "total_records": len(manifest),
             "positive_records": sum(
@@ -720,10 +868,20 @@ def main():
             ),
             "component_count": len(components),
             "mixed_label_component_count": len(collisions),
+            "direct_cross_label_mmseqs_edge_count": len(
+                direct_cross_label_mmseqs_edges
+            ),
+            "direct_cross_label_pfam_edge_count": len(
+                direct_cross_label_pfam_edges
+            ),
             "status": (
-                "MIXED_LABEL_COMPONENT_COLLISION"
-                if collisions
-                else "GROUPING_READY"
+                "HISTORICAL_MMSEQS_FILTER_CONTRADICTION"
+                if direct_cross_label_mmseqs_edges
+                else (
+                    "MIXED_LABEL_COMPONENT_COLLISION"
+                    if collisions
+                    else "GROUPING_READY"
+                )
             ),
         }
         (OUTPUT / "summary.json").write_text(

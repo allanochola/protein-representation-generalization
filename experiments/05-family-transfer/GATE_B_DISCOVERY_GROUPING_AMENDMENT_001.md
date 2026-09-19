@@ -204,3 +204,71 @@ This amendment changes only Gate B discovery grouping. It does not alter:
 
 No comparator feature family, classifier family, tuning metric, tolerance rule,
 calibration method, or development score is frozen or computed here.
+
+## 11. Pre-execution predictions and provenance clarification
+
+This section was appended while the grouping runner remained disabled and
+before any discovery-wide MMseqs2 clustering or component geometry existed.
+
+### 11.1 Edge-source-specific prediction
+
+The Experiment 03 negative-overlap filter excluded any candidate negative with
+a qualifying MMseqs2 hit to any cleaned positive at at least 30% identity and
+at least 80% shorter-sequence coverage under coverage mode 1. Those are the
+same sequence-similarity parameters used here.
+
+The prospective prediction is therefore:
+
+- **zero direct positive-negative MMseqs2 cluster edges**.
+
+This prediction does not extend to the combined graph. The historical filter
+did not prohibit a discovery negative from sharing a Pfam family or clan with a
+positive while remaining below the MMseqs2 sequence threshold. Because the
+negative pool was designed to be family-aware, cross-label Pfam bridges remain
+a live possibility.
+
+The interpretations are frozen separately:
+
+1. A direct cross-label MMseqs2 edge contradicts the historical overlap-filter
+   claim and triggers a provenance investigation.
+2. A cross-label bridge created only by a Pfam family or clan is a valid
+   scientific collision under the new, coarser family definition. It stops
+   Gate B fitting but does not retroactively invalidate Experiments 03 or 04.
+3. Any mixed-label final component remains indivisible and requires a
+   prospective amendment. It may never be silently split.
+
+The archive must retain edge-level provenance sufficient to distinguish these
+cases.
+
+### 11.2 Toolchain comparability and limitation
+
+In the preparation session, the resolved Gate B binary SHA-256 was
+`16c2df62ad552650e1ad3c20746812438d300ba861148243edf503af0a72c162`,
+matching the session-validation binary recorded for A1-M. When that same binary
+remains available at execution, the A1-M positive-only partition and the Gate B
+278-record partition use identical executable bytes. Structural differences
+between those runs are then attributable to their input universes rather than
+to binary-byte differences.
+
+This is supporting session evidence, not a durable binary requirement.
+`mmseqs version` authenticates the source commit but does not prove every build
+flag. The snapshot records `Release` build type and a Rust-enabled build as
+expected construction conditions, while the durable identities remain the
+source commit, canonical git-archive SHA-256, exact command parameters, input
+identity, and replayed scientific outputs.
+
+### 11.3 Historical model-blind results are not commensurable targets
+
+Three earlier results use nominally similar length-plus-composition features
+but different universes, estimators, and resampling designs:
+
+| Result | Evaluation universe and design | Estimator |
+|---|---|---|
+| approximately 0.587 AUROC | Experiment 04 matched 139-positive/139-negative discovery universe under its frozen perturbation evaluation | 21-dimensional logistic baseline |
+| AUROC 0.8468; AUPRC 0.7182 | Experiment 03 Gate-D diagnostic-burn universe under grouped cross-validation | length-plus-composition logistic regression |
+| AUROC 0.9494; AUPRC 0.9011 | the same Experiment 03 Gate-D diagnostic-burn universe | 300-tree random forest with `min_samples_leaf=2` |
+
+The spread is evidence that evaluation universe and classifier matter. None of
+these values is a performance target or acceptance threshold for the fresh
+Gate B comparator.
+
