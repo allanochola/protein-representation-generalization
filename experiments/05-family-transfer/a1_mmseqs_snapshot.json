@@ -1,0 +1,46 @@
+{
+  "build": {
+    "cmake_build_type": "Release",
+    "reproducibility_claim": "The source commit and canonical git-archive hash are durable identities. Rebuilt binary bytes are not expected to be identical.",
+    "required_version_output": "eec9c354be4276d2373996af2e50808b1390d527",
+    "rust_required": true
+  },
+  "execution_contract": {
+    "canonical_row_set_identity_required": true,
+    "confirmatory_accessed": false,
+    "independent_runs": 2,
+    "partition_identity_required": true,
+    "raw_tsv_byte_identity_required": false,
+    "stable_cluster_identifier": "sha256 of LF-joined bytewise-sorted member identifiers"
+  },
+  "input": {
+    "canonical_positive_count": 139,
+    "canonical_positive_fasta_bytes": 31481,
+    "canonical_positive_fasta_sha256": "35a18f81eec471904c6bceb8671e7531db1ddaeb610bbf34e8b2f2efa6126878",
+    "manifest_path": "experiments/05-family-transfer/a1_scan_archive/discovery_sequence_manifest.tsv",
+    "manifest_sha256": "7ac8d253d06ab86b67f2f3d42d7b5ad0c770360a2d4959dc8d325bed00b9ce09",
+    "serialization": "bytewise identifier order; identifier-only header; one unwrapped uppercase sequence line; LF endings; final LF",
+    "source_fasta_path": "experiments/03-toxin-representation/stage1_model_blind/precontact_gate/discovery_sequences.fasta",
+    "source_fasta_sha256": "ef17a1231bafc86255bf8ba57aaa64fe7f81c39677fb8d0553fa2d94ca2fb358"
+  },
+  "schema": "exp05_a1_mmseqs_snapshot_v1",
+  "scientific_definition": {
+    "cluster_mode": 0,
+    "command": "easy-cluster",
+    "coverage": 0.8,
+    "coverage_mode": 1,
+    "min_seq_id": 0.3,
+    "sensitivity": 7.5,
+    "threads": 8
+  },
+  "session_validation_example": {
+    "binary_sha256": "16c2df62ad552650e1ad3c20746812438d300ba861148243edf503af0a72c162",
+    "claim": "Evidence from the preparation session only; not a frozen cross-session binary requirement.",
+    "version_output": "eec9c354be4276d2373996af2e50808b1390d527"
+  },
+  "source": {
+    "commit": "eec9c354be4276d2373996af2e50808b1390d527",
+    "git_archive_sha256": "de5085207c04902c4b8810ab3092859c5a8e22ab70d56427f54001be4e554379",
+    "remote": "https://github.com/soedinglab/MMseqs2.git"
+  }
+}
