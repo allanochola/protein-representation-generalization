@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""A1-M-S: authorized two-run MMseqs2 immutable archive phase; not yet executed."""
+"""A1-M-S: executed two-run MMseqs2 archive committed at parent cb3f3e55; execution is closed."""
 import csv
 import hashlib
 import json
@@ -9,7 +9,7 @@ import tempfile
 from collections import defaultdict
 from pathlib import Path
 
-MMSEQS_SCAN_AUTHORIZED = True
+MMSEQS_SCAN_AUTHORIZED = False
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
