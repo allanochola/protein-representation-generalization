@@ -6,7 +6,12 @@ from pathlib import Path
 
 CENSUS_AUTHORIZED=False
 HERE=Path(__file__).resolve().parent; ARCHIVE=HERE/"a1_scan_archive"; OUTPUT=HERE/"a1_census_output"
+BANNED_COLUMNS=("auroc","tpr","fpr","score","threshold")
 def digest(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def check_columns(columns):
+    for column in columns:
+        if any(token in column.casefold() for token in BANNED_COLUMNS):
+            raise RuntimeError(f"Forbidden A1-C output column: {column}")
 class DSU:
     def __init__(self,x): self.p={i:i for i in x}
     def find(self,x):
@@ -60,11 +65,16 @@ def main():
     ids,components,summary=census(positives,hits,clans)
     if OUTPUT.exists(): raise RuntimeError("A1-C output already exists")
     OUTPUT.mkdir()
+    assignment_columns=("protein_id","group_identifiers"); check_columns(assignment_columns)
     with (OUTPUT/"assignments.tsv").open("w",newline="") as f:
-        w=csv.writer(f,delimiter="\t",lineterminator="\n"); w.writerow(("protein_id","group_identifiers")); w.writerows((p,";".join(ids[p]) or "UNASSIGNED") for p in sorted(positives))
+        w=csv.writer(f,delimiter="\t",lineterminator="\n"); w.writerow(assignment_columns); w.writerows((p,";".join(ids[p]) or "UNASSIGNED") for p in sorted(positives))
+    component_columns=("component_id","member_count","member_ids"); check_columns(component_columns)
     with (OUTPUT/"components.tsv").open("w",newline="") as f:
-        w=csv.writer(f,delimiter="\t",lineterminator="\n"); w.writerow(("component_id","member_count","member_ids"))
+        w=csv.writer(f,delimiter="\t",lineterminator="\n"); w.writerow(component_columns)
         for members in components:
             cid="COMP_"+hashlib.sha256("\n".join(members).encode()).hexdigest()[:16]; w.writerow((cid,len(members),";".join(members)))
     (OUTPUT/"summary.json").write_text(json.dumps(summary,indent=2,sort_keys=True)+"\n")
+    output_sha256={name:digest(OUTPUT/name) for name in ("assignments.tsv","components.tsv","summary.json")}
+    census_provenance={"confirmatory_accessed":False,"scan_provenance_sha256":digest(provenance),"archive_members_verified_tracked":True,"grouping_rule":"all accepted clan-first/family-fallback identifiers; full transitive closure","l_denominator":"assigned discovery positives","largest_component_share_denominator":"all 139 discovery positives","unassigned_share_denominator":"all 139 discovery positives","output_sha256":output_sha256}
+    (OUTPUT/"census_provenance.json").write_text(json.dumps(census_provenance,indent=2,sort_keys=True)+"\n")
 if __name__=="__main__": main()
