@@ -22,6 +22,7 @@ class DSU:
         if a!=b: self.p[max(a,b)]=min(a,b)
 def census(positives,hits,clans):
     ids={p:sorted({clans.get(f,f) for f in hits.get(p,set())}) for p in positives}
+    if any(not g for gs in ids.values() for g in gs): raise RuntimeError("Empty group identifier emitted")
     assigned=[p for p in positives if ids[p]]; d=DSU(assigned); by=defaultdict(list)
     for p in assigned:
         for i in ids[p]: by[i].append(p)
@@ -51,7 +52,8 @@ def main():
     clans={}
     with gzip.open(ARCHIVE/"Pfam-A.clans.tsv.gz","rt") as f:
         for line in f:
-            x=line.rstrip().split("\t"); clans[x[0]]=x[1]
+            x=line.rstrip().split("\t")
+            if len(x)>1 and x[1].strip(): clans[x[0]]=x[1].strip()
     positives=[]
     with (ARCHIVE/"discovery_sequence_manifest.tsv").open() as f:
         for r in csv.DictReader(f,delimiter="\t"):
