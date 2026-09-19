@@ -48,6 +48,16 @@ small candidate universe.
 11. `GATE_B_FRESH_COMPARATOR_SCOPE.md` — frozen scope for the required new
     discovery-only sequence comparator.
 
+Phase-0 implementation freezes:
+
+- `A1_ANNOTATION_AND_RUNNER_FREEZE.md` — fresh Pfam-37 annotation identity,
+  scan semantics, grouping rules, and the separation between freeze and
+  authorization;
+- `a1_annotation_snapshot.json` — exact discovery, Pfam, and HMMER identities
+  and hashes;
+- `run_gate_a1.py` — deterministic A1 implementation, hard-disabled;
+- `audit_gate_a1.py` — static source and input audit for the disabled runner.
+
 These documents are Phase-0 scaffolds, not a complete frozen confirmatory
 protocol. Clauses explicitly labelled frozen are binding and cannot be revised
 in response to census, simulation, or protected results. Phase 0 may end in

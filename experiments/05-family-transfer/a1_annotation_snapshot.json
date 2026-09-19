@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "status": "FROZEN_NOT_AUTHORIZED",
+  "execution_authorized": false,
+  "annotation_classification": "fresh_annotation",
+  "discovery": {
+    "fasta_path": "experiments/03-toxin-representation/stage1_model_blind/precontact_gate/discovery_sequences.fasta",
+    "fasta_sha256": "ef17a1231bafc86255bf8ba57aaa64fe7f81c39677fb8d0553fa2d94ca2fb358",
+    "manifest_path": "experiments/03-toxin-representation/stage1_model_blind/precontact_gate/discovery_sequence_manifest.tsv",
+    "manifest_sha256": "7ac8d253d06ab86b67f2f3d42d7b5ad0c770360a2d4959dc8d325bed00b9ce09",
+    "manifest_json_path": "experiments/03-toxin-representation/stage1_model_blind/precontact_gate/discovery_sequence_manifest.json",
+    "manifest_json_sha256": "52001a8d619f0feff3588aedcd63b396f717aa342c9a879ee4daa1dba6fc8603",
+    "uniprot_release": "2026_02",
+    "uniprot_release_date": "10-June-2026",
+    "expected_rows": 278,
+    "expected_positive_rows": 139,
+    "expected_negative_rows": 139
+  },
+  "pfam": {
+    "release": "37.0",
+    "release_date": "May-2024",
+    "archive_root": "https://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam37.0/",
+    "artifacts": {
+      "Pfam-A.hmm.gz": {
+        "md5": "8272c3f18626bc300ed7cc00e86bad40",
+        "sha256": "66f57012fe5825c82f2e31447d7a8026367e1ca9e5e91b4b716c594c268db69b"
+      },
+      "Pfam-A.clans.tsv.gz": {
+        "md5": "fb751b5e70cadd34af1b3bf7ef77f5b9",
+        "sha256": "1d9d7f054b017733935aae50c69e2c99037461617a0244ef6c188292474fdcd5"
+      },
+      "Pfam-A.hmm.dat.gz": {
+        "md5": "fe47157ebf640a553fbf529b781ed231",
+        "sha256": "d6f13117e481034be98f799d387a8122cbfa9a0964e29c0c8583d921c2d4556c"
+      },
+      "Pfam.version.gz": {
+        "md5": "6dbe0f1048c02cad0442730ff5dcb720",
+        "sha256": "8e4de54729bb767d68271b440c91ebb3049f89108422833d8b15ae729dba7dfc"
+      },
+      "md5_checksums": {
+        "md5": "1ddfacc05631a0ace6ab75c3792c08ea",
+        "sha256": "dfc35510a296c24d37a65100e381ad83cf332220e5932228b7e1852a9867378c"
+      },
+      "relnotes.txt": {
+        "md5": "71ceb281fcbd641fbb882ac7d7d66453",
+        "sha256": "2afeb5a2dbdea3555ca0efcea6d676bf26d30e3bf705d533760738baecbc6630"
+      }
+    }
+  },
+  "hmmer": {
+    "version": "3.4",
+    "source_url": "http://eddylab.org/software/hmmer/hmmer-3.4.tar.gz",
+    "source_sha256": "ca70d94fd0cf271bd7063423aabb116d42de533117343a9b27a65c17ff06fbf3",
+    "required_version_fragment": "HMMER 3.4"
+  },
+  "scan": {
+    "program": "hmmscan",
+    "arguments": ["--cut_ga", "--noali", "--domtblout"],
+    "domain_acceptance": "Pfam model-specific GA thresholds via --cut_ga",
+    "identifier_version_rule": "strip suffix after first dot from PF accession",
+    "multi_domain_rule": "retain every accepted Pfam family hit per protein"
+  },
+  "grouping": {
+    "definition_id": "exp05_a1_pfam37_clan_first_v1",
+    "assignment_unit": "protein",
+    "clan_rule": "use Pfam clan accession when mapped; otherwise use versionless Pfam family accession",
+    "component_rule": "connected components over proteins sharing at least one resulting identifier",
+    "unassigned_rule": "no accepted Pfam hit yields UNASSIGNED, never a singleton or pooled block",
+    "canonical_order": "UTF-8 lexical byte order"
+  },
+  "routing": {
+    "l_min": 0.25,
+    "l_denominator": "assigned discovery positives",
+    "largest_component_share_max": 0.15,
+    "largest_component_share_denominator": "all 139 discovery positives",
+    "unassigned_share_max": 0.10,
+    "unassigned_share_denominator": "all 139 discovery positives"
+  }
+}
