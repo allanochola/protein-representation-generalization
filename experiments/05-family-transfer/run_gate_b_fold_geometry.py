@@ -147,6 +147,7 @@ def main():
 
     validation_fold = {}
     summary_rows = []
+    feasibility_violations = []
 
     for fold, (train_index, validation_index) in enumerate(
         splitter.split(dummy, y, groups),
@@ -158,9 +159,9 @@ def main():
         if train_groups & validation_groups:
             raise RuntimeError("Component leaked across train/validation")
         if set(y[train_index]) != {0, 1}:
-            raise RuntimeError("Training fold lacks one label")
+            feasibility_violations.append({"fold": fold, "partition": "training", "reason": "MISSING_LABEL"})
         if set(y[validation_index]) != {0, 1}:
-            raise RuntimeError("Validation fold lacks one label")
+            feasibility_violations.append({"fold": fold, "partition": "validation", "reason": "MISSING_LABEL"})
 
         for index in validation_index:
             identifier = str(identifiers[index])
@@ -241,8 +242,9 @@ def main():
         else:
             component_classes["mixed"] += 1
 
+    geometry_ready = not feasibility_violations
     summary = {
-        "status": "FOLD_GEOMETRY_READY",
+        "status": "FOLD_GEOMETRY_READY" if geometry_ready else "FOLD_GEOMETRY_INFEASIBLE",
         "total_records": len(labels),
         "positive_records": sum(v == "positive" for v in labels.values()),
         "negative_records": sum(v == "negative" for v in labels.values()),
@@ -255,7 +257,9 @@ def main():
         "fold_count": N_SPLITS,
         "seed": CV_SEED,
         "all_components_intact": True,
-        "all_folds_have_both_labels": True,
+        "all_folds_have_both_labels": geometry_ready,
+        "feasibility_violation_count": len(feasibility_violations),
+        "feasibility_violations": feasibility_violations,
     }
 
     summary_path = OUTPUT / "summary.json"
@@ -281,6 +285,7 @@ def main():
         "scikit_learn_version": sklearn.__version__,
         "feature_input": "constant dummy column; no biological features",
         "mixed_components_retained_intact": True,
+        "feasibility_status": summary["status"],
         "output_sha256": output_hashes,
     }
 
