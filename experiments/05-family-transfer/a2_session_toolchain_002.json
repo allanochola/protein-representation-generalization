@@ -1,0 +1,243 @@
+{
+  "hmmer": {
+    "binary_identity_scope": "Session build identity, not a cross-session byte guarantee.",
+    "hmmpress_path": "/kaggle/working/exp05-a2-tools/install/hmmer/bin/hmmpress",
+    "hmmpress_sha256": "502c9d4401744b6c42d04fefbc9cde862af805df99d4560405a1ba146598a8cb",
+    "hmmscan_path": "/kaggle/working/exp05-a2-tools/install/hmmer/bin/hmmscan",
+    "hmmscan_sha256": "8be5e368204516a208b43ae6a8f37f8763b15fd888a9f51e2100bd00ac3356e8",
+    "source_sha256": "ca70d94fd0cf271bd7063423aabb116d42de533117343a9b27a65c17ff06fbf3",
+    "version_line": "# HMMER 3.4 (Aug 2023); http://hmmer.org/"
+  },
+  "mmseqs2": {
+    "binary_identity_scope": "Session build identity, not a cross-session byte guarantee.",
+    "binary_path": "/kaggle/working/exp05-a2-tools/install/mmseqs2/bin/mmseqs",
+    "binary_sha256": "fda18968882d9e63c3c25933284d83e410462cbfe84fafcac4a511dbefb507d1",
+    "source_commit": "eec9c354be4276d2373996af2e50808b1390d527",
+    "source_git_archive_sha256": "de5085207c04902c4b8810ab3092859c5a8e22ab70d56427f54001be4e554379",
+    "source_repository": "https://github.com/soedinglab/MMseqs2.git",
+    "version_output": "eec9c354be4276d2373996af2e50808b1390d527"
+  },
+  "pfam": {
+    "compressed_artifacts": {
+      "Pfam-A.clans.tsv.gz": {
+        "bytes": 411178,
+        "path": "/kaggle/working/exp05-a2-tools/pfam37/Pfam-A.clans.tsv.gz",
+        "sha256": "1d9d7f054b017733935aae50c69e2c99037461617a0244ef6c188292474fdcd5"
+      },
+      "Pfam-A.hmm.dat.gz": {
+        "bytes": 586696,
+        "path": "/kaggle/working/exp05-a2-tools/pfam37/Pfam-A.hmm.dat.gz",
+        "sha256": "d6f13117e481034be98f799d387a8122cbfa9a0964e29c0c8583d921c2d4556c"
+      },
+      "Pfam-A.hmm.gz": {
+        "bytes": 310495632,
+        "path": "/kaggle/working/exp05-a2-tools/pfam37/Pfam-A.hmm.gz",
+        "sha256": "66f57012fe5825c82f2e31447d7a8026367e1ca9e5e91b4b716c594c268db69b"
+      },
+      "Pfam.version.gz": {
+        "bytes": 115,
+        "path": "/kaggle/working/exp05-a2-tools/pfam37/Pfam.version.gz",
+        "sha256": "8e4de54729bb767d68271b440c91ebb3049f89108422833d8b15ae729dba7dfc"
+      }
+    },
+    "prepared_database": {
+      "Pfam-A.hmm": {
+        "bytes": 1694833729,
+        "path": "/kaggle/working/exp05-a2-tools/pfam37/Pfam-A.hmm",
+        "sha256": "827d458228d87f97328d6fb937b3bae33d8fc3dd735daa4ce711fec7b957acea"
+      },
+      "Pfam-A.hmm.h3f": {
+        "bytes": 394847619,
+        "path": "/kaggle/working/exp05-a2-tools/pfam37/Pfam-A.hmm.h3f",
+        "sha256": "0184e55fe71fe292dca1d838d96e7bd13056cf94bbd274f6ce4a26956919bc28"
+      },
+      "Pfam-A.hmm.h3i": {
+        "bytes": 2088148,
+        "path": "/kaggle/working/exp05-a2-tools/pfam37/Pfam-A.hmm.h3i",
+        "sha256": "bd7d041fb9cb7149e7a51a56b90e373d80dc11cebb48c9059037dc5664f8f5ef"
+      },
+      "Pfam-A.hmm.h3m": {
+        "bytes": 701706594,
+        "path": "/kaggle/working/exp05-a2-tools/pfam37/Pfam-A.hmm.h3m",
+        "sha256": "b5ac132c2aa23c549ce002a4bf1980bf4a4640257cc2f43cbf465d042472906d"
+      },
+      "Pfam-A.hmm.h3p": {
+        "bytes": 825567626,
+        "path": "/kaggle/working/exp05-a2-tools/pfam37/Pfam-A.hmm.h3p",
+        "sha256": "92df7a48face1bfb3eda88f059891d6133de687d4f05fd1d6e7cb9e7cadf483e"
+      }
+    },
+    "release_identity": {
+      "Based on UniProtKB": "2023_05",
+      "Date": "2024-03",
+      "Pfam release": "37.0",
+      "Pfam-A families": "21979"
+    }
+  },
+  "repository": {
+    "branch": "exp05-family-transfer",
+    "head": "4999dda9be4328de454cd884d18c0fbaeb8b2365",
+    "tree": "6ca4e95a14582f9d71420511d7273628a3f6482c"
+  },
+  "schema": "exp05_gate_a2_session_toolchain_v1",
+  "session_update": {
+    "build_log_sha256": {
+      "apt_install.log": "2f9f86dd86205c4749efd1d7c8de38e466bfdc980ef83e1d5fc425338d45438b",
+      "apt_update.log": "1eb74face4bc56aeef7d4056fa232acb257f796293a161f4a2496e80c5b7977c",
+      "hmmer_configure.log": "7a025a09af7f94b779dbd543dcf91b8eddc60a4e23bc3d92501645f211d1af36",
+      "hmmer_install.log": "f5602a964d384a73cc7e24fe7253e491c6f07ded040e0f0cc5e6ed52a8cfdd2f",
+      "hmmer_make.log": "6281fc698d53c6af5b5d8a4cc722f16a85808ddd687022a4a474525ce7055110",
+      "hmmpress.log": "072f407c2d57d3d924eac2223764756bbfe7aee66dc830c13d8f1ef8ccd1ee1a",
+      "mmseqs_build.log": "970a7735ef93c734a3b600e241ae507ed90bf794e845bc4226d750be1165f53b",
+      "mmseqs_checkout.log": "36d1419b149e438e83ebd0b8b581b6e627ee35fb9cfcf0b00ebc5512868d2eec",
+      "mmseqs_configure.log": "1162d11fbb6e36897fb165e2d5edf5781efa138c989bae892dec73e18068fc4d",
+      "mmseqs_fetch.log": "0aa4f49f00621335f0adeb242738e088dbb012c9067d8cca03331ff7e66d37c9",
+      "mmseqs_install.log": "471ce4ec7ec8c995603afec2e3e91efe2628246824d9dd9f090b48bfb520bbd3",
+      "mmseqs_submodules.log": "758603c5fc64692cc45b0b79133cbf9cd454024beb6d21ec60b8a2577bdbb78e"
+    },
+    "cmake": "cmake version 3.22.1",
+    "cmake_build_type": "Release",
+    "commands": [
+      {
+        "command": [
+          "apt-get",
+          "update"
+        ],
+        "cwd": "/kaggle/working/protein-representation-generalization",
+        "label": "apt_update"
+      },
+      {
+        "command": [
+          "apt-get",
+          "install",
+          "-y",
+          "build-essential",
+          "cmake",
+          "git",
+          "pkg-config",
+          "zlib1g-dev",
+          "libbz2-dev",
+          "liblzma-dev",
+          "libzstd-dev",
+          "libssl-dev",
+          "ca-certificates",
+          "curl",
+          "rustc",
+          "cargo"
+        ],
+        "cwd": "/kaggle/working/protein-representation-generalization",
+        "label": "apt_install"
+      },
+      {
+        "command": [
+          "./configure",
+          "--prefix=/kaggle/working/exp05-a2-tools/install/hmmer"
+        ],
+        "cwd": "/kaggle/working/exp05-a2-tools/sources/hmmer-rebuild-002/hmmer-3.4",
+        "label": "hmmer_configure"
+      },
+      {
+        "command": [
+          "make",
+          "-j",
+          "4"
+        ],
+        "cwd": "/kaggle/working/exp05-a2-tools/sources/hmmer-rebuild-002/hmmer-3.4",
+        "label": "hmmer_make"
+      },
+      {
+        "command": [
+          "make",
+          "install"
+        ],
+        "cwd": "/kaggle/working/exp05-a2-tools/sources/hmmer-rebuild-002/hmmer-3.4",
+        "label": "hmmer_install"
+      },
+      {
+        "command": [
+          "git",
+          "fetch",
+          "--depth",
+          "1",
+          "origin",
+          "eec9c354be4276d2373996af2e50808b1390d527"
+        ],
+        "cwd": "/kaggle/working/exp05-a2-tools/sources/MMseqs2",
+        "label": "mmseqs_fetch"
+      },
+      {
+        "command": [
+          "git",
+          "checkout",
+          "--detach",
+          "eec9c354be4276d2373996af2e50808b1390d527"
+        ],
+        "cwd": "/kaggle/working/exp05-a2-tools/sources/MMseqs2",
+        "label": "mmseqs_checkout"
+      },
+      {
+        "command": [
+          "git",
+          "submodule",
+          "update",
+          "--init",
+          "--recursive"
+        ],
+        "cwd": "/kaggle/working/exp05-a2-tools/sources/MMseqs2",
+        "label": "mmseqs_submodules"
+      },
+      {
+        "command": [
+          "cmake",
+          "-S",
+          "/kaggle/working/exp05-a2-tools/sources/MMseqs2",
+          "-B",
+          "/kaggle/working/exp05-a2-tools/build/mmseqs2_002",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCMAKE_INSTALL_PREFIX=/kaggle/working/exp05-a2-tools/install/mmseqs2"
+        ],
+        "cwd": "/kaggle/working/protein-representation-generalization",
+        "label": "mmseqs_configure"
+      },
+      {
+        "command": [
+          "cmake",
+          "--build",
+          "/kaggle/working/exp05-a2-tools/build/mmseqs2_002",
+          "--parallel",
+          "4"
+        ],
+        "cwd": "/kaggle/working/protein-representation-generalization",
+        "label": "mmseqs_build"
+      },
+      {
+        "command": [
+          "cmake",
+          "--install",
+          "/kaggle/working/exp05-a2-tools/build/mmseqs2_002"
+        ],
+        "cwd": "/kaggle/working/protein-representation-generalization",
+        "label": "mmseqs_install"
+      },
+      {
+        "command": [
+          "/kaggle/working/exp05-a2-tools/install/hmmer/bin/hmmpress",
+          "/kaggle/working/exp05-a2-tools/pfam37/Pfam-A.hmm"
+        ],
+        "cwd": "/kaggle/working/protein-representation-generalization",
+        "label": "hmmpress"
+      }
+    ],
+    "compiler": "c++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+    "confirmatory_outcomes_accessed": false,
+    "hmmer_source_claim": "Matches the recorded source SHA; no additional historical source-authenticity claim.",
+    "previous_manifest_sha256": "957aef98a65d5dc646cdc33a02fd352bf8b7d8d0afd9d6c4500013acd8873d2e",
+    "reason": "Kaggle reset removed session tools",
+    "rust": {
+      "cargo_version": "cargo 1.75.0",
+      "rustc_version": "rustc 1.75.0 (82e1608df 2023-12-21) (built from a source tarball)",
+      "selection": "Ubuntu APT rustc and cargo, matching the historical build method; actual versions recorded."
+    },
+    "scientific_parameters_changed": false
+  }
+}
