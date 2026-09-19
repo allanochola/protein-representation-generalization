@@ -1,0 +1,35 @@
+{
+  "confirmatory_accessed": false,
+  "feasibility_status": "FOLD_GEOMETRY_INFEASIBLE",
+  "feature_input": "constant dummy column; no biological features",
+  "grouping_archive_sha256": {
+    "canonical_cluster_rows.tsv": "e7327640018b749287416375190291226bc8d84085f5997f8e344f312f9bedf5",
+    "canonical_discovery_278.fasta": "e54ddf390c9569857663c029ec4679a18f4a0384d391c9183f550be3e0ebe94d",
+    "canonical_partition.tsv": "4b3ce36350e289d1c0baa234ce3b2b234de02277ce00fa32acc0958412b54dfe",
+    "collision_edge_provenance.tsv": "9a978b7b640791528750590577fbb41ebc024aaba46215d34fd72ab42d931f72",
+    "collision_report.tsv": "2120c46494c6ae73b6c1d815ddeec5cc90a7a17e3b3409988347c83dfeb99f66",
+    "components.tsv": "967d45ebffff40053ba2b2791777f4f94982b09997b23d20c39b27d4aa412cef",
+    "edge_provenance.tsv": "b52f7ebfdb4ee2c9f01d18f97350298f71f99c53ede78a58866685e187974748",
+    "grouping_provenance.json": "c014ca1ffcf133b8b009a64f412237e15db6f8fb5cac362f762fb5d0b4c2b573",
+    "pfam_edges.tsv": "06152d0991d88a69f9c7bc4c5775eaf34f50573eed6fe00ad625bf8367ec8473",
+    "run_1.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "run_1.stdout": "b7c9c6033a7ddabbc5cc69c3e6e53e8c264a09c5fa928981a3ea1ecbe6c99f02",
+    "run_1_raw_cluster.tsv": "863e4df696fac8b56967789dcf9b44ea7eca4156a1c686ef2bc950b89c292ca7",
+    "run_2.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "run_2.stdout": "c17c013a76d1d737e7bd7d4a97ac489ad0dedacb6d3e9664b5602a34c872a0f6",
+    "run_2_raw_cluster.tsv": "f67cd437f1f9f4cbda5120ef452e21d7c373dbfa5163070dcc3286a85921e2e2",
+    "summary.json": "ef6b825bc722107895a467cdaf6d542abe751a76db8d81023b53a5db4c22794c"
+  },
+  "manifest_sha256": "7ac8d253d06ab86b67f2f3d42d7b5ad0c770360a2d4959dc8d325bed00b9ce09",
+  "mixed_components_retained_intact": true,
+  "n_splits": 5,
+  "output_sha256": {
+    "fold_assignments.tsv": "ed849f1fbb44b7166bbd411c213e8c7722bf9e80e1957b60976a48783c876901",
+    "fold_summary.tsv": "7a6c1899204fc12f9a27b915aaf0a577dabf5d23361af8c76a9ab3e37a47c081",
+    "summary.json": "2a063fc5cc2a47b8d43e010304dc40c4d1fd9dcee91d6f31d73bba6b037ab33a"
+  },
+  "random_state": 20260829,
+  "scikit_learn_version": "1.6.1",
+  "shuffle": true,
+  "splitter": "StratifiedGroupKFold"
+}

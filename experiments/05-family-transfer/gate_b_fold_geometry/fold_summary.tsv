@@ -1,0 +1,6 @@
+fold	training_records	training_positives	training_negatives	training_components	validation_records	validation_positives	validation_negatives	validation_components
+1	227	105	122	89	51	34	17	28
+2	210	108	102	86	68	31	37	31
+3	272	133	139	111	6	6	0	6
+4	168	98	70	92	110	41	69	25
+5	235	112	123	90	43	27	16	27

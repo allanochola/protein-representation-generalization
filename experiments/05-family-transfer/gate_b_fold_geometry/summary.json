@@ -1,0 +1,22 @@
+{
+  "all_components_intact": true,
+  "all_folds_have_both_labels": false,
+  "component_count": 117,
+  "feasibility_violation_count": 1,
+  "feasibility_violations": [
+    {
+      "fold": 3,
+      "partition": "validation",
+      "reason": "MISSING_LABEL"
+    }
+  ],
+  "fold_count": 5,
+  "mixed_component_count": 7,
+  "negative_only_component_count": 16,
+  "negative_records": 139,
+  "positive_only_component_count": 94,
+  "positive_records": 139,
+  "seed": 20260829,
+  "status": "FOLD_GEOMETRY_INFEASIBLE",
+  "total_records": 278
+}
