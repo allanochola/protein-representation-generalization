@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""A1-M-C: authorized amended census over committed Pfam and MMseqs2 archives; not yet executed."""
+"""A1-M-C: amended census executed and output committed at parent edbd8f91; execution is closed."""
 import csv
 import gzip
 import hashlib
@@ -8,7 +8,7 @@ import subprocess
 from collections import defaultdict
 from pathlib import Path
 
-AMENDED_CENSUS_AUTHORIZED = True
+AMENDED_CENSUS_AUTHORIZED = False
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
