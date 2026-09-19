@@ -1,0 +1,38 @@
+{
+  "acceptance_rule": "retain every domain accepted by curator-defined Pfam gathering thresholds via hmmscan --cut_ga; no global E-value cutoff",
+  "command": [
+    "hmmscan",
+    "--cut_ga",
+    "--noali",
+    "--domtblout",
+    "raw.domtblout",
+    "Pfam-A.hmm",
+    "experiments/03-toxin-representation/stage1_model_blind/precontact_gate/discovery_sequences.fasta"
+  ],
+  "confirmatory_accessed": false,
+  "discovery_counts": {
+    "negative": 139,
+    "positive": 139
+  },
+  "file_sha256": {
+    "Pfam-A.clans.tsv.gz": "1d9d7f054b017733935aae50c69e2c99037461617a0244ef6c188292474fdcd5",
+    "Pfam.version.gz": "8e4de54729bb767d68271b440c91ebb3049f89108422833d8b15ae729dba7dfc",
+    "accepted_family_hits.tsv": "d0d15ba423ba209807dea307a5446597f53a51d0a3d7fca48d62feb51ffb494b",
+    "discovery_sequence_manifest.tsv": "7ac8d253d06ab86b67f2f3d42d7b5ad0c770360a2d4959dc8d325bed00b9ce09",
+    "hmmscan.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "hmmscan.stdout": "f925e081a22603354e32a3b9727ff4d51c7451f6b8e3893d5d26a1dab7b4e57a",
+    "raw.domtblout": "0e102aad12fdc60d4348e2894c1a2aa5a362fffdc48db0041722b83744fb8a47"
+  },
+  "hmmer_version": "# HMMER 3.4 (Aug 2023); http://hmmer.org/",
+  "pfam_version": {
+    "Based on UniProtKB": "2023_05",
+    "Date": "2024-03",
+    "Pfam release": "37.0",
+    "Pfam-A families": "21979"
+  },
+  "session_binary_sha256": {
+    "claim": "session identity only; not reproducible-build hashes",
+    "hmmpress": "502c9d4401744b6c42d04fefbc9cde862af805df99d4560405a1ba146598a8cb",
+    "hmmscan": "8be5e368204516a208b43ae6a8f37f8763b15fd888a9f51e2100bd00ac3356e8"
+  }
+}
