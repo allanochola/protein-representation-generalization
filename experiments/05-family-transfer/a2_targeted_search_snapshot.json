@@ -1,0 +1,151 @@
+{
+  "automatic_retry": false,
+  "coverage_semantics": "Mode 1: target coverage; positive is target.",
+  "derived_sha256": {
+    "negative_queries.fasta": "75de121c286672f85d49de0eb73ea4df1a3ee236d952cbbd1eff66648ad17cd4",
+    "positive_targets.fasta": "a0d504a642bebb9a0c00a7af6177964da828568a2f38d38cbb288c708f1cdad2",
+    "selected_pairs.tsv": "d754a60dbf4c7feb7a035ff568d3b208d999783e475b427dfbe87bddcb21ac8c"
+  },
+  "frozen_scope_sha256": {
+    "GATE_A2_TARGETED_SEARCH_FORENSIC_SPEC_001.md": "14159a5ed2a8d6b21dce77d818ecc204b648eed2000acaa91a88658d8dbdb067",
+    "a2_targeted_search_forensic_intake_001.json": "8300989ffec41c88c3aaa291f9e6538c50b73e5870c2c7c0fae3dc8c5ee15f22"
+  },
+  "historical_replay": false,
+  "inputs": {
+    "fasta": {
+      "path": "experiments/05-family-transfer/a2_scan_archive/canonical_joint.fasta",
+      "sha256": "bbfa145c37287f33f102fbdba0e163c258aa079d7ef5c120543a3a8b82f79efe"
+    },
+    "mapping": {
+      "path": "experiments/05-family-transfer/a2_scan_archive/joint_identifier_map.tsv",
+      "sha256": "877b255acc77df84607e546078c42686d4184f0f08b9204892f016f54661a037"
+    },
+    "partition": {
+      "path": "experiments/05-family-transfer/a2_scan_archive/canonical_partition.tsv",
+      "sha256": "61af0a44432531f7c6a8acde9226b808364ac77bca025cb85bab52d7366e1120"
+    }
+  },
+  "qualification": "Returned row with fident >= 0.30; absence means not detected by this diagnostic, not absence of alignment.",
+  "schema": "exp05_targeted_search_v1",
+  "scope": "Current recovered sequences; 687 negatives as query, nine positives as target; retain every returned row.",
+  "search_arguments": [
+    "--min-seq-id",
+    "0.30",
+    "-c",
+    "0.80",
+    "--cov-mode",
+    "1",
+    "-s",
+    "7.5",
+    "--threads",
+    "8",
+    "--alignment-mode",
+    "3",
+    "--format-output",
+    "query,target,fident",
+    "-e",
+    "1e-3"
+  ],
+  "selection": "687 co-clustered pairs fixed using already observed geometry; not a blind analysis.",
+  "session_toolchain": {
+    "binary_hash_scope": "This recorded session only; rebuilt binary identity is not guaranteed.",
+    "binary_path": "/kaggle/working/exp05-search-forensic-tools/build_q7u_jfct/install/bin/mmseqs",
+    "binary_sha256": "fb5e302ab638349e0c44f76abcd1230db662657fd6c3c54fe8f87a3c154eb8ec",
+    "build_type": "Release",
+    "cmake_cache_sha256": "95c1fa192454c7cdfbea9492ed4987ef02a3f296fb8de5bfc651bf24c3ede94c",
+    "commands": [
+      {
+        "argv": [
+          "apt-get",
+          "update"
+        ],
+        "cwd": "/kaggle/working/protein-representation-generalization",
+        "label": "apt_update"
+      },
+      {
+        "argv": [
+          "apt-get",
+          "install",
+          "-y",
+          "build-essential",
+          "cmake",
+          "git",
+          "pkg-config",
+          "zlib1g-dev",
+          "libbz2-dev",
+          "liblzma-dev",
+          "libzstd-dev",
+          "libssl-dev",
+          "ca-certificates",
+          "curl",
+          "rustc",
+          "cargo"
+        ],
+        "cwd": "/kaggle/working/protein-representation-generalization",
+        "label": "apt_install"
+      },
+      {
+        "argv": [
+          "git",
+          "submodule",
+          "update",
+          "--init",
+          "--recursive"
+        ],
+        "cwd": "/kaggle/working/exp05-search-forensic-tools/source_uaa1c0fn/MMseqs2",
+        "label": "submodules"
+      },
+      {
+        "argv": [
+          "cmake",
+          "-S",
+          "/kaggle/working/exp05-search-forensic-tools/source_uaa1c0fn/MMseqs2",
+          "-B",
+          "/kaggle/working/exp05-search-forensic-tools/build_q7u_jfct/build",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCMAKE_INSTALL_PREFIX=/kaggle/working/exp05-search-forensic-tools/build_q7u_jfct/install"
+        ],
+        "cwd": "/kaggle/working/protein-representation-generalization",
+        "label": "configure"
+      },
+      {
+        "argv": [
+          "cmake",
+          "--build",
+          "/kaggle/working/exp05-search-forensic-tools/build_q7u_jfct/build",
+          "--parallel",
+          "4"
+        ],
+        "cwd": "/kaggle/working/protein-representation-generalization",
+        "label": "build"
+      },
+      {
+        "argv": [
+          "cmake",
+          "--install",
+          "/kaggle/working/exp05-search-forensic-tools/build_q7u_jfct/build"
+        ],
+        "cwd": "/kaggle/working/protein-representation-generalization",
+        "label": "install"
+      }
+    ],
+    "logs_sha256": {
+      "apt_install.log": "0311b53ed27336f82653847ee1e6906bff4a78f5e917a6c7f17dd7348dbaddc4",
+      "apt_update.log": "a7f6ff4caa75753c738eec57acb4f9fb36ca1b9dcf21cb3de4389ee00174c081",
+      "build.log": "38714f6c26d0cc919ca02dc692139830719eb474dec9803d813fe1900193222b",
+      "configure.log": "4683e36f1d70de1fd6a56ab87a58221c60670bddd51c92efa36564297ab53a81",
+      "install.log": "e4c566bd92162d50dc8b1ef8c34cfa7ee2cb27395f98a49f99685beac67efd5a",
+      "submodules.log": "6da92323f6f72f5e2c1fc5f4cba7e31986a8c4df3eaff1a82e587968af14252a"
+    },
+    "submodules": " 3a621deec94f740f4a398ae7167d80e5a57deec5 util/regression (heads/master)\n",
+    "version_output": "eec9c354be4276d2373996af2e50808b1390d527",
+    "versions": {
+      "c++": "c++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "cargo": "cargo 1.75.0",
+      "cmake": "cmake version 3.31.10",
+      "rustc": "rustc 1.75.0 (82e1608df 2023-12-21) (built from a source tarball)"
+    }
+  },
+  "source_commit": "eec9c354be4276d2373996af2e50808b1390d527",
+  "source_git_archive_sha256": "de5085207c04902c4b8810ab3092859c5a8e22ab70d56427f54001be4e554379"
+}
