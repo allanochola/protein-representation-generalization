@@ -1,5 +1,5 @@
-"""Formal Gate B validation. HARD-DISABLED pending separate authorization."""
-RESOLVABILITY_VALIDATION_AUTHORIZED = False
+"""Formal Gate B validation. Authorized for one checkpointed execution."""
+RESOLVABILITY_VALIDATION_AUTHORIZED = True
 
 def main():
     if not RESOLVABILITY_VALIDATION_AUTHORIZED:
