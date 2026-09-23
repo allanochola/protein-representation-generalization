@@ -1,0 +1,38 @@
+{
+  "benchmark_results": [
+    {
+      "calibration_groups": 276,
+      "evaluation_groups": 435,
+      "fixture": "synthetic_dominant_calibration",
+      "record_count": 3696,
+      "seconds_per_outer_including_999_bootstraps": [
+        0.589932903999852,
+        0.44260039699997833,
+        0.43010606899997583,
+        0.4967253099998743
+      ]
+    },
+    {
+      "calibration_groups": 281,
+      "evaluation_groups": 429,
+      "fixture": "synthetic_dominant_evaluation",
+      "record_count": 3695,
+      "seconds_per_outer_including_999_bootstraps": [
+        0.21898192599996946,
+        0.21802781499991397,
+        0.2198851680000189,
+        0.21416476100012005
+      ]
+    }
+  ],
+  "confirmatory_outcomes_accessed": false,
+  "cpu_count": 4,
+  "illustrative_serial_hours_surface": 10.833187283333245,
+  "illustrative_serial_hours_validation": 3.15967962430553,
+  "limitation": "Synthetic timing extrapolation only; real geometry, checkpoint I/O and contention can change runtime.",
+  "numpy_version": "2.0.2",
+  "platform": "Linux-6.12.90+-x86_64-with-glibc2.35",
+  "python_version": "3.12.13",
+  "real_geometry_accessed": false,
+  "synthetic_geometry_only": true
+}

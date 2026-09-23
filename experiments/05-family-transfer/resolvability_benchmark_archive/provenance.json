@@ -1,0 +1,8 @@
+{
+  "confirmatory_outcomes_accessed": false,
+  "implementation_snapshot_sha256": "7b7a829e2ca6da07ce4603fffd562605c8f5b3940cb23d1f53ea9a6eeb52d5a3",
+  "output_sha256": {
+    "timing.json": "8159721363acca0404111b2ee6988e5183ae0916d674e1f362b4cd442863aed8"
+  },
+  "runner_sha256": "be2fd635ade36c54a41331d4d46cc29d084f0705f4687f09aa609c91b3611ee1"
+}
