@@ -1,0 +1,18 @@
+{
+  "confirmatory_metadata_accessed": true,
+  "confirmatory_outcomes_accessed": false,
+  "execution_head": "1280ada14ee41b10905ce8cb892dbb29eb7014e6",
+  "input_sha256": {
+    "mapping": "877b255acc77df84607e546078c42686d4184f0f08b9204892f016f54661a037",
+    "partition": "61af0a44432531f7c6a8acde9226b808364ac77bca025cb85bab52d7366e1120"
+  },
+  "output_sha256": {
+    "assignments.tsv": "8a41e92045585f463421463dbd2e01582f5e8f14710137f387e9643786b0aee5",
+    "group_allocations.tsv": "bf0c25877f808ac1cb277d36d58a6d09e1ce94e519bca3aea77769913f997835",
+    "summary.json": "91a6a16f849883a9e60f814b4c2bdebcb96bc59961be31fb3a62312bd0a824b8"
+  },
+  "runner_sha256": "4d0ac72e465aca9fd71ffd015362f095791f855a65065ecb0af5e34493b0a121",
+  "simulation_executed": false,
+  "snapshot_sha256": "e7c1e0860ebc595176460205a53a9dc96e3d06eb91e82997477e246a30023a71",
+  "specification_sha256": "ce8863ed232b09c412ca3f0c34453da24b4d65ce3b346c06d79b3d7845945b70"
+}
