@@ -1,0 +1,21 @@
+{
+  "formal_gate": "B",
+  "inputs": {
+    "mapping": {
+      "path": "experiments/05-family-transfer/a2_scan_archive/joint_identifier_map.tsv",
+      "sha256": "877b255acc77df84607e546078c42686d4184f0f08b9204892f016f54661a037"
+    },
+    "partition": {
+      "path": "experiments/05-family-transfer/a2_scan_archive/canonical_partition.tsv",
+      "sha256": "61af0a44432531f7c6a8acde9226b808364ac77bca025cb85bab52d7366e1120"
+    }
+  },
+  "parent_head": "01fb5679c3e50b9e8224730b654addee7888f1a0",
+  "scenarios": [
+    "dominant_to_calibration",
+    "dominant_to_evaluation"
+  ],
+  "schema": "exp05_resolvability_allocation_v1",
+  "scope": "Metadata-only allocation; no simulation or admissibility clearance",
+  "specification_sha256": "ce8863ed232b09c412ca3f0c34453da24b4d65ce3b346c06d79b3d7845945b70"
+}
