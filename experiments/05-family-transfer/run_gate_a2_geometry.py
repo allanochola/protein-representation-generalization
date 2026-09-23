@@ -1,4 +1,4 @@
-'A2-C: authorized one-time joint family-geometry census.'
+'A2-C: joint family geometry archived; execution closed.'
 import ast
 import csv
 import gzip
@@ -10,7 +10,7 @@ import tempfile
 from collections import Counter, defaultdict
 from pathlib import Path
 
-A2_CENSUS_AUTHORIZED = True
+A2_CENSUS_AUTHORIZED = False
 REPO = Path(__file__).resolve().parents[2]
 EXP = REPO / "experiments/05-family-transfer"
 ARCHIVE = EXP / "a2_scan_archive"
