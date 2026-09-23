@@ -51,7 +51,14 @@ def derive(snapshot):
         require(len(s)==int(meta[p]['sequence_length']) and digest(s.encode())==meta[p]['sequence_sha256'],'FASTA sequence identity mismatch')
     def fasta(ids): return ''.join('>'+p+'\n'+seq[p]+'\n' for p in sorted(ids)).encode('ascii')
     files={'negative_queries.fasta':fasta(negatives),'positive_targets.fasta':fasta(positives),
-           'selected_pairs.tsv':('negative_id\tpositive_id\tsequence_cluster_sha256\n'+''.join('\t'.join(r)+'\n' for r in sorted(pairs))).encode()}
+           'selected_pairs.tsv':(
+               'negative_id\tpositive_id\tsequence_cluster_sha256\tnegative_length\tpositive_length\tshorter_sequence\n'
+               + ''.join(
+                   '\t'.join((n, p, h, str(len(seq[n])), str(len(seq[p])),
+                       'negative' if len(seq[n]) < len(seq[p]) else
+                       'positive' if len(seq[p]) < len(seq[n]) else 'equal')) + '\n'
+                   for n, p, h in sorted(pairs)
+               )).encode()}
     if 'derived_sha256' in snapshot:
         require({n:digest(b) for n,b in files.items()}==snapshot['derived_sha256'],'Frozen search input identity mismatch')
     return files, negatives, positives
@@ -90,6 +97,11 @@ def main():
             'snapshot_sha256':digest(SNAPSHOT.read_bytes()),'runner_sha256':digest(Path(__file__).read_bytes()),
             'execution_head':subprocess.run(['git','rev-parse','HEAD'],cwd=REPO,check=True,capture_output=True,text=True).stdout.strip(),
             'interpretation':'Current-sequence targeted diagnostic; no historical filter-failure inference.',
+            'qualification_rule':'Returned fident >= 0.30; classification follows independent archival.',
+            'coverage_rule':'Negative query, positive target; cov-mode 1 and c=0.80 apply coverage to the positive target.',
+            'null_result_limit':'No qualifying hit means not detected by this targeted diagnostic. It does not disprove an alignment or establish what the historical filter would have done.',
+            'historical_evidence_limit':'Historical executable identity and cleaned_precursor.fasta bytes have not been recovered from inspected evidence; target database scope also differs.',
+            'pair_length_scope':'Lengths describe asymmetry only; they do not establish alignment validity.',
             'output_sha256':{p.name:digest(p.read_bytes()) for p in sorted(stage.iterdir())}}
         (stage/'search_provenance.json').write_text(json.dumps(provenance,sort_keys=True,indent=2)+'\n')
         stage.rename(OUTPUT)

@@ -4,7 +4,7 @@
   "derived_sha256": {
     "negative_queries.fasta": "75de121c286672f85d49de0eb73ea4df1a3ee236d952cbbd1eff66648ad17cd4",
     "positive_targets.fasta": "a0d504a642bebb9a0c00a7af6177964da828568a2f38d38cbb288c708f1cdad2",
-    "selected_pairs.tsv": "d754a60dbf4c7feb7a035ff568d3b208d999783e475b427dfbe87bddcb21ac8c"
+    "selected_pairs.tsv": "a0ac7b8656a21ad62c3c4c81b8f879bb202f461caca8603cc9e303b567d46bb8"
   },
   "frozen_scope_sha256": {
     "GATE_A2_TARGETED_SEARCH_FORENSIC_SPEC_001.md": "14159a5ed2a8d6b21dce77d818ecc204b648eed2000acaa91a88658d8dbdb067",
@@ -24,6 +24,21 @@
       "path": "experiments/05-family-transfer/a2_scan_archive/canonical_partition.tsv",
       "sha256": "61af0a44432531f7c6a8acde9226b808364ac77bca025cb85bab52d7366e1120"
     }
+  },
+  "pair_metadata_amendment": {
+    "added_columns": [
+      "negative_length",
+      "positive_length",
+      "shorter_sequence"
+    ],
+    "meaning": "Length asymmetry description only; no alignment-validity inference.",
+    "parent_snapshot_sha256": "52de732844f3b3f95db6ef4812c677793cfbecd96079dd6d8d5237566ff27ed5",
+    "search_inputs_and_arguments_changed": false,
+    "shorter_sequence_values": [
+      "negative",
+      "positive",
+      "equal"
+    ]
   },
   "qualification": "Returned row with fident >= 0.30; absence means not detected by this diagnostic, not absence of alignment.",
   "schema": "exp05_targeted_search_v1",
