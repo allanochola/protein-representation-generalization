@@ -1,0 +1,16 @@
+{
+  "confirmatory_outcomes_accessed": false,
+  "historical_filter_path": "preprotocol/toxprot_census/06b_filter_negatives.py",
+  "historical_filter_sha256": "5df3966b2a2de353dabb6af2f47d7c66f58d505428574a7eb1e7f9f962284ae8",
+  "historical_rule_recovery_complete": false,
+  "imported_configuration_sha256": {
+    "preprotocol/toxprot_census/config.py": "d921c3d891a7c2440c412cbe237169f3fca32f64fc9f1ce0e100385a3ae1cdde"
+  },
+  "schema": "exp05_a2_targeted_search_forensic_intake_v1",
+  "search_authorized": false,
+  "search_executed": false,
+  "search_implemented": false,
+  "session_binary_observations_only": [],
+  "source_commit": "cc13ffe70a796737c2c240550b551cb0704c2e39",
+  "specification_sha256": "14159a5ed2a8d6b21dce77d818ecc204b648eed2000acaa91a88658d8dbdb067"
+}
