@@ -1,0 +1,27 @@
+{
+  "benchmark_authorized": false,
+  "disabled_runner_sha256": {
+    "run_resolvability_benchmark.py": "a2f57d61848f02c3f51f6224970c14d06df946a506a43e6de462365a3d995788",
+    "run_resolvability_surface.py": "20c77b7c9e80a1ea39a8b50e42c5297f62b05883c5e718e7b77d676d3a9861f0",
+    "run_resolvability_validation.py": "8bd4158008530166d8ceeb66ba71bf6555504b5e9e6925bb98653609cc28f235"
+  },
+  "numpy_version": "2.0.2",
+  "parent_head": "3bda2a2d520c66fb9ebe2e10c259ef736f0e4fdd",
+  "python_version": "3.12.13",
+  "runner_normalized_ast_sha256": {
+    "run_resolvability_benchmark.py": "cde709913dc7bef38c2c6baf98dee091f10cf4463e5e6a0e768affd96adfcef3",
+    "run_resolvability_surface.py": "bf4b872e2e0e66b871caa8fe15d984e37c6ae4be02ad3aa96c5cb1beb6fc4b9b",
+    "run_resolvability_validation.py": "63afc3dcbb68cfd4af80b3affb8cdc8ee37c1204c391a554748de9d4bab8329a"
+  },
+  "schema": "exp05_disabled_resolvability_implementation_v1",
+  "source_sha256": {
+    "RESOLVABILITY_IMPLEMENTATION_NOTES_001.md": "5ed3156b772fda7c8f48c18ad8845364b61ba7eb9a20a84d19757d7141c43a7c",
+    "audit_resolvability_simulator.py": "1fd26d89d0ba6c926fc8cbb1d1e1fc6180850d06799098178c55e00465c4eeca",
+    "resolvability_core.py": "789c688d39f9b2e480a384da331b19754ba0ebdacf4ec0b5835ca85acbc76c06",
+    "resolvability_runtime.py": "b06a692109be8801cabb93b37c68dda1ca2e6ca2aa0aaa98be505bfa780b61e2"
+  },
+  "statistical_settings_sha256": "f6a0de886d442bc516afb16299016b913470867731dec8181bec995880ca4cf2",
+  "statistical_specification_sha256": "e653f106375ecb4b41d99f88c7ff170171e7e478986c00cba2e825c408a84523",
+  "surface_authorized": false,
+  "validation_authorized": false
+}
