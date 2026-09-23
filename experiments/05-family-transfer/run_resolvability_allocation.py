@@ -1,9 +1,9 @@
-"""Formal Gate B allocation metadata. Authorized for one execution."""
+"""Formal Gate B allocation metadata. Execution archived; authorization closed."""
 import csv, hashlib, io, json, subprocess, tempfile
 from collections import Counter, defaultdict
 from pathlib import Path
 
-ALLOCATION_AUTHORIZED = True
+ALLOCATION_AUTHORIZED = False
 EXP=Path(__file__).resolve().parent
 REPO=EXP.parents[1]
 OUTPUT=EXP/'resolvability_allocation_archive'
