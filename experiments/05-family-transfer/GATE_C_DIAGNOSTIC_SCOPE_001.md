@@ -40,3 +40,35 @@ boundary is distinct from any power target evaluated at +0.10.
 No numerical choices absent from the inherited documents are supplied here.
 The next implementation must resolve those choices prospectively. Gate C outputs
 must remain separate from biological performance results and confirmatory access.
+
+
+## Append-only correction 001: formal labels and effect target
+
+This addendum supersedes the Gate C label and the reference to a +0.05
+scientific boundary above. The original text is retained as an audit trail.
+
+Under PRE_PROTOCOL.md, formal Gate B is Resolvability and formal Gate C is
+Comparator. This document concerns the formal Gate B precision/feasibility
+diagnostic. Historical filenames using GATE_B for comparator work and GATE_C
+for simulator preparation remain unchanged and are mapped in
+PHASE0_GATE_LABEL_AND_EFFECT_CORRECTION_001.md.
+
+The minimum scientifically interesting incremental effect is +0.10. The
+power target is at least 80% at +0.10, with median CI half-width at most 0.10.
++0.05 remains an effect-grid point; it is not the Experiment 05 scientific
+target. No separate confidence-interval decision boundary is invented here.
+
+The 556 negative-bearing sequence clusters are intersections with an
+operational archived partition, not effective sample size. Neither a half
+split nor independent calibration/evaluation family counts follow from that
+number. Grouping, allocation, weighting, mixed-label handling and overlap
+assumptions must be specified before computing allocation geometry.
+
+V1, V2 and V3 must all pass before resolvability-surface access. Realistic
+allocation scenarios and the rule for aggregating their results must be
+frozen prospectively. No alternate allocation or scenario may be selected
+after seeing simulation performance to obtain a preferred verdict.
+
+The diagnostic-only restriction remains binding: favorable precision does
+not resolve holdout overlap, establish historical family separation, or
+authorize confirmatory scoring. No simulation is authorized by this addendum.

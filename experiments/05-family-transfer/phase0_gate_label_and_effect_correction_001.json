@@ -1,0 +1,29 @@
+{
+  "allocation_computed": false,
+  "confirmatory_outcomes_accessed": false,
+  "formal_gate_mapping": {
+    "comparator": "C",
+    "resolvability": "B"
+  },
+  "median_ci_half_width_maximum": 0.1,
+  "minimum_scientifically_interesting_effect": 0.1,
+  "parent_head": "f3cfc2e4d63b4957f42b503ff14c076c99c0f57d",
+  "power_minimum": 0.8,
+  "power_target_effect": 0.1,
+  "required_effect_grid": [
+    0,
+    0.05,
+    0.1,
+    0.15,
+    0.2
+  ],
+  "schema": "exp05_phase0_correction_v1",
+  "scope_addendum_sha256": "57fb4daece1a6dec716f7db7bdd451b59c1104ce39b877ca5459ee7a6442ec52",
+  "scope_original_bytes": 2477,
+  "scope_original_sha256": "af9c2d0938f5a040786b9ccde5c29ee0abe76e7a62c37834ed4b77a4b61ad235",
+  "simulation_authorized": false,
+  "source_sha256": {
+    "PRE_PROTOCOL.md": "855b19497319f7b5f03b0d5ef03169084fcad868f1baedd267616e303d0873f0",
+    "RESOLVABILITY_PLAN.md": "bc7f3882fdb564a78142aa5a139067ee233018b84da1215b9e5c48795fd3087e"
+  }
+}
