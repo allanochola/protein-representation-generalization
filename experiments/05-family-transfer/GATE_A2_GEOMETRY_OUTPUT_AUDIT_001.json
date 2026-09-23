@@ -1,0 +1,33 @@
+{
+  "all_numeric_summaries_verified": true,
+  "authorization_commit": "354d079798959fac08734bffa76fe470769055aa",
+  "confirmatory_outcomes_accessed": false,
+  "independent_bipartite_graph_verified": true,
+  "input_sha256": {
+    "canonical_cluster_rows.tsv": "c7194afa61317e11b8feea9a661df8c7a5872644e19615aebb83feb6443f38c0",
+    "canonical_joint.fasta": "bbfa145c37287f33f102fbdba0e163c258aa079d7ef5c120543a3a8b82f79efe",
+    "canonical_partition.tsv": "61af0a44432531f7c6a8acde9226b808364ac77bca025cb85bab52d7366e1120",
+    "joint_identifier_map.tsv": "877b255acc77df84607e546078c42686d4184f0f08b9204892f016f54661a037",
+    "mmseqs/run_1.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mmseqs/run_1.stdout": "7d2664e6d7539ea7fee14b5bb9179db37a02a8640dff7cfdc0c141dcce09160c",
+    "mmseqs/run_1_raw_cluster.tsv": "7cc0de3f6d02bc3ab888acb2d76905c36653cc5edf580adc4e141419e31480c0",
+    "mmseqs/run_2.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mmseqs/run_2.stdout": "0baf9e8960166a1c33f08e109c0cde693fb91bd6b7f3b697c620220bfb3564df",
+    "mmseqs/run_2_raw_cluster.tsv": "878ffbcb85e582d590208d78222b07bc62db78f8f570f8cef1b63a0bbf95739a",
+    "pfam/Pfam-A.clans.tsv.gz": "1d9d7f054b017733935aae50c69e2c99037461617a0244ef6c188292474fdcd5",
+    "pfam/Pfam.version.gz": "8e4de54729bb767d68271b440c91ebb3049f89108422833d8b15ae729dba7dfc",
+    "pfam/accepted_family_hits.tsv": "a01854ffe726106b42e62ec8d33e8a97700a19875f80de9badd10c741fc79161",
+    "pfam/hmmscan.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "pfam/hmmscan.stdout": "ee3b9082de5452a5c561744cf170c14267a33463b257de40f04512e55ddf9116",
+    "pfam/raw.domtblout": "aa71a8edc2a6462e1ae98635b3e82c5ade4ce18601fd8a6a5bc7b13015e6c74c",
+    "scan_provenance.json": "e3993b1cdfc301a5a1b9ea8aa6c08627ad6a15c093f0419e57c942e51842c5af"
+  },
+  "output_sha256": {
+    "assignments.tsv": "3613e96a8d4a797ff378f7bf51315268f3d787eb968f8c1c1065233ca60f7317",
+    "components.tsv": "aabd474bc3c2f4aae07c12a3cf39436a0ec875c20ee1232f62da3fca86dd2721",
+    "geometry_provenance.json": "88052eb007a37452ded00480e001c400b645111c3b9e665176cd740af874873d",
+    "pfam_memberships.tsv": "5995d580f5aab5c1f6f764b140ae9de4dc36fc0b1caab87978fdd835bd68bee9",
+    "summary.json": "c7321be85fe3dd837f44e97477ce4196e446461479ad1ad50e40a8e3b5822a8a"
+  },
+  "schema": "exp05_a2_geometry_independent_audit_v1"
+}
