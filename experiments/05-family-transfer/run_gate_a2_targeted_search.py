@@ -1,9 +1,9 @@
-"""A2 targeted sequence-search diagnostic. Authorized for one execution."""
+"""A2 targeted sequence-search diagnostic. Execution archived; authorization closed."""
 import csv, hashlib, io, json, math, subprocess, tempfile
 from collections import defaultdict
 from pathlib import Path
 
-TARGETED_SEARCH_AUTHORIZED = True
+TARGETED_SEARCH_AUTHORIZED = False
 REPO = Path(__file__).resolve().parents[2]
 EXP = Path(__file__).resolve().parent
 SNAPSHOT = EXP / 'a2_targeted_search_snapshot.json'
