@@ -152,11 +152,11 @@ def evaluate_draw(design,scores,draw):
     require(np.all(nc>0),'Empty calibration occurrence')
     cidx=np.repeat(np.arange(len(cdraw)),nc)
     ei=np.concatenate([a for occurrence in edraw for a in occurrence])
-    counts=np.asarray([(len(occ[0]),len(occ[1])) for occ in edraw],dtype=np.int64)
-    eidx=np.repeat(np.arange(len(edraw),dtype=np.int64),counts.sum(axis=1))
-    ep=np.repeat(np.tile(np.array([True,False],dtype=bool),len(edraw)),counts.ravel())
+    eidx=np.concatenate([np.full(len(a),g,dtype=np.int64) for g,occ in enumerate(edraw) for a in occ])
+    ep=np.concatenate([np.full(len(a),j==0,dtype=bool) for occ in edraw for j,a in enumerate(occ)])
     local=dict(cn=cn,ei=ei,cidx=cidx,eidx=eidx,ep=ep,nc=nc,
-               epp=counts[:,0],en=counts[:,1])
+               epp=np.array([len(occ[0]) for occ in edraw],dtype=np.int64),
+               en=np.array([len(occ[1]) for occ in edraw],dtype=np.int64))
     return evaluate(local,scores,np.ones((1,len(cdraw)),dtype=np.int64),
                     np.ones((1,len(edraw)),dtype=np.int64))
 

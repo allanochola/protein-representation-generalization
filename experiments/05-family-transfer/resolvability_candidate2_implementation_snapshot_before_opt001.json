@@ -12,13 +12,7 @@
     "run_resolvability_candidate2_validation.py": "178df962eb5c3f3e97cba1a84fa564e70a76bf5ba7fc533181309be1fad1043d"
   },
   "numpy_version": "2.0.2",
-  "optimization_001": {
-    "equivalence": "exact outputs and RNG state on synthetic fixtures; unchanged RNG calls",
-    "parent_head": "1a24a68493e905077f3c6b8b5102576373b05ce2",
-    "preserved_snapshot": "resolvability_candidate2_implementation_snapshot_before_opt001.json",
-    "previous_snapshot_sha256": "e05f4ae81349c01ac2cad185de9b798017fe56f16e70ac5b0e905f6bb2f9ebbc"
-  },
-  "parent_head": "1a24a68493e905077f3c6b8b5102576373b05ce2",
+  "parent_head": "74d26f74e629e8790312025c5fc28a16abe38840",
   "python_version": "3.12.13",
   "runner_normalized_ast_sha256": {
     "run_resolvability_candidate2_benchmark.py": "3f6d5d81f754f1f718e2fa611fe3af7041f64236b7e910a945730dcc02afb3ec",
@@ -28,12 +22,8 @@
   "schema": "exp05_disabled_resolvability_candidate2_implementation_v1",
   "source_sha256": {
     "RESOLVABILITY_CANDIDATE2_IMPLEMENTATION_NOTES.md": "3d4fce74f13ef33306d4d012d3a77020e2ec3121f7c7c36a7ed82fe38332ce3e",
-    "RESOLVABILITY_CANDIDATE2_OPTIMIZATION_001.md": "e69952b206315cc5c1d45567273d4aad5ed36e2176258dfa147a35866d73775c",
     "audit_resolvability_candidate2.py": "ccc112a841ce1633a1e78f91f7f1fc92d75e697ffab112e7187c8edc9c8b57f8",
-    "audit_resolvability_candidate2_equivalence_001.py": "498fd5d8adc7836be2d6d72f5f2d12bcbd8ec348e0254901ae2de58da3ab7731",
-    "resolvability_candidate2_core.py": "0d90c162182741a2f9c80a64b33464d92b0fd70602532e2f21298dc1c9320987",
-    "resolvability_candidate2_core_reference_001.py": "23de29999c5e124512dab2f581b8e33327df3208da5cc78ba990dd03b7d0b481",
-    "resolvability_candidate2_implementation_snapshot_before_opt001.json": "e05f4ae81349c01ac2cad185de9b798017fe56f16e70ac5b0e905f6bb2f9ebbc",
+    "resolvability_candidate2_core.py": "23de29999c5e124512dab2f581b8e33327df3208da5cc78ba990dd03b7d0b481",
     "resolvability_candidate2_runtime.py": "bf5f90fb52039a95a74c57cd7ebb03e156e802b76529e246eefc3baaea1d1a4d"
   },
   "statistical_settings_sha256": "7c4b62718b748282d3a1d777d4fa8bf57009d4beedf0ca9322500ec6698902c1",
