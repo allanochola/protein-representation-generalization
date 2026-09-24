@@ -1,0 +1,21 @@
+{
+  "binding": {
+    "candidate": "hierarchical_v2",
+    "head": "fb9e4a807d0444bed4f782909fad8b7f8cdc0c15",
+    "implementation_snapshot_sha256": "e18fea6dcf69ca10cf737bde58a5440bca4b423747310d748d1295b32aa1bb9f",
+    "phase": "validation",
+    "runner_sha256": "1e3430460a6b0a4a530aa5b3b6ce47196011f0addeb61df472640f78185d0e50",
+    "statistical_settings_sha256": "7c4b62718b748282d3a1d777d4fa8bf57009d4beedf0ca9322500ec6698902c1",
+    "validation_provenance_sha256": null
+  },
+  "chunks": {
+    "cell_000_00000.jsonl": "83a567bc4040e35cf3170437a28c9ecd460114125a500345f1decbcf35557201",
+    "cell_000_00100.jsonl": "523dd3ce1cc03f8c774a82544b475ee339bb17a9a27e0310c8038e3bc7a17a13",
+    "cell_000_00200.jsonl": "84da1192852c87a99e831a42221ce4e9a4dbd976b74a075442060c95c0e86ffb",
+    "cell_000_00300.jsonl": "781eddf0c8bec7848b26d292cc243e33af84f547cb3967d97b462f93961eeeef",
+    "cell_000_00400.jsonl": "4b570b949b3c0ce083921ed94ca6079d11c8933f44854ff6093b1aa123dfd76e",
+    "cell_000_00500.jsonl": "4768b0880aba5a42837fd844eefd25a0fbf086e753df28cb416092155bb2c0b0",
+    "cell_000_00600.jsonl": "e2a799b7ffabc98eea9b8d4887ec67e16ebe299b73354e42c8c03344443489b9",
+    "cell_000_00700.jsonl": "d7cabfd23ff93e512711b9d30fdb49d63c4806c8dc5278526f190569ec14d114"
+  }
+}
