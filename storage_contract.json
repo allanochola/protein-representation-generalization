@@ -5,8 +5,13 @@
     "scope_sha256": "1016ee4b4094ed051a55c1e234722a6fbfd325761adbc3a1aa4e0bd74f1b33e9"
   },
   "experiment_branch": "exp05-family-transfer",
-  "production_checkpoint_upload_authorized": false,
+  "production_checkpoint_upload_authorized": true,
+  "production_execution_head": "fb9e4a807d0444bed4f782909fad8b7f8cdc0c15",
+  "production_implementation_snapshot_sha256": "e18fea6dcf69ca10cf737bde58a5440bca4b423747310d748d1295b32aa1bb9f",
+  "production_namespace_prefix": "production/candidate2/validation/",
+  "production_recovery_contract_sha256": "cdd74956e44399400192eca2f5744a530c3cf4d636360cabfc651ef0ebe7460a",
+  "production_scope": "Candidate 2 validation only; no surface",
   "rule": "Append-only synthetic probes. No force push. Production backup needs a separate frozen contract.",
   "schema": "exp05_candidate2_synthetic_storage_probe_v1",
-  "scope": "synthetic_probes_and_candidate2_controlled_reset_001"
+  "scope": "synthetic_probes_controlled_reset_and_candidate2_validation"
 }
