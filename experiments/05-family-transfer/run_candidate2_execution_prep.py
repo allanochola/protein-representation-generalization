@@ -1,5 +1,5 @@
 """Candidate 2 synthetic profiling and checkpoint plumbing. Disabled."""
-EXECUTION_PREP_AUTHORIZED = False
+EXECUTION_PREP_AUTHORIZED = True
 
 import hashlib
 import json
