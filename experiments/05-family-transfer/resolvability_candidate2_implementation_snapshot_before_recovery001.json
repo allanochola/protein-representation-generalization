@@ -6,12 +6,6 @@
   },
   "benchmark_authorized": false,
   "candidate": "hierarchical_v2",
-  "checkpoint_recovery_001": {
-    "parent_head": "e69f92bc77447409cdc92a528f819fa3c5be123f",
-    "previous_snapshot_sha256": "af1ac272cb9b7654b730b55e91f24c8dda1e85db898395e057ec7e34c1952de0",
-    "production_chunk_size": 100,
-    "statistical_core_unchanged": true
-  },
   "disabled_runner_sha256": {
     "run_resolvability_candidate2_benchmark.py": "363153a54a16d3921f7d6e2f79ab2aa660bf2e756e877f39ea656dcdf8010c9d",
     "run_resolvability_candidate2_surface.py": "f309f871c227a7c57815ecc0210bd6d1e07e345a3c69dbfbcadaef7624ac27cb",
@@ -27,27 +21,20 @@
   "parent_head": "1a24a68493e905077f3c6b8b5102576373b05ce2",
   "python_version": "3.12.13",
   "runner_normalized_ast_sha256": {
-    "run_candidate2_checkpoint_session.py": "92bdfe09fb708d24cf026942c6a6562f7d50e8a75667b5ac55007fb20606b3d2",
     "run_resolvability_candidate2_benchmark.py": "3f6d5d81f754f1f718e2fa611fe3af7041f64236b7e910a945730dcc02afb3ec",
     "run_resolvability_candidate2_surface.py": "ee7a2b1e09e4f9c80c67d078eeb4279242b3521466b0bc18df64f8945cc705b2",
     "run_resolvability_candidate2_validation.py": "902c2e1d15786fa0f7e66ee2a7609fd1308b0bc601b4b55424c9e3cae90c1738"
   },
   "schema": "exp05_disabled_resolvability_candidate2_implementation_v1",
   "source_sha256": {
-    "CANDIDATE2_CHECKPOINT_IMPLEMENTATION_001.md": "f6d00bf19578d614280bd3807bd8997370f7f66f6eecbeb19789e17bd8e3c2d5",
-    "CANDIDATE2_PRODUCTION_CHECKPOINT_CONTRACT_001.md": "cdd74956e44399400192eca2f5744a530c3cf4d636360cabfc651ef0ebe7460a",
     "RESOLVABILITY_CANDIDATE2_IMPLEMENTATION_NOTES.md": "3d4fce74f13ef33306d4d012d3a77020e2ec3121f7c7c36a7ed82fe38332ce3e",
     "RESOLVABILITY_CANDIDATE2_OPTIMIZATION_001.md": "e69952b206315cc5c1d45567273d4aad5ed36e2176258dfa147a35866d73775c",
-    "audit_candidate2_checkpoint_controller.py": "7b86054fa1ed8c58c5e45a2f0555858e38d9555fe1c6c5ed998c9d4a0125559b",
     "audit_resolvability_candidate2.py": "ccc112a841ce1633a1e78f91f7f1fc92d75e697ffab112e7187c8edc9c8b57f8",
     "audit_resolvability_candidate2_equivalence_001.py": "498fd5d8adc7836be2d6d72f5f2d12bcbd8ec348e0254901ae2de58da3ab7731",
-    "candidate2_checkpoint_controller.py": "2c4d8c6fd4d9c82120d16e9774c0240ffc8bbee5ff24575697216994692334d8",
-    "candidate2_production_checkpoint_settings_001.json": "781abaa943a5e6ca4be6c2e1f61379d8b15b11b5c1339dd0b6910b45ee6c8166",
     "resolvability_candidate2_core.py": "0d90c162182741a2f9c80a64b33464d92b0fd70602532e2f21298dc1c9320987",
     "resolvability_candidate2_core_reference_001.py": "23de29999c5e124512dab2f581b8e33327df3208da5cc78ba990dd03b7d0b481",
     "resolvability_candidate2_implementation_snapshot_before_opt001.json": "e05f4ae81349c01ac2cad185de9b798017fe56f16e70ac5b0e905f6bb2f9ebbc",
-    "resolvability_candidate2_implementation_snapshot_before_recovery001.json": "af1ac272cb9b7654b730b55e91f24c8dda1e85db898395e057ec7e34c1952de0",
-    "resolvability_candidate2_runtime.py": "cdeb3a92c38abe6b752b96d5bf413315d2a94ee6540ac0f5fb74ca5e30e3d606"
+    "resolvability_candidate2_runtime.py": "bf5f90fb52039a95a74c57cd7ebb03e156e802b76529e246eefc3baaea1d1a4d"
   },
   "statistical_settings_sha256": "7c4b62718b748282d3a1d777d4fa8bf57009d4beedf0ca9322500ec6698902c1",
   "statistical_specification_sha256": "678a5a6938806be3d29d0082f624c525b75addb4022e1bdc6ebce8166fd0ae4d",

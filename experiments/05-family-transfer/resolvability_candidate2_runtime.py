@@ -144,7 +144,8 @@ def durable_write(path,data):
     with temp.open('xb') as handle:handle.write(data);handle.flush();os.fsync(handle.fileno())
     temp.rename(path)
 
-def phase_run(phase,runner_file,resume=False):
+def phase_run(phase,runner_file,resume=False,controller=None):
+    if phase=='validation':require(controller is not None,'Validation requires the bounded checkpoint controller')
     require(phase in ('validation','surface'),'Invalid phase')
     require(not git('status','--porcelain','--untracked-files=all'),'Clean worktree required')
     spec,implementation=contract()
@@ -157,7 +158,7 @@ def phase_run(phase,runner_file,resume=False):
     validation_identity=verify_validation_archive(spec,implementation) if phase=='surface' else None
     output=EXP/('resolvability_candidate2_'+phase+'_archive')
     require(not output.exists(),'Archive exists; refusing repeat execution')
-    design=designs();phase_cells=cells(spec,phase)
+    phase_cells=cells(spec,phase)
     binding={'candidate':'hierarchical_v2','phase':phase,'head':git('rev-parse','HEAD').decode().strip(),
         'runner_sha256':core.digest(Path(runner_file).read_bytes()),
         'implementation_snapshot_sha256':core.digest(IMPLEMENTATION.read_bytes()),
@@ -174,12 +175,17 @@ def phase_run(phase,runner_file,resume=False):
         require(not resume,'No checkpoint exists to resume')
         checkpoint.mkdir(parents=True);ledger={'binding':binding,'chunks':{}}
         durable_write(checkpoint/'ledger.json',canonical(ledger))
+    if controller is not None:
+        controller.bind(checkpoint,binding,phase_cells)
+        controller.export()
+    design=designs()
     summaries=[]
     for cell_index,cell in enumerate(phase_cells):
         phase_name='surface' if phase=='surface' else ('validation_v1' if cell['validation']=='V1' else 'validation_v2')
         for start in range(0,cell['budget'],100):
             end=min(start+100,cell['budget']);name=f'cell_{cell_index:03d}_{start:05d}.jsonl'
             if name not in ledger['chunks']:
+                if controller is not None:controller.before_chunk()
                 rows=[core.outer(design[cell['allocation']],phase_name,cell,i,999) for i in range(start,end)]
                 payload=b''.join((json.dumps(r,sort_keys=True,separators=(',',':'),allow_nan=False)+'\n').encode() for r in rows)
                 durable_write(checkpoint/name,payload)
@@ -188,6 +194,7 @@ def phase_run(phase,runner_file,resume=False):
                 temp=checkpoint/'ledger.next'
                 with temp.open('xb') as f:f.write(canonical(ledger));f.flush();os.fsync(f.fileno())
                 os.replace(temp,checkpoint/'ledger.json')
+                if controller is not None:controller.after_chunk()
             print(f'{phase}: cell {cell_index+1}/{len(phase_cells)}, outer {end}/{cell["budget"]}; values withheld',flush=True)
         rows=[]
         for start in range(0,cell['budget'],100):
@@ -230,4 +237,5 @@ def phase_run(phase,runner_file,resume=False):
         prov={**binding,'confirmatory_metadata_accessed':True,'confirmatory_outcomes_accessed':False,
               'synthetic_scores_only':True,'output_sha256':{str(p.relative_to(stage)):core.digest(p.read_bytes()) for p in sorted(stage.rglob('*')) if p.is_file()}}
         (stage/'provenance.json').write_bytes(canonical(prov));stage.rename(output)
+    if controller is not None:controller.final_archive(output)
     print('Archive published; independently audit and commit before interpreting results.',flush=True)
