@@ -1,0 +1,33 @@
+{
+  "binding": {
+    "candidate": "hierarchical_v2",
+    "head": "fb9e4a807d0444bed4f782909fad8b7f8cdc0c15",
+    "implementation_snapshot_sha256": "e18fea6dcf69ca10cf737bde58a5440bca4b423747310d748d1295b32aa1bb9f",
+    "phase": "validation",
+    "runner_sha256": "1e3430460a6b0a4a530aa5b3b6ce47196011f0addeb61df472640f78185d0e50",
+    "statistical_settings_sha256": "7c4b62718b748282d3a1d777d4fa8bf57009d4beedf0ca9322500ec6698902c1",
+    "validation_provenance_sha256": null
+  },
+  "completed_chunk_seconds": [
+    907.6442858330001,
+    905.5401027469998,
+    908.6310330769993,
+    970.337423899
+  ],
+  "kind": "checkpoint",
+  "member_sha256": {
+    "cell_000_00000.jsonl": "83a567bc4040e35cf3170437a28c9ecd460114125a500345f1decbcf35557201",
+    "cell_000_00100.jsonl": "523dd3ce1cc03f8c774a82544b475ee339bb17a9a27e0310c8038e3bc7a17a13",
+    "cell_000_00200.jsonl": "84da1192852c87a99e831a42221ce4e9a4dbd976b74a075442060c95c0e86ffb",
+    "cell_000_00300.jsonl": "781eddf0c8bec7848b26d292cc243e33af84f547cb3967d97b462f93961eeeef",
+    "ledger.json": "a72e4fc8db83ce1fb88b88a81e5bd4d5178ac169c2047295ca41a888d1861e0c"
+  },
+  "previous_manifest_sha256": "0c72b2a6db34c3f41299fab4955936e29ec96a8e128e020a3ab14fc226656641",
+  "schema": "candidate2_production_export_v1",
+  "sequence": 4,
+  "session": {
+    "budget_minutes": 120.0,
+    "cpu_quota": "NOT_DISPLAYED",
+    "remaining_minutes_user_reported": 686.1890883854334
+  }
+}
