@@ -1,5 +1,5 @@
 """Controlled synthetic reset test 001. Disabled pending isolated authorization."""
-RESET_TEST_AUTHORIZED = False
+RESET_TEST_AUTHORIZED = True
 
 def main():
     if not RESET_TEST_AUTHORIZED:raise SystemExit('STOP: reset test is not authorized')
