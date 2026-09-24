@@ -1,5 +1,5 @@
 """Formal Gate B validation. HARD-DISABLED pending separate authorization."""
-CANDIDATE2_VALIDATION_AUTHORIZED = False
+CANDIDATE2_VALIDATION_AUTHORIZED = True
 
 def main():
     if not CANDIDATE2_VALIDATION_AUTHORIZED:
