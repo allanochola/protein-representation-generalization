@@ -1,0 +1,24 @@
+{
+  "binding": {
+    "candidate": "hierarchical_v2",
+    "head": "fb9e4a807d0444bed4f782909fad8b7f8cdc0c15",
+    "implementation_snapshot_sha256": "e18fea6dcf69ca10cf737bde58a5440bca4b423747310d748d1295b32aa1bb9f",
+    "phase": "validation",
+    "runner_sha256": "1e3430460a6b0a4a530aa5b3b6ce47196011f0addeb61df472640f78185d0e50",
+    "statistical_settings_sha256": "7c4b62718b748282d3a1d777d4fa8bf57009d4beedf0ca9322500ec6698902c1",
+    "validation_provenance_sha256": null
+  },
+  "completed_chunk_seconds": [],
+  "kind": "checkpoint",
+  "member_sha256": {
+    "ledger.json": "ce353bcbeeb33e7b0b0296a2882b96404c7ad9ce9ac46dc6ea3c104c017f1ce6"
+  },
+  "previous_manifest_sha256": null,
+  "schema": "candidate2_production_export_v1",
+  "sequence": 0,
+  "session": {
+    "budget_minutes": 120.0,
+    "cpu_quota": "NOT_DISPLAYED",
+    "remaining_minutes_user_reported": 686.1890883854334
+  }
+}
