@@ -1,0 +1,14 @@
+{
+  "confirmatory_outcomes_accessed": false,
+  "execution_head": "d1a324930ed60dbb1515ff224473ca03aac7546e",
+  "output_sha256": {
+    "audit.json": "11583af2aaee9aa788773516a7653e3d673f9dd226143244e4c8326d23031640",
+    "first_half.json": "41aa766939f220e761389f299f63f77c1e625034f72a36f6196069550f4cb92d",
+    "reference_results.json": "9ea2e738c89765070c7a324b21f3ec05773ebe023f9a8248ad30abf1b908857e",
+    "remote_manifest.json": "af2fc3d7ca8790aed5f8dd7b72b582565a0b6c319568e3b89452842fd8cc586a",
+    "resumed_results.json": "9ea2e738c89765070c7a324b21f3ec05773ebe023f9a8248ad30abf1b908857e"
+  },
+  "runner_sha256": "f43456afa8c5fbd921ba26f3ca250321a430fc1438b77e764ff5862f09b0ba4a",
+  "settings_sha256": "ef7a66a8875494e3b6f17f8f47916db892b76a24c4d8d20f9c6daa572233320f",
+  "synthetic_only": true
+}

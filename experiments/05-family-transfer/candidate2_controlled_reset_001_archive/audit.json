@@ -1,0 +1,48 @@
+{
+  "actual_inference_used": true,
+  "all_outputs_and_final_rng_states_exactly_equal": true,
+  "bootstrap_replicates": 999,
+  "checkpoint_sha256": "41aa766939f220e761389f299f63f77c1e625034f72a36f6196069550f4cb92d",
+  "confirmatory_outcomes_accessed": false,
+  "corruption_rejected": true,
+  "execution_head": "d1a324930ed60dbb1515ff224473ca03aac7546e",
+  "limitation": "Dedicated synthetic fixture controlled-stop recovery; not production-runtime end-to-end recovery, mid-write kill survival, periodic backup or production-scale performance.",
+  "manifest_sha256": "af2fc3d7ca8790aed5f8dd7b72b582565a0b6c319568e3b89452842fd8cc586a",
+  "old_session_directory_absent_before_restore": true,
+  "production_validation_executed": false,
+  "reference_slots": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "restored_slots": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "resumed_slots": [
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "schema": "exp05_candidate2_controlled_reset_audit_v1",
+  "status": "PASS",
+  "storage_commit": "e92fa5da8583c2b197ed603ffc5299d4dbfa67de",
+  "user_attested_genuine_reset": true,
+  "wrong_execution_identity_rejected": true
+}
