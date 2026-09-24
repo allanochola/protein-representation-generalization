@@ -1,0 +1,33 @@
+{
+  "adapted_source_sha256": {
+    "audit_resolvability_simulator.py": "1fd26d89d0ba6c926fc8cbb1d1e1fc6180850d06799098178c55e00465c4eeca",
+    "resolvability_core.py": "789c688d39f9b2e480a384da331b19754ba0ebdacf4ec0b5835ca85acbc76c06",
+    "resolvability_runtime.py": "b06a692109be8801cabb93b37c68dda1ca2e6ca2aa0aaa98be505bfa780b61e2"
+  },
+  "benchmark_authorized": false,
+  "candidate": "hierarchical_v2",
+  "disabled_runner_sha256": {
+    "run_resolvability_candidate2_benchmark.py": "363153a54a16d3921f7d6e2f79ab2aa660bf2e756e877f39ea656dcdf8010c9d",
+    "run_resolvability_candidate2_surface.py": "f309f871c227a7c57815ecc0210bd6d1e07e345a3c69dbfbcadaef7624ac27cb",
+    "run_resolvability_candidate2_validation.py": "178df962eb5c3f3e97cba1a84fa564e70a76bf5ba7fc533181309be1fad1043d"
+  },
+  "numpy_version": "2.0.2",
+  "parent_head": "74d26f74e629e8790312025c5fc28a16abe38840",
+  "python_version": "3.12.13",
+  "runner_normalized_ast_sha256": {
+    "run_resolvability_candidate2_benchmark.py": "3f6d5d81f754f1f718e2fa611fe3af7041f64236b7e910a945730dcc02afb3ec",
+    "run_resolvability_candidate2_surface.py": "ee7a2b1e09e4f9c80c67d078eeb4279242b3521466b0bc18df64f8945cc705b2",
+    "run_resolvability_candidate2_validation.py": "902c2e1d15786fa0f7e66ee2a7609fd1308b0bc601b4b55424c9e3cae90c1738"
+  },
+  "schema": "exp05_disabled_resolvability_candidate2_implementation_v1",
+  "source_sha256": {
+    "RESOLVABILITY_CANDIDATE2_IMPLEMENTATION_NOTES.md": "3d4fce74f13ef33306d4d012d3a77020e2ec3121f7c7c36a7ed82fe38332ce3e",
+    "audit_resolvability_candidate2.py": "ccc112a841ce1633a1e78f91f7f1fc92d75e697ffab112e7187c8edc9c8b57f8",
+    "resolvability_candidate2_core.py": "23de29999c5e124512dab2f581b8e33327df3208da5cc78ba990dd03b7d0b481",
+    "resolvability_candidate2_runtime.py": "bf5f90fb52039a95a74c57cd7ebb03e156e802b76529e246eefc3baaea1d1a4d"
+  },
+  "statistical_settings_sha256": "7c4b62718b748282d3a1d777d4fa8bf57009d4beedf0ca9322500ec6698902c1",
+  "statistical_specification_sha256": "678a5a6938806be3d29d0082f624c525b75addb4022e1bdc6ebce8166fd0ae4d",
+  "surface_authorized": false,
+  "validation_authorized": false
+}
