@@ -1,5 +1,5 @@
-"""Synthetic runtime benchmark. Authorized once; never reads archived geometry."""
-CANDIDATE2_BENCHMARK_AUTHORIZED = True
+"""Synthetic runtime benchmark. Archived and closed; never reads archived geometry."""
+CANDIDATE2_BENCHMARK_AUTHORIZED = False
 
 def main():
     if not CANDIDATE2_BENCHMARK_AUTHORIZED:raise SystemExit('STOP: synthetic benchmark is not authorized')
