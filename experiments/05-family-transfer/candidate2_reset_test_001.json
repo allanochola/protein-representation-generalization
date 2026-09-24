@@ -1,0 +1,25 @@
+{
+  "bootstrap_replicates": 999,
+  "cpu_quota": "NOT_DISPLAYED",
+  "first_session_slots": 6,
+  "input_sha256": {
+    "CANDIDATE2_CONTROLLED_RESET_TEST_001.md": "1016ee4b4094ed051a55c1e234722a6fbfd325761adbc3a1aa4e0bd74f1b33e9",
+    "RESOLVABILITY_CANDIDATE2_IMPLEMENTATION_NOTES.md": "3d4fce74f13ef33306d4d012d3a77020e2ec3121f7c7c36a7ed82fe38332ce3e",
+    "RESOLVABILITY_CANDIDATE2_OPTIMIZATION_001.md": "e69952b206315cc5c1d45567273d4aad5ed36e2176258dfa147a35866d73775c",
+    "audit_resolvability_candidate2.py": "ccc112a841ce1633a1e78f91f7f1fc92d75e697ffab112e7187c8edc9c8b57f8",
+    "audit_resolvability_candidate2_equivalence_001.py": "498fd5d8adc7836be2d6d72f5f2d12bcbd8ec348e0254901ae2de58da3ab7731",
+    "resolvability_candidate2_core.py": "0d90c162182741a2f9c80a64b33464d92b0fd70602532e2f21298dc1c9320987",
+    "resolvability_candidate2_core_reference_001.py": "23de29999c5e124512dab2f581b8e33327df3208da5cc78ba990dd03b7d0b481",
+    "resolvability_candidate2_implementation_snapshot.json": "af1ac272cb9b7654b730b55e91f24c8dda1e85db898395e057ec7e34c1952de0",
+    "resolvability_candidate2_implementation_snapshot_before_opt001.json": "e05f4ae81349c01ac2cad185de9b798017fe56f16e70ac5b0e905f6bb2f9ebbc",
+    "resolvability_candidate2_runtime.py": "bf5f90fb52039a95a74c57cd7ebb03e156e802b76529e246eefc3baaea1d1a4d"
+  },
+  "parent_head": "ec071e927c57b9ccde23b9b1775ee7860ee46c33",
+  "previous_session_remaining_hours": 11.333333333333334,
+  "production_checkpoint_cadence_changed": false,
+  "production_validation_authorized": false,
+  "remaining_session_hours_user_reported": null,
+  "schema": "exp05_candidate2_controlled_reset_spec_v1",
+  "synthetic_only": true,
+  "total_slots": 12
+}
