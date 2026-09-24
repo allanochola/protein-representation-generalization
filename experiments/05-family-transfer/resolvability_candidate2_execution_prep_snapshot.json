@@ -1,0 +1,17 @@
+{
+  "disabled_runner_sha256": "9f3aa783ff21afd062e69f0a418cb7d8d8156bccb218ba458640c87de4efa445",
+  "input_sha256": {
+    "RESOLVABILITY_CANDIDATE2_EXECUTION_PREP_001.md": "06939a4448e5d57ecb81380975a7f0ed0f0a7f903ba0365b5a96a25d3c4d1b45",
+    "RESOLVABILITY_CANDIDATE2_IMPLEMENTATION_NOTES.md": "3d4fce74f13ef33306d4d012d3a77020e2ec3121f7c7c36a7ed82fe38332ce3e",
+    "audit_resolvability_candidate2.py": "ccc112a841ce1633a1e78f91f7f1fc92d75e697ffab112e7187c8edc9c8b57f8",
+    "resolvability_candidate2_core.py": "23de29999c5e124512dab2f581b8e33327df3208da5cc78ba990dd03b7d0b481",
+    "resolvability_candidate2_implementation_snapshot.json": "e05f4ae81349c01ac2cad185de9b798017fe56f16e70ac5b0e905f6bb2f9ebbc",
+    "resolvability_candidate2_runtime.py": "bf5f90fb52039a95a74c57cd7ebb03e156e802b76529e246eefc3baaea1d1a4d"
+  },
+  "numpy_version": "2.0.2",
+  "parent_head": "55dab23251cb7a82da3ef50f7f8131209bf8882a",
+  "production_validation_authorized": false,
+  "python_version": "3.12.13",
+  "schema": "exp05_candidate2_execution_prep_v1",
+  "synthetic_only": true
+}
