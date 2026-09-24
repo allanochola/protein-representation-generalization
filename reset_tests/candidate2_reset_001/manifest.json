@@ -1,0 +1,24 @@
+{
+  "completed_slots": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "execution_head": "d1a324930ed60dbb1515ff224473ca03aac7546e",
+  "implementation_snapshot_sha256": "af1ac272cb9b7654b730b55e91f24c8dda1e85db898395e057ec7e34c1952de0",
+  "next_slot": 6,
+  "output_sha256": {
+    "first_half.json": "41aa766939f220e761389f299f63f77c1e625034f72a36f6196069550f4cb92d",
+    "scope.md": "1016ee4b4094ed051a55c1e234722a6fbfd325761adbc3a1aa4e0bd74f1b33e9",
+    "session_marker.json": "fd0dd1ca89d44daabcfd62b1aa03608b1b6da00e747747c3b8dc32cde8d0fcc5"
+  },
+  "production_authorized": false,
+  "runner_sha256": "f43456afa8c5fbd921ba26f3ca250321a430fc1438b77e764ff5862f09b0ba4a",
+  "schema": "exp05_candidate2_remote_reset_test_v1",
+  "settings_sha256": "ef7a66a8875494e3b6f17f8f47916db892b76a24c4d8d20f9c6daa572233320f",
+  "synthetic_only": true,
+  "total_slots": 12
+}

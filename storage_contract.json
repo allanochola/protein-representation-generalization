@@ -1,7 +1,12 @@
 {
+  "authorized_synthetic_reset_test": {
+    "experiment_authorization_head": "d1a324930ed60dbb1515ff224473ca03aac7546e",
+    "path": "reset_tests/candidate2_reset_001/",
+    "scope_sha256": "1016ee4b4094ed051a55c1e234722a6fbfd325761adbc3a1aa4e0bd74f1b33e9"
+  },
   "experiment_branch": "exp05-family-transfer",
   "production_checkpoint_upload_authorized": false,
   "rule": "Append-only synthetic probes. No force push. Production backup needs a separate frozen contract.",
   "schema": "exp05_candidate2_synthetic_storage_probe_v1",
-  "scope": "synthetic_probe_only"
+  "scope": "synthetic_probes_and_candidate2_controlled_reset_001"
 }
