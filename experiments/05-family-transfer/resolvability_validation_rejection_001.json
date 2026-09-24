@@ -1,0 +1,143 @@
+{
+  "V3_all_passed": true,
+  "archive_commit": "a9ae793fe78c0b6721762a75ff79595b11bfdbf9",
+  "archive_provenance_sha256": "557534b77f8048e16643045f53e6c2e0fecc6e671fc9e036619f3df50e2c336b",
+  "cause": "NOT_ESTABLISHED",
+  "closed_runner_sha256": {
+    "run_resolvability_benchmark.py": "24be61923b26d4403f7e3138562dddddb8db19367c84e45e3813b94b4bd7e50b",
+    "run_resolvability_surface.py": "20c77b7c9e80a1ea39a8b50e42c5297f62b05883c5e718e7b77d676d3a9861f0",
+    "run_resolvability_validation.py": "f002789bfd9fefb51fb8915e66b27b71d7016d1ddf56eeb0bd9a71c8cb0cc3a8"
+  },
+  "confirmatory_outcomes_accessed": false,
+  "execution_commit": "4f91f32103626c715d1ac4a6f1a97162b75a5399",
+  "parent_head": "52e54721dc63f795da4ff1e497e80809a32cbf4f",
+  "rejection_record_sha256": "0dbf1b396a439028bcbf8b98a15c0a61e1b9f7de08a4368151593fc283c0c29a",
+  "replacement_method_authorized": false,
+  "ruling": "INSTRUMENT_REJECTED_FOR_SURFACE_USE",
+  "schema": "exp05_resolvability_validation_rejection_v1",
+  "simulation_executed_by_this_cell": false,
+  "statistical_settings_sha256": "f6a0de886d442bc516afb16299016b913470867731dec8181bec995880ca4cf2",
+  "surface_authorized": false,
+  "validation_results": [
+    {
+      "acceptance_bounds": [
+        0.03,
+        0.07
+      ],
+      "allocation": "dominant_to_calibration",
+      "count": 270,
+      "effect": 0.0,
+      "failure_count": 0,
+      "metric": "null_rejection",
+      "passed": false,
+      "rate": 0.027,
+      "replicates": 10000,
+      "test": "V1"
+    },
+    {
+      "acceptance_bounds": [
+        0.93,
+        0.97
+      ],
+      "allocation": "dominant_to_calibration",
+      "count": 2422,
+      "effect": 0.05,
+      "failure_count": 0,
+      "metric": "coverage",
+      "passed": true,
+      "rate": 0.9688,
+      "replicates": 2500,
+      "test": "V2"
+    },
+    {
+      "acceptance_bounds": [
+        0.93,
+        0.97
+      ],
+      "allocation": "dominant_to_calibration",
+      "count": 2416,
+      "effect": 0.1,
+      "failure_count": 0,
+      "metric": "coverage",
+      "passed": true,
+      "rate": 0.9664,
+      "replicates": 2500,
+      "test": "V2"
+    },
+    {
+      "acceptance_bounds": [
+        0.93,
+        0.97
+      ],
+      "allocation": "dominant_to_calibration",
+      "count": 2412,
+      "effect": 0.2,
+      "failure_count": 0,
+      "metric": "coverage",
+      "passed": true,
+      "rate": 0.9648,
+      "replicates": 2500,
+      "test": "V2"
+    },
+    {
+      "acceptance_bounds": [
+        0.03,
+        0.07
+      ],
+      "allocation": "dominant_to_evaluation",
+      "count": 291,
+      "effect": 0.0,
+      "failure_count": 0,
+      "metric": "null_rejection",
+      "passed": false,
+      "rate": 0.0291,
+      "replicates": 10000,
+      "test": "V1"
+    },
+    {
+      "acceptance_bounds": [
+        0.93,
+        0.97
+      ],
+      "allocation": "dominant_to_evaluation",
+      "count": 2416,
+      "effect": 0.05,
+      "failure_count": 0,
+      "metric": "coverage",
+      "passed": true,
+      "rate": 0.9664,
+      "replicates": 2500,
+      "test": "V2"
+    },
+    {
+      "acceptance_bounds": [
+        0.93,
+        0.97
+      ],
+      "allocation": "dominant_to_evaluation",
+      "count": 2414,
+      "effect": 0.1,
+      "failure_count": 0,
+      "metric": "coverage",
+      "passed": true,
+      "rate": 0.9656,
+      "replicates": 2500,
+      "test": "V2"
+    },
+    {
+      "acceptance_bounds": [
+        0.93,
+        0.97
+      ],
+      "allocation": "dominant_to_evaluation",
+      "count": 2402,
+      "effect": 0.2,
+      "failure_count": 0,
+      "metric": "coverage",
+      "passed": true,
+      "rate": 0.9608,
+      "replicates": 2500,
+      "test": "V2"
+    }
+  ]
+}
