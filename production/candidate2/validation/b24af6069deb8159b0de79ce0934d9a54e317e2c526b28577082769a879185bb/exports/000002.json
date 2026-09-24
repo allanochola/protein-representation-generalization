@@ -1,0 +1,29 @@
+{
+  "binding": {
+    "candidate": "hierarchical_v2",
+    "head": "fb9e4a807d0444bed4f782909fad8b7f8cdc0c15",
+    "implementation_snapshot_sha256": "e18fea6dcf69ca10cf737bde58a5440bca4b423747310d748d1295b32aa1bb9f",
+    "phase": "validation",
+    "runner_sha256": "1e3430460a6b0a4a530aa5b3b6ce47196011f0addeb61df472640f78185d0e50",
+    "statistical_settings_sha256": "7c4b62718b748282d3a1d777d4fa8bf57009d4beedf0ca9322500ec6698902c1",
+    "validation_provenance_sha256": null
+  },
+  "completed_chunk_seconds": [
+    907.6442858330001,
+    905.5401027469998
+  ],
+  "kind": "checkpoint",
+  "member_sha256": {
+    "cell_000_00000.jsonl": "83a567bc4040e35cf3170437a28c9ecd460114125a500345f1decbcf35557201",
+    "cell_000_00100.jsonl": "523dd3ce1cc03f8c774a82544b475ee339bb17a9a27e0310c8038e3bc7a17a13",
+    "ledger.json": "7ce6df520b6d685d057e2ecf65e105238ab3e8d70b5f53c9e232ead781945d56"
+  },
+  "previous_manifest_sha256": "5de0556485af3d60b404828801821aa7c697fc256f26d0c60bf9f6728d79108e",
+  "schema": "candidate2_production_export_v1",
+  "sequence": 2,
+  "session": {
+    "budget_minutes": 120.0,
+    "cpu_quota": "NOT_DISPLAYED",
+    "remaining_minutes_user_reported": 686.1890883854334
+  }
+}
