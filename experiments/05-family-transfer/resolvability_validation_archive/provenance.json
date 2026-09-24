@@ -1,0 +1,23 @@
+{
+  "confirmatory_metadata_accessed": true,
+  "confirmatory_outcomes_accessed": false,
+  "head": "4f91f32103626c715d1ac4a6f1a97162b75a5399",
+  "implementation_snapshot_sha256": "7b7a829e2ca6da07ce4603fffd562605c8f5b3940cb23d1f53ea9a6eeb52d5a3",
+  "output_sha256": {
+    "checkpoint_ledger.json": "c6b4cfd77e3c6ff3bb4b2657fe6699d2800e7107d6712b5dbcc3ca58f508269f",
+    "replicates/cell_000.jsonl": "4e432b72ce232950b5f785cd1246afa9d4581acdfccc9d7e14250d69553b3c4d",
+    "replicates/cell_001.jsonl": "aee4a1e9445b5e3df1c4e07e1ae2409f56d7c409385dd675e833630044be5eda",
+    "replicates/cell_002.jsonl": "43629783c3831cf80fe940ca8c6f6ecf25675488a0c146974fc21b5538b10f41",
+    "replicates/cell_003.jsonl": "26cfc4ed1bb7740dad797b8b5ca77d04eab98259731c1688b64971b4b3b07571",
+    "replicates/cell_004.jsonl": "e28eb09432636ee159e722e94232c731a3c62191df1611f5e8bc99cdf0a952ea",
+    "replicates/cell_005.jsonl": "4619aaab46d64ae815dd17eda41a292469408c5216d9ce73533cd3fea61d6756",
+    "replicates/cell_006.jsonl": "3041bafd022c59e8cc7b1012efa6e820ba38ba384110260759b0cf534772e666",
+    "replicates/cell_007.jsonl": "4d86a9c9968e0b5129e4e40f83150ef6d39f03bcca25b284bd7e7f98b03ce978",
+    "summary.json": "5b64b8b2b613b8ad171c31eabb0530bc44b67ef46d7f23483bad85ec8c597fe4"
+  },
+  "phase": "validation",
+  "runner_sha256": "4a6c4b69836edf38493aa8cccd5f18b0cd66cb9b9d0448a9aea27698f8581329",
+  "statistical_settings_sha256": "f6a0de886d442bc516afb16299016b913470867731dec8181bec995880ca4cf2",
+  "synthetic_scores_only": true,
+  "validation_provenance_sha256": null
+}
