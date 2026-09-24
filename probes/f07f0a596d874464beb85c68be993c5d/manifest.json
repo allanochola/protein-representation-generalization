@@ -1,0 +1,13 @@
+{
+  "confirmatory_outcomes_accessed": false,
+  "created_at_utc": "2026-09-24T05:48:25.498603+00:00",
+  "experiment_head": "ec071e927c57b9ccde23b9b1775ee7860ee46c33",
+  "output_sha256": {
+    "allowance.json": "3ad8cd87899a8b1bf0719b1633917594919ccdcbed58b5dc95bf07756d7c5e10",
+    "probe.bin": "3e15bb7ed254ec8f5a7b863d0fcc6b69320a7769514aa24774c9f3c383c6d8d0"
+  },
+  "probe_id": "f07f0a596d874464beb85c68be993c5d",
+  "schema": "exp05_candidate2_synthetic_storage_probe_v1",
+  "simulation_executed": false,
+  "synthetic_only": true
+}

@@ -1,0 +1,11 @@
+EXP05 SYNTHETIC CHECKPOINT STORAGE PROBE
+{
+  "experiment_head": "ec071e927c57b9ccde23b9b1775ee7860ee46c33",
+  "probe_id": "f07f0a596d874464beb85c68be993c5d",
+  "values": [
+    0,
+    1,
+    2,
+    3
+  ]
+}

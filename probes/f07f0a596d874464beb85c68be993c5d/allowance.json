@@ -1,0 +1,10 @@
+{
+  "available_cpu_quota_hours": null,
+  "checked_at_utc": "2026-09-24T05:48:25.498603+00:00",
+  "cpu_quota_provided": false,
+  "evidence_note": "",
+  "note": "No generic Kaggle session limit or CPU quota is inferred. Confirm units before comparing with wall time.",
+  "remaining_session_hours": null,
+  "session_allowance_provided": false,
+  "source": "USER_REPORTED_UI_VALUES_NOT_INDEPENDENTLY_VERIFIED"
+}

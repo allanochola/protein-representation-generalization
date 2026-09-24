@@ -1,0 +1,7 @@
+{
+  "experiment_branch": "exp05-family-transfer",
+  "production_checkpoint_upload_authorized": false,
+  "rule": "Append-only synthetic probes. No force push. Production backup needs a separate frozen contract.",
+  "schema": "exp05_candidate2_synthetic_storage_probe_v1",
+  "scope": "synthetic_probe_only"
+}
