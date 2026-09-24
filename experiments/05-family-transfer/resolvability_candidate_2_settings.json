@@ -1,0 +1,160 @@
+{
+  "archive_provenance_sha256": "557534b77f8048e16643045f53e6c2e0fecc6e671fc9e036619f3df50e2c336b",
+  "benchmark_authorized": false,
+  "candidate": "hierarchical_v2",
+  "closed_runner_sha256": {
+    "run_resolvability_benchmark.py": "24be61923b26d4403f7e3138562dddddb8db19367c84e45e3813b94b4bd7e50b",
+    "run_resolvability_surface.py": "20c77b7c9e80a1ea39a8b50e42c5297f62b05883c5e718e7b77d676d3a9861f0",
+    "run_resolvability_validation.py": "f002789bfd9fefb51fb8915e66b27b71d7016d1ddf56eeb0bd9a71c8cb0cc3a8"
+  },
+  "confirmatory_outcomes_accessed": false,
+  "diagnostic_record_sha256": "17493fdd3399c86f17fa239f5f367ed45cdb23e72bb71364edbf5064a7c6a506",
+  "exposure_record_sha256": "a9abbb9626f5bc5c84f555260cf6167010d0a9155a9addd789c05c87521444c3",
+  "implementation_present": false,
+  "inherited_settings": {
+    "aggregation": "all prespecified surface dependence/baseline regimes must clear both targets for an allocation to be robustly adequate",
+    "allocations": [
+      "dominant_to_calibration",
+      "dominant_to_evaluation"
+    ],
+    "between_arm_latent_correlation_grid": [
+      0.25,
+      0.75
+    ],
+    "bootstrap_replicates": 999,
+    "comparator_population_tpr_grid": [
+      0.3,
+      0.6
+    ],
+    "confirmatory_outcomes_accessed": false,
+    "effect_grid": [
+      0.0,
+      0.05,
+      0.1,
+      0.15,
+      0.2
+    ],
+    "formal_gate": "B",
+    "fpr_target": 0.05,
+    "inference": "two-sided 95% interval; positive-effect power requires lower bound > 0",
+    "input_sha256": {
+      "experiments/05-family-transfer/PRE_PROTOCOL.md": "855b19497319f7b5f03b0d5ef03169084fcad868f1baedd267616e303d0873f0",
+      "experiments/05-family-transfer/RESOLVABILITY_PLAN.md": "bc7f3882fdb564a78142aa5a139067ee233018b84da1215b9e5c48795fd3087e",
+      "experiments/05-family-transfer/resolvability_allocation_archive/allocation_provenance.json": "a8d7d46ba3206e30337c49aaa2d638e355d31823c67384382254a0466ce2fc2d",
+      "experiments/05-family-transfer/resolvability_allocation_archive/assignments.tsv": "8a41e92045585f463421463dbd2e01582f5e8f14710137f387e9643786b0aee5",
+      "experiments/05-family-transfer/resolvability_allocation_archive/group_allocations.tsv": "bf0c25877f808ac1cb277d36d58a6d09e1ce94e519bca3aea77769913f997835",
+      "experiments/05-family-transfer/resolvability_allocation_archive/summary.json": "91a6a16f849883a9e60f814b4c2bdebcb96bc59961be31fb3a62312bd0a824b8"
+    },
+    "interval_confidence": 0.95,
+    "interval_method": "paired operational-group percentile bootstrap; calibration thresholds refit each replicate",
+    "maximum_median_half_width": 0.1,
+    "minimum_power": 0.8,
+    "parent_head": "afe61fe6bd4e9ec660fcc2e5bb55332c2122271e",
+    "power_effect": 0.1,
+    "prediction_rule": "score strictly greater than threshold",
+    "primary_weighting": "equal operational group within each label",
+    "quantile_convention": "linear interpolation, index (n-1)*p",
+    "random_stream": {
+      "derivation": "SHA256 of canonical JSON token list, first 16 bytes as big-endian integer",
+      "generator": "NumPy PCG64",
+      "phase_names": [
+        "validation_v1",
+        "validation_v2",
+        "boundary",
+        "surface"
+      ],
+      "root": 20260923,
+      "tokens": [
+        "root",
+        "phase",
+        "allocation",
+        "comparator_tpr",
+        "within_group_correlation",
+        "between_arm_correlation",
+        "effect",
+        "outer_index",
+        "purpose"
+      ]
+    },
+    "schema": "exp05_resolvability_statistics_v1",
+    "scope": "conditional precision/feasibility diagnostic",
+    "secondary_weighting": "equal record, at the same primary-calibrated thresholds",
+    "simulation_authorized": false,
+    "specification_sha256": "e653f106375ecb4b41d99f88c7ff170171e7e478986c00cba2e825c408a84523",
+    "surface_authorized": false,
+    "surface_outer_replicates_per_cell": 1000,
+    "threshold_rule": "smallest observed calibration-negative score with weighted CDF >= 0.95",
+    "validation": {
+      "V1": {
+        "effect": 0.0,
+        "outer_replicates_per_allocation": 10000,
+        "type_I_bounds": [
+          0.03,
+          0.07
+        ]
+      },
+      "V2": {
+        "coverage_bounds": [
+          0.93,
+          0.97
+        ],
+        "effects": [
+          0.05,
+          0.1,
+          0.2
+        ],
+        "outer_replicates_per_cell": 2500
+      },
+      "V3": [
+        "perfect_separation",
+        "threshold_between_adjacent_negative_scores",
+        "tied_negative_scores"
+      ],
+      "allocations": "both",
+      "between_arm_latent_correlation": 0.5,
+      "comparator_tpr": 0.6,
+      "within_group_latent_correlation": 0.3
+    },
+    "within_group_latent_correlation_grid": [
+      0.0,
+      0.3,
+      0.8
+    ]
+  },
+  "inherited_settings_sha256": "f6a0de886d442bc516afb16299016b913470867731dec8181bec995880ca4cf2",
+  "method": "paired hierarchical percentile bootstrap with nested calibration refit",
+  "overrides": {
+    "candidate3_specified": false,
+    "endpoint_rule": "non-rejection when null equals an endpoint",
+    "inner_resampling": "independent per selected group occurrence; paired arms",
+    "interval_method": "two-stage group then within-label paired-record bootstrap",
+    "maximum_additional_candidates_after_candidate2": 1,
+    "random_candidate_namespace": "hierarchical_v2",
+    "random_root": 20260924,
+    "sampling_target": "two-level superpopulation, conditioned on observed label counts",
+    "selection_order": [
+      2,
+      3
+    ],
+    "stream_token_order": [
+      "root",
+      "candidate",
+      "phase",
+      "allocation",
+      "b",
+      "rho",
+      "r",
+      "delta",
+      "outer_index",
+      "purpose"
+    ]
+  },
+  "parent_head": "75b5b0da4f4d0e80025e33484a871b3f31f4ec62",
+  "precedence": "candidate2 specification and overrides supersede conflicting inherited method/random-stream fields; all other inherited settings retained",
+  "rejection_record_sha256": "0dbf1b396a439028bcbf8b98a15c0a61e1b9f7de08a4368151593fc283c0c29a",
+  "schema": "exp05_resolvability_candidate2_spec_v1",
+  "simulation_executed": false,
+  "specification_sha256": "678a5a6938806be3d29d0082f624c525b75addb4022e1bdc6ebce8166fd0ae4d",
+  "surface_authorized": false,
+  "validation_authorized": false
+}
