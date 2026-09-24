@@ -1,5 +1,5 @@
-"""Formal Gate B validation. Authorized for one checkpointed execution."""
-RESOLVABILITY_VALIDATION_AUTHORIZED = True
+"""Formal Gate B validation. Execution archived; authorization closed."""
+RESOLVABILITY_VALIDATION_AUTHORIZED = False
 
 def main():
     if not RESOLVABILITY_VALIDATION_AUTHORIZED:
