@@ -1,0 +1,10 @@
+{
+  "confirmatory_outcomes_accessed": false,
+  "execution_head": "2356c5285fa2f47244b062b83732e73068756d0b",
+  "output_sha256": {
+    "report.json": "db6da01d1147404705503ab83518cf32aa6b006e6413fb936307c40a8a1fccd7"
+  },
+  "runner_sha256": "9236523d6edb20aceced4be9a02b943dbddf416503689f8cec10199e9c002e3f",
+  "snapshot_sha256": "604b14dc525749de6da9322df0725b60b4d9a52fa0a1d52344b0d4783220fbd2",
+  "synthetic_only": true
+}
