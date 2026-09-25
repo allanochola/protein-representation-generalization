@@ -1,0 +1,51 @@
+{
+  "aggregate_budget_minutes": 600.0,
+  "automatic_error_retry": false,
+  "checkpoint_export": 77,
+  "checkpoint_storage_parent": "a2026f63ef11019eec8303a7dae3110f634136b0",
+  "completed_outer_slots": 6700,
+  "confirmatory_outcomes_accessed": false,
+  "cpu_quota": "NOT_DISPLAYED",
+  "driver_sha256": "50b78ec5c59a61f936591707431175254e00ffec82fdedaa7d01cd1605958c74",
+  "experiment_execution_head": "fb9e4a807d0444bed4f782909fad8b7f8cdc0c15",
+  "experiment_head_changed": false,
+  "initial_remaining_minutes_user_reported": 700.0,
+  "limitations": "Controlled boundary stops; runtime is approximate. Does not ensure survival of a platform kill during an unfinished chunk or protect unuploaded work.",
+  "max_individual_launch_minutes": 120,
+  "recovery_authorization": {
+    "completed_acknowledged_slots": "0 through 6699 skipped; no replacement or selection of acknowledged results.",
+    "execution_identity_and_seeds": "UNCHANGED",
+    "interruption_record": {
+      "durable_completed_slots": 6700,
+      "last_verified_export": 77,
+      "last_verified_storage_commit": "a2026f63ef11019eec8303a7dae3110f634136b0",
+      "mechanical_failure_cause": "Not established; user-reported stop is recorded without inferring backend state.",
+      "recovery_decision": "User requested the next merged recovery cell after explicit chunk-specific authorization question.",
+      "schema": "candidate2_user_session_stop_interruption_002",
+      "scientific_values_used_for_decision": false,
+      "scope": "One deterministic recovery attempt, then ordinary validation continuation; subsequent errors stop.",
+      "unacknowledged_chunk": {
+        "cell_index": 0,
+        "outer_end_exclusive": 6800,
+        "outer_start_inclusive": 6700
+      },
+      "unacknowledged_work_state": "UNKNOWN; may have been partly or fully computed without durable export.",
+      "user_report": "Browser refresh, session starting, restart, then explicit session stop."
+    },
+    "interruption_record_sha256": "93756314f6d2de4f36c3cf5d9314ce85bbc16473057a812f66e93af65a43baf1",
+    "lost_work": "May be recomputed only at the specified unacknowledged boundary; no new seeds or scientific outcome-based retry.",
+    "original_failure_cause": "User reported restarting and stopping the session; backend interruption details unknown.",
+    "scope": "One recovery attempt for unacknowledged outer indices 6700 through 6799, followed by ordinary validation continuation.",
+    "source_export": 77,
+    "source_manifest_sha256": "773085a668bfed1ec899fa04facda1b5d2835be2fea0aeb11f5cc444a7b5c374",
+    "subsequent_error": "Stop and retain evidence; no automatic retry.",
+    "user_authorized": true
+  },
+  "remaining_allowance_rule": "During this single uninterrupted orchestration only, subtract elapsed monotonic wall time from the fresh initial UI reading before each launch. A process or session restart requires a new UI reading.",
+  "reserve_minutes": 30,
+  "schema": "candidate2_recovery_orchestration_004",
+  "scope_amendment": "For this orchestration, elapsed-derived allowance replaces repeated manual UI input at each sublaunch. All frozen controller per-launch caps, admission rules and checkpoint handshakes remain unchanged.",
+  "statistical_method_changed": false,
+  "surface_authorized": false,
+  "user_request": "Explicitly authorized deterministic recovery and continuation after export 77; fresh allowance entered for this orchestration"
+}
