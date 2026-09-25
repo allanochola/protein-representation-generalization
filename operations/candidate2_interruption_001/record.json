@@ -1,0 +1,38 @@
+{
+  "binding": {
+    "candidate": "hierarchical_v2",
+    "head": "fb9e4a807d0444bed4f782909fad8b7f8cdc0c15",
+    "implementation_snapshot_sha256": "e18fea6dcf69ca10cf737bde58a5440bca4b423747310d748d1295b32aa1bb9f",
+    "phase": "validation",
+    "runner_sha256": "1e3430460a6b0a4a530aa5b3b6ce47196011f0addeb61df472640f78185d0e50",
+    "statistical_settings_sha256": "7c4b62718b748282d3a1d777d4fa8bf57009d4beedf0ca9322500ec6698902c1",
+    "validation_provenance_sha256": null
+  },
+  "confirmatory_outcomes_accessed": false,
+  "decision": "HOLD pending explicit recorded recovery decision; no inference authorized by this record.",
+  "durable_completed_slots": 6200,
+  "execution_head": "fb9e4a807d0444bed4f782909fad8b7f8cdc0c15",
+  "existing_completed_slots_replayed": false,
+  "failed_orchestration": "operations/candidate2_tenhour_002",
+  "failure_cause": "UNKNOWN",
+  "failure_logs_available_at_reported_path": false,
+  "interruption_classification": "Operational interruption; root cause and internal integrity status undetermined.",
+  "last_verified_export": 71,
+  "last_verified_storage_commit": "a548cdbbc2d61aeda293140326299bb75550eb40",
+  "local_checkpoint_available": false,
+  "manifest_sha256": "e629957ee8617133f3df7ee31dc2bd53e96223ca2f06b27dbfa211b30491c25a",
+  "next_chunk_execution_state": "UNKNOWN; may have been partly or fully computed but not durably exported",
+  "next_scheduled_chunk": {
+    "cell_index": 0,
+    "outer_end_exclusive": 6300,
+    "outer_start_inclusive": 6200
+  },
+  "recovery_contract_path": "CANDIDATE2_PRODUCTION_CHECKPOINT_CONTRACT_001.md",
+  "recovery_contract_ruling": "Existing contract does not authorize recomputing lost or partly completed inference.",
+  "recovery_contract_sha256": "cdd74956e44399400192eca2f5744a530c3cf4d636360cabfc651ef0ebe7460a",
+  "reported_subprocess_exit_code": 1,
+  "schema": "candidate2_execution_interruption_v1",
+  "statistical_values_inspected": false,
+  "surface_authorized": false,
+  "transport_recovery_directory_available_at_reported_path": false
+}
