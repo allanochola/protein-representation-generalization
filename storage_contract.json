@@ -5,10 +5,10 @@
     "scope_sha256": "1016ee4b4094ed051a55c1e234722a6fbfd325761adbc3a1aa4e0bd74f1b33e9"
   },
   "candidate2_tenhour_orchestration_001": {
-    "driver_sha256": "3cb5968685560fb713a9741e034e0ce43b6d6442467d6ba6e076b1e116c96ddd",
+    "driver_sha256": "6eba4169b07f6327c294d214a7d9a53f1fe0861b7525d2c477606157b7aab5dc",
     "execution_head": "fb9e4a807d0444bed4f782909fad8b7f8cdc0c15",
-    "policy_path": "operations/candidate2_tenhour_001/policy.json",
-    "policy_sha256": "bb4defcfeb39cabf1b9b74332035e5a14c82ad598bb1424c5f8fc47979e7dcc4"
+    "policy_path": "operations/candidate2_tenhour_002/policy.json",
+    "policy_sha256": "2db78c3fafbace29ba2f8c0f9bfb0da7a10721f48de78eb5e685f8c5a9892ce4"
   },
   "experiment_branch": "exp05-family-transfer",
   "production_checkpoint_upload_authorized": true,

@@ -1,0 +1,22 @@
+{
+  "aggregate_budget_minutes": 600,
+  "automatic_error_retry": false,
+  "checkpoint_export": 67,
+  "checkpoint_storage_parent": "9478bc16607e7bb68b046e3bf7ef83755544b501",
+  "completed_outer_slots": 5900,
+  "confirmatory_outcomes_accessed": false,
+  "cpu_quota": "NOT_DISPLAYED",
+  "driver_sha256": "6eba4169b07f6327c294d214a7d9a53f1fe0861b7525d2c477606157b7aab5dc",
+  "experiment_execution_head": "fb9e4a807d0444bed4f782909fad8b7f8cdc0c15",
+  "experiment_head_changed": false,
+  "initial_remaining_minutes_user_reported": 700.0,
+  "limitations": "Controlled boundary stops; runtime is approximate. Does not ensure survival of a platform kill during an unfinished chunk or protect unuploaded work.",
+  "max_individual_launch_minutes": 120,
+  "remaining_allowance_rule": "During this single uninterrupted orchestration only, subtract elapsed monotonic wall time from the fresh initial UI reading before each launch. A process or session restart requires a new UI reading.",
+  "reserve_minutes": 30,
+  "schema": "candidate2_tenhour_orchestration_001",
+  "scope_amendment": "For this orchestration, elapsed-derived allowance replaces repeated manual UI input at each sublaunch. All frozen controller per-launch caps, admission rules and checkpoint handshakes remain unchanged.",
+  "statistical_method_changed": false,
+  "surface_authorized": false,
+  "user_request": "Approximately ten hours unattended after a fresh Kaggle session reset"
+}
