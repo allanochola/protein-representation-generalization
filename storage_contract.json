@@ -28,6 +28,12 @@
     "policy_path": "operations/candidate2_session_resume_007/policy.json",
     "policy_sha256": "2f2388e8cf4629e4aeee6585977622ffd9761cb6aea62329ddcacca1ffd0fda1"
   },
+  "candidate2_session_orchestration_008": {
+    "driver_sha256": "4ff0cdbff005b2b5905e729b956a853dfc1bfa684cf038acfaf392179dd596b3",
+    "execution_head": "fb9e4a807d0444bed4f782909fad8b7f8cdc0c15",
+    "policy_path": "operations/candidate2_session_resume_008/policy.json",
+    "policy_sha256": "a9e2636e8d0e3e6859df0eeb19c8adef6555ab58a4f1a56fe473ca5d2c5d8389"
+  },
   "candidate2_tenhour_orchestration_001": {
     "driver_sha256": "96f6e7033bd8267589dcbcc2168caa75525b69f34a0b2fb81caed63fc38b9ed7",
     "execution_head": "fb9e4a807d0444bed4f782909fad8b7f8cdc0c15",
