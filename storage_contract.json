@@ -58,8 +58,20 @@
     "policy_path": "operations/candidate2_recovery_resume_003/policy.json",
     "policy_sha256": "c9fd3df656d192168798e93e28adbba622293607a8104ec440342bb718446226"
   },
+  "candidate2_validation_closure": {
+    "archive_export": 406,
+    "archive_manifest_sha256": "967f106e778447a1fd528d1a6ccd3f9bc70f72dadfc99f02de6bb376ff569736",
+    "boundary_audit_scope": "Recorded V3 invariants checked; no synthetic inference rerun",
+    "checkpoint_export": 405,
+    "checkpoint_manifest_sha256": "f18654f1e43de8a3c9111a33fd918d7daa3fb5982b83aa8d8ce74be1ed9564ec",
+    "experiment_archive_head": "fb0c5978276e814cf4dfe2c6be141f9dc3d58e6b",
+    "experiment_closed_head": "00315530e753143ae416ae3dac838450daba9d1c",
+    "stale_wrapper_footer": 34700,
+    "surface_authorized": false,
+    "verified_outer_slots": 35000
+  },
   "experiment_branch": "exp05-family-transfer",
-  "production_checkpoint_upload_authorized": true,
+  "production_checkpoint_upload_authorized": false,
   "production_execution_head": "fb9e4a807d0444bed4f782909fad8b7f8cdc0c15",
   "production_implementation_snapshot_sha256": "e18fea6dcf69ca10cf737bde58a5440bca4b423747310d748d1295b32aa1bb9f",
   "production_namespace_prefix": "production/candidate2/validation/",
