@@ -1,0 +1,40 @@
+{
+  "aggregate_budget_minutes": 685.0,
+  "automatic_error_retry": false,
+  "checkpoint_export": 350,
+  "checkpoint_schedule_verification": "Schedule derived from pinned settings: V1 then three V2 cells for each allocation; corrects the prior wrapper hardcoded order without altering production code.",
+  "checkpoint_storage_parent": "a2efdf7b39344b719a316f5aa16c83a64a63f753",
+  "completed_outer_slots": 30300,
+  "confirmatory_outcomes_accessed": false,
+  "cpu_quota": "NOT_DISPLAYED",
+  "driver_sha256": "ec5f25e52b522454294cfb21556b8385538df25ddad7ae24c83c4a02227f81d2",
+  "experiment_execution_head": "fb9e4a807d0444bed4f782909fad8b7f8cdc0c15",
+  "experiment_head_changed": false,
+  "initial_remaining_minutes_user_reported": 720.0,
+  "interruption_record": {
+    "durable_completed_slots": 30300,
+    "failure_cause": "UNKNOWN; browser refresh is reported chronology, not an established backend failure cause.",
+    "last_verified_export": 350,
+    "local_observation": "User read-only check found no matching validation PIDs and no original launch-4 directory or logs.",
+    "manifest_sha256": "329b5443e978f4fcc8b29e0aae5f1afe5dd0a7bfd6abc78740543c64c8943e9e",
+    "user_report": "Browser refreshed; original notebook subsequently presented a new draft session.",
+    "work_beyond_verified_export": "UNKNOWN"
+  },
+  "limitations": "Controlled boundary stops; runtime is approximate. Does not ensure survival of a platform kill during an unfinished chunk or protect unuploaded work.",
+  "max_individual_launch_minutes": 120,
+  "recovery_authorization": {
+    "acknowledged_results": "All 30300 acknowledged slots are preserved and skipped; no outcome-based selection or replacement.",
+    "execution_identity_and_seeds": "UNCHANGED",
+    "scope": "One deterministic recovery attempt for cell index 6, outer indices 300 through 399, followed by ordinary validation continuation.",
+    "source_export": 350,
+    "subsequent_error": "Stop and retain evidence; no automatic retry.",
+    "user_authorized": true
+  },
+  "remaining_allowance_rule": "During this single uninterrupted orchestration only, subtract elapsed monotonic wall time from the fresh initial UI reading before each launch. A process or session restart requires a new UI reading.",
+  "reserve_minutes": 30,
+  "schema": "candidate2_recovery_orchestration_010",
+  "scope_amendment": "For this orchestration, elapsed-derived allowance replaces repeated manual UI input at each sublaunch. All frozen controller per-launch caps, admission rules and checkpoint handshakes remain unchanged.",
+  "statistical_method_changed": false,
+  "surface_authorized": false,
+  "user_request": "Resume clean checkpoint using maximum current session allowance while preserving 30-minute reserve and 120-minute per-launch cap"
+}

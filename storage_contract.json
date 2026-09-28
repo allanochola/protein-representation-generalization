@@ -10,6 +10,12 @@
     "policy_path": "operations/candidate2_recovery_resume_004/policy.json",
     "policy_sha256": "3159b7ff28672b2ab7f49a72a8b6804ee566e852dfea9e9ea6a76c4c583d3642"
   },
+  "candidate2_recovery_orchestration_010": {
+    "driver_sha256": "ec5f25e52b522454294cfb21556b8385538df25ddad7ae24c83c4a02227f81d2",
+    "execution_head": "fb9e4a807d0444bed4f782909fad8b7f8cdc0c15",
+    "policy_path": "operations/candidate2_recovery_resume_010/policy.json",
+    "policy_sha256": "58777f9e314fcdeedd03e2f60805b9e69ad779fd259b8b6476fe6d3539fe43fa"
+  },
   "candidate2_session_orchestration_005": {
     "driver_sha256": "981e26fe5cb1f4589ee24899c24e2086169192a2c6ead1e91e57174a6e844d8a",
     "execution_head": "fb9e4a807d0444bed4f782909fad8b7f8cdc0c15",
