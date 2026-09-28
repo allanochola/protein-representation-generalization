@@ -1,0 +1,54 @@
+{
+  "addendum_sha256": "2e8f683d5d146026f17f655e91e0dca63b1f55ad4522432c2ea7118d747e44c6",
+  "base_settings_sha256": "50c037cb23a91893f89c5cbf3c63af618370d45093038d02f4a6b676f3d7a9f4",
+  "base_specification_sha256": "b9d4aa9cdd819d851e0bb5fdaa9343fcddc2cd6612bfc5319451287dfe327417",
+  "candidate3_authorized": false,
+  "contrast_intervals": 14,
+  "contrast_orientation": "second_minus_first",
+  "contrasts_per_scheme": [
+    [
+      0,
+      3
+    ],
+    [
+      1,
+      4
+    ],
+    [
+      2,
+      5
+    ],
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      4,
+      5
+    ]
+  ],
+  "coverage_interval": "Wilson_score",
+  "coverage_intervals": 18,
+  "diagnostic_authorized": false,
+  "family_alpha": 0.05,
+  "heterogeneity_margin": 0.1,
+  "integrity_gate_first": true,
+  "interval_family_size": 44,
+  "other_dimensions_independent": true,
+  "outer_count_per_fixture": 1000,
+  "rejection_interval": "coverage_complement",
+  "schema": "resampling_variance_diagnostic_routing_001",
+  "surface_authorized": false,
+  "threshold_discreteness_tested": false,
+  "variance_equivalence_margin": 0.1,
+  "variance_interval": "outer_normal_approximation",
+  "variance_ratio_intervals": 12
+}
