@@ -1,5 +1,5 @@
 """Bounded validation sessions. Uploads require a separate isolated authorization."""
-CANDIDATE2_CHECKPOINT_UPLOAD_AUTHORIZED = True
+CANDIDATE2_CHECKPOINT_UPLOAD_AUTHORIZED = False
 
 def main():
     if not CANDIDATE2_CHECKPOINT_UPLOAD_AUTHORIZED:
